@@ -39,6 +39,28 @@ abstract class BaseRepository implements IBaseRepository
         return $this->model->newQuery()->with($relations)->findOrFail($id, $columns);
     }
 
+    public function findBySlugOrId(string|int $identifier, array $columns = ['*'], array $relations = []): ?Model
+    {
+        $query = $this->model->newQuery()->with($relations);
+
+        if (is_numeric($identifier)) {
+            return $query->where('id', $identifier)->orWhere('slug', $identifier)->first($columns);
+        }
+
+        return $query->where('slug', $identifier)->first($columns);
+    }
+
+    public function findBySlugOrIdOrFail(string|int $identifier, array $columns = ['*'], array $relations = []): Model
+    {
+        $model = $this->findBySlugOrId($identifier, $columns, $relations);
+
+        if (!$model) {
+            throw new \Illuminate\Database\Eloquent\ModelNotFoundException();
+        }
+
+        return $model;
+    }
+
     public function create(array $data): Model
     {
         return $this->model->newQuery()->create($data);

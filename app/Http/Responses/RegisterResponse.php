@@ -21,6 +21,6 @@ class RegisterResponse implements RegisterResponseContract
             return redirect()->intended(route('account'));
         }
 
-        return redirect()->intended(config('fortify.home'));
+        return redirect()->intended(route('admin.dashboard.index'));
     }
 }

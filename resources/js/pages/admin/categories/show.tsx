@@ -30,7 +30,7 @@ export default function CategoriesShow({ item }: Props) {
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Dashboard',
-            href: admin.dashboard().url,
+            href: admin.dashboard.index(),
         },
         {
             title: 'Kategoriler',

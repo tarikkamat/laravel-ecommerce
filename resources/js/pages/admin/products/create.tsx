@@ -109,7 +109,7 @@ type Props = ProductOptions;
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Dashboard',
-        href: admin.dashboard().url,
+        href: admin.dashboard.index(),
     },
     {
         title: 'Ürünler',

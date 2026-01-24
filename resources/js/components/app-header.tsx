@@ -29,7 +29,6 @@ import { UserMenuContent } from '@/components/user-menu-content';
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import { useInitials } from '@/hooks/use-initials';
 import { cn, toUrl } from '@/lib/utils';
-import { home } from '@/routes';
 import admin from '@/routes/admin';
 import type { BreadcrumbItem, NavItem, SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
@@ -44,7 +43,7 @@ type Props = {
 const adminNavItems: NavItem[] = [
     {
         title: 'Gösterge Paneli',
-        href: admin.dashboard(),
+        href: admin.dashboard.index(),
         icon: LayoutGrid,
     },
     {
@@ -112,7 +111,7 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
     const { isCurrentUrl, whenCurrentUrl } = useCurrentUrl();
     const isAdminArea = page.url.startsWith('/suug');
     const mainNavItems = isAdminArea ? adminNavItems : [];
-    const logoHref = isAdminArea ? admin.dashboard() : home();
+    const logoHref = isAdminArea ? admin.dashboard.index() : '';
     return (
         <>
             <div className="border-b border-sidebar-border/80">

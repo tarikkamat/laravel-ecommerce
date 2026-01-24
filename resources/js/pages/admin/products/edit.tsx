@@ -140,7 +140,7 @@ export default function ProductsEdit({ item, brands, categories, tags, ingredien
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Dashboard',
-            href: admin.dashboard().url,
+            href: admin.dashboard.index(),
         },
         {
             title: 'Ürünler',

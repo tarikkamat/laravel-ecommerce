@@ -7,7 +7,6 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { home } from '@/routes';
 import admin from '@/routes/admin';
 import type { NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
@@ -22,14 +21,19 @@ import {
     Leaf,
     List,
     Plus,
+    Folder,
+    BookOpen,
 } from 'lucide-react';
 import AppLogo from './app-logo';
 import { useCurrentUrl } from '@/hooks/use-current-url';
+import { SidebarFooter } from '@/components/ui/sidebar';
+import { NavFooter } from './nav-footer';
+import { NavUser } from '@/components/nav-user';
 
 const adminNavItems: NavItem[] = [
     {
         title: 'Gösterge Paneli',
-        href: admin.dashboard(),
+        href: admin.dashboard.index(),
         icon: LayoutGrid,
     },
     {
@@ -161,13 +165,26 @@ const definitionsNavItems: NavItem[] = [
     },
 ];
 
+const footerNavItems: NavItem[] = [
+    {
+        title: 'Repository',
+        href: 'https://github.com/laravel/react-starter-kit',
+        icon: Folder,
+    },
+    {
+        title: 'Documentation',
+        href: 'https://laravel.com/docs/starter-kits#react',
+        icon: BookOpen,
+    },
+];
+
 export function AppSidebar() {
     const { currentUrl } = useCurrentUrl();
     const isAdminArea = currentUrl.startsWith('/suug');
     const mainNavItems = isAdminArea ? adminNavItems : [];
     const definitionItems = isAdminArea ? definitionsNavItems : [];
 
-    const logoHref = isAdminArea ? admin.dashboard() : home();
+    const logoHref = isAdminArea ? admin.dashboard.index() : '';
 
     return (
         <Sidebar collapsible="icon" variant="inset">
@@ -187,6 +204,11 @@ export function AppSidebar() {
                 <NavMain items={mainNavItems} />
                 <NavMain items={definitionItems} label="Tanımlamalar" />
             </SidebarContent>
+
+            <SidebarFooter>
+                <NavFooter items={footerNavItems} className="mt-auto" />
+                <NavUser />
+            </SidebarFooter>
         </Sidebar>
     );
 }

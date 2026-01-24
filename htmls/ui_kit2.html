@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Suug UI: Product &amp; Typography</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ec135b",
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#221016",
+                        "text-dark": "#181113",
+                        "text-light": "#f4f0f2",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    backgroundImage: {
+                        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+                    }
+                },
+            },
+        }
+    </script>
+<style>::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #e5e7eb;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #d1d5db;
+        }.glass-nav {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .dark .glass-nav {
+            background: rgba(34, 16, 22, 0.7);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }.product-card-demo .add-btn {
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+        }
+        .product-card-demo:hover .add-btn {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .product-card-demo:hover .product-img {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-text-dark dark:text-text-light font-display antialiased selection:bg-primary selection:text-white">
+<div class="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden">
+<header class="fixed top-0 left-0 right-0 z-50 glass-nav transition-colors duration-300">
+<div class="mx-auto flex h-20 max-w-[1440px] items-center justify-between px-6 lg:px-12">
+<div class="flex items-center gap-2">
+<div class="flex size-8 items-center justify-center rounded-lg bg-primary/10 dark:bg-primary/20 text-primary">
+<span class="material-symbols-outlined !text-[24px]">spa</span>
+</div>
+<h1 class="text-xl font-extrabold tracking-tight text-text-dark dark:text-text-light">Suug <span class="font-normal text-sm opacity-50 ml-2">UI Kit</span></h1>
+</div>
+<nav class="hidden md:flex items-center gap-8 opacity-50 pointer-events-none">
+<a class="text-sm font-semibold" href="#">Shop</a>
+<a class="text-sm font-semibold" href="#">About</a>
+<a class="text-sm font-semibold" href="#">Journal</a>
+</nav>
+<div class="flex items-center gap-2 opacity-50 pointer-events-none">
+<button class="flex size-10 items-center justify-center rounded-full">
+<span class="material-symbols-outlined text-[20px]">search</span>
+</button>
+<button class="flex size-10 items-center justify-center rounded-full">
+<span class="material-symbols-outlined text-[20px]">account_circle</span>
+</button>
+</div>
+</div>
+</header>
+<main class="flex-1 pt-32 pb-24 px-6 lg:px-12">
+<div class="mx-auto max-w-[1440px]">
+<div class="mb-20 border-b border-gray-200 dark:border-white/10 pb-8">
+<span class="text-xs font-bold uppercase tracking-widest text-primary mb-3 block">Design System</span>
+<h1 class="text-4xl md:text-6xl font-black text-text-dark dark:text-text-light tracking-tight mb-4">Product &amp; Typography</h1>
+<p class="text-lg text-gray-500 dark:text-gray-400 max-w-2xl">Core components for the e-commerce experience, detailing the typography hierarchy, navigation controls, and product card states.</p>
+</div>
+<section class="mb-24">
+<div class="flex items-center gap-4 mb-10">
+<span class="flex items-center justify-center size-8 rounded-full bg-text-dark text-white dark:bg-white dark:text-text-dark text-xs font-bold">01</span>
+<h2 class="text-xl font-bold tracking-tight text-text-dark dark:text-text-light">Typography Scale</h2>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start rounded-3xl bg-white dark:bg-white/5 p-8 md:p-12 border border-gray-100 dark:border-white/5 shadow-sm">
+<div class="space-y-12">
+<div class="border-l-2 border-primary/20 pl-6">
+<span class="text-xs font-mono text-gray-400 block mb-2">Display H1 • Manrope ExtraBold • 48-72px</span>
+<h1 class="text-5xl md:text-7xl font-black tracking-tighter text-text-dark dark:text-text-light leading-[1.1]">Radiance,<br/>Refined.</h1>
+</div>
+<div class="border-l-2 border-primary/20 pl-6">
+<span class="text-xs font-mono text-gray-400 block mb-2">Heading H2 • Manrope Bold • 30-36px</span>
+<h2 class="text-3xl md:text-4xl font-bold tracking-tight text-text-dark dark:text-text-light">Pure ingredients, powerful results.</h2>
+</div>
+<div class="border-l-2 border-primary/20 pl-6">
+<span class="text-xs font-mono text-gray-400 block mb-2">Heading H3 • Manrope Bold • 24px</span>
+<h3 class="text-2xl font-bold tracking-tight text-text-dark dark:text-text-light">Trending Now</h3>
+</div>
+</div>
+<div class="space-y-10">
+<div class="border-l-2 border-gray-200 dark:border-white/10 pl-6">
+<span class="text-xs font-mono text-gray-400 block mb-2">Subtitle / Product Title • Manrope Bold • 16-18px</span>
+<h4 class="text-lg font-bold text-text-dark dark:text-text-light">Velvet Serum</h4>
+</div>
+<div class="border-l-2 border-gray-200 dark:border-white/10 pl-6">
+<span class="text-xs font-mono text-gray-400 block mb-2">Body Large • Manrope Medium • 18-20px</span>
+<p class="text-lg font-medium text-gray-600 dark:text-gray-300 leading-relaxed">Clean beauty formulas for the modern minimalist. Ethically sourced, scientifically proven.</p>
+</div>
+<div class="border-l-2 border-gray-200 dark:border-white/10 pl-6">
+<span class="text-xs font-mono text-gray-400 block mb-2">Body Regular • Manrope Regular • 16px</span>
+<p class="text-base text-gray-600 dark:text-gray-300 leading-relaxed">We believe skincare should be simple, effective, and ethically grounded. Our vegan formulas are crafted without compromise.</p>
+</div>
+<div class="flex gap-8">
+<div class="border-l-2 border-gray-200 dark:border-white/10 pl-6">
+<span class="text-xs font-mono text-gray-400 block mb-2">Small Caption</span>
+<p class="text-sm text-gray-500 dark:text-gray-400">Night Repair &amp; Restore</p>
+</div>
+<div class="border-l-2 border-gray-200 dark:border-white/10 pl-6">
+<span class="text-xs font-mono text-gray-400 block mb-2">Label</span>
+<span class="text-xs font-bold uppercase tracking-widest text-primary">New Collection</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="mb-24">
+<div class="flex items-center gap-4 mb-10">
+<span class="flex items-center justify-center size-8 rounded-full bg-text-dark text-white dark:bg-white dark:text-text-dark text-xs font-bold">02</span>
+<h2 class="text-xl font-bold tracking-tight text-text-dark dark:text-text-light">Navigation &amp; Controls</h2>
+</div>
+<div class="p-12 rounded-3xl bg-white dark:bg-white/5 border border-gray-100 dark:border-white/5 shadow-sm">
+<div class="flex flex-wrap gap-16 items-center">
+<div class="flex flex-col gap-4">
+<span class="text-xs font-mono text-gray-400">Slider Control (Default)</span>
+<div class="flex gap-4">
+<button class="flex size-12 items-center justify-center rounded-full border border-gray-200 dark:border-white/20 bg-transparent text-text-dark dark:text-text-light hover:bg-gray-50 dark:hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined text-[24px]">chevron_left</span>
+</button>
+<button class="flex size-12 items-center justify-center rounded-full border border-gray-200 dark:border-white/20 bg-transparent text-text-dark dark:text-text-light hover:bg-gray-50 dark:hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined text-[24px]">chevron_right</span>
+</button>
+</div>
+</div>
+<div class="flex flex-col gap-4">
+<span class="text-xs font-mono text-gray-400">Slider Control (Hover/Active)</span>
+<div class="flex gap-4">
+<button class="flex size-12 items-center justify-center rounded-full border border-primary bg-primary text-white shadow-lg shadow-primary/30">
+<span class="material-symbols-outlined text-[24px]">chevron_right</span>
+</button>
+</div>
+</div>
+<div class="flex flex-col gap-4">
+<span class="text-xs font-mono text-gray-400">Text Link with Icon</span>
+<a class="text-sm font-semibold text-primary hover:text-primary/80 flex items-center gap-1" href="#">
+                                    View all categories <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+</div>
+</div>
+</div>
+</section>
+<section>
+<div class="flex items-center gap-4 mb-10">
+<span class="flex items-center justify-center size-8 rounded-full bg-text-dark text-white dark:bg-white dark:text-text-dark text-xs font-bold">03</span>
+<h2 class="text-xl font-bold tracking-tight text-text-dark dark:text-text-light">Product Cards</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+<div class="flex flex-col gap-6">
+<div class="pb-4 border-b border-gray-200 dark:border-white/10">
+<h3 class="text-sm font-bold text-text-dark dark:text-text-light">Default State</h3>
+<p class="text-xs text-gray-400 font-mono mt-1">Standard view with hidden actions.</p>
+</div>
+<div class="group product-card-demo relative flex flex-col gap-3 max-w-sm">
+<div class="relative aspect-[4/5] w-full overflow-hidden rounded-xl bg-gray-100 dark:bg-white/5">
+<button class="absolute top-3 right-3 z-10 flex size-8 items-center justify-center rounded-full bg-white/80 dark:bg-black/40 text-text-dark dark:text-text-light opacity-0 transition-opacity group-hover:opacity-100 hover:text-primary dark:hover:text-primary">
+<span class="material-symbols-outlined text-[18px]">favorite</span>
+</button>
+<img alt="Velvet Serum" class="product-img h-full w-full object-cover object-center transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC2b32zow8CIBt6yIojnjrtjDSR4R9Mk6vMBpUZ8uNYt4TwL_32RHZYP5Fu8qWDlqxOWfPwOcoSfnyBMu4AZNG4nahXookpU_zxIInRNzAGTJ3R9I08drtjbjrFdlmxS1afwSff6l2d-XAh3tE6zOh2Zm1MJQS5AuqSyVNYxa6LFSppNlgjaTNz5gI5MUmrAl3zROxR3rAR1ZP6R3L4mCk_EiaYqMGDd-_SZG199sEFxuXeHpyLZ5RoYtW5WCBH7zC9kWN2ftyStrI"/>
+<div class="absolute bottom-4 left-0 right-0 px-4 add-btn">
+<button class="w-full rounded-lg bg-primary py-3 text-sm font-bold text-white shadow-lg shadow-primary/20 hover:bg-primary/90">
+                                            Add to Bag
+                                        </button>
+</div>
+</div>
+<div class="flex flex-col gap-1 px-1">
+<div class="flex justify-between items-start">
+<h3 class="text-base font-bold text-text-dark dark:text-text-light">Velvet Serum</h3>
+<p class="text-base font-medium text-text-dark dark:text-text-light">$48</p>
+</div>
+<p class="text-sm text-gray-500 dark:text-gray-400">Night Repair &amp; Restore</p>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-6">
+<div class="pb-4 border-b border-gray-200 dark:border-white/10">
+<h3 class="text-sm font-bold text-primary">Hover State</h3>
+<p class="text-xs text-gray-400 font-mono mt-1">Active interaction with revealed actions.</p>
+</div>
+<div class="relative flex flex-col gap-3 max-w-sm">
+<div class="relative aspect-[4/5] w-full overflow-hidden rounded-xl bg-gray-100 dark:bg-white/5 shadow-md">
+<button class="absolute top-3 right-3 z-10 flex size-8 items-center justify-center rounded-full bg-white dark:bg-black/60 text-primary opacity-100 shadow-sm">
+<span class="material-symbols-outlined text-[18px] fill-current">favorite</span>
+</button>
+<img alt="Hydra-Mist" class="h-full w-full object-cover object-center scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB7Uzs97YZVFszjfiGsF5Tw78gL3ldRLZL5IbuqRPnjnet5ysyHVnHTpQNXCswnjeYNYkg5KgwInnoc-CTivTRRWLUrE69520kgx5LMUq59qRXS7ysL9erpOda1M3XohQNIfisCchNPL0SPUuSqfNa_Ti5KvoY_O4rL7_3TfcFINGVTEqaII7IuMFDIyoNZjTCIoyauz07ezpXf0En0GZjBAE62qCHaoYgkgfb7dNQBF88jqdV_5qPhBiC6WNYBbcITDormDKfVsgY"/>
+<div class="absolute bottom-4 left-0 right-0 px-4">
+<button class="w-full rounded-lg bg-primary py-3 text-sm font-bold text-white shadow-lg shadow-primary/20">
+                                            Add to Bag
+                                        </button>
+</div>
+</div>
+<div class="flex flex-col gap-1 px-1">
+<div class="flex justify-between items-start">
+<h3 class="text-base font-bold text-text-dark dark:text-text-light">Hydra-Mist</h3>
+<p class="text-base font-medium text-text-dark dark:text-text-light">$32</p>
+</div>
+<p class="text-sm text-gray-500 dark:text-gray-400">Daily Refreshing Toner</p>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-6">
+<div class="pb-4 border-b border-gray-200 dark:border-white/10">
+<h3 class="text-sm font-bold text-text-dark dark:text-text-light">Variant: With Tags</h3>
+<p class="text-xs text-gray-400 font-mono mt-1">Displays 'New', 'Best Seller', or 'Sale'.</p>
+</div>
+<div class="group product-card-demo relative flex flex-col gap-3 max-w-sm">
+<div class="relative aspect-[4/5] w-full overflow-hidden rounded-xl bg-gray-100 dark:bg-white/5">
+<span class="absolute top-3 left-3 z-10 rounded bg-primary/10 text-primary border border-primary/20 px-2 py-1 text-[10px] font-bold uppercase tracking-wide">New Arrival</span>
+<button class="absolute top-3 right-3 z-10 flex size-8 items-center justify-center rounded-full bg-white/80 dark:bg-black/40 text-text-dark dark:text-text-light opacity-0 transition-opacity group-hover:opacity-100 hover:text-primary dark:hover:text-primary">
+<span class="material-symbols-outlined text-[18px]">favorite</span>
+</button>
+<img alt="Cloud Cream" class="product-img h-full w-full object-cover object-center transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBtMEiylvekvCLzBg_aEUvXpknfvhljuLeHc7BJJ0gHjj7dp9iY5mXa0u2WTkcpIYRAPA_LBKrrCMaYqDedTSiXlUc3Q8DgyQYLf7lDNhSQSs93vUI6P044CZxZJKxQ5KD8-44cxcuuStPg8TI0i5H7oI-1v0Hg-2tM0uilY2mE8yw_BghoeD7aBzEsZ6NNba02V_d9M6EAUaVo2Vnen5pPQGTSv6gxUAW2Nkm1XxlsCWHYKhpwUOIvAs27n0PC0nzZQqK5yQLgRbo"/>
+<div class="absolute bottom-4 left-0 right-0 px-4 add-btn">
+<button class="w-full rounded-lg bg-primary py-3 text-sm font-bold text-white shadow-lg shadow-primary/20 hover:bg-primary/90">
+                                            Add to Bag
+                                        </button>
+</div>
+</div>
+<div class="flex flex-col gap-1 px-1">
+<div class="flex justify-between items-start">
+<h3 class="text-base font-bold text-text-dark dark:text-text-light">Cloud Cream</h3>
+<p class="text-base font-medium text-text-dark dark:text-text-light">$56</p>
+</div>
+<p class="text-sm text-gray-500 dark:text-gray-400">Deep Hydration Moisturizer</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+</main>
+<footer class="bg-white dark:bg-[#1a0c10] border-t border-gray-100 dark:border-white/5 py-12">
+<div class="mx-auto max-w-[1440px] px-6 lg:px-12 flex justify-between items-center text-xs text-gray-400 font-mono">
+<p>Suug Design System v1.2</p>
+<p>Confidential © 2023</p>
+</div>
+</footer>
+</div>
+
+</body></html>

@@ -25,7 +25,7 @@ import type { BreadcrumbItem, BrandFormData, ImageFormData } from '@/types';
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Dashboard',
-        href: admin.dashboard().url,
+        href: admin.dashboard.index(),
     },
     {
         title: 'Markalar',

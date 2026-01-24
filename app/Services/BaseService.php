@@ -40,6 +40,16 @@ abstract class BaseService implements IBaseService
         return $this->repository->findOrFail($id, $columns, $relations);
     }
 
+    public function findBySlugOrId(string|int $identifier, array $columns = ['*'], array $relations = []): ?Model
+    {
+        return $this->repository->findBySlugOrId($identifier, $columns, $relations);
+    }
+
+    public function findBySlugOrIdOrFail(string|int $identifier, array $columns = ['*'], array $relations = []): Model
+    {
+        return $this->repository->findBySlugOrIdOrFail($identifier, $columns, $relations);
+    }
+
     public function create(array $data): Model
     {
         return $this->repository->create($data);

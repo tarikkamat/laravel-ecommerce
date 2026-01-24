@@ -20,6 +20,10 @@ interface IBaseService
 
     public function findOrFail(int $id, array $columns = ['*'], array $relations = []): Model;
 
+    public function findBySlugOrId(string|int $identifier, array $columns = ['*'], array $relations = []): ?Model;
+
+    public function findBySlugOrIdOrFail(string|int $identifier, array $columns = ['*'], array $relations = []): Model;
+
     public function create(array $data): Model;
 
     public function update(int $id, array $data): Model;

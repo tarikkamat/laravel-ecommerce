@@ -21,7 +21,7 @@ export default function TagsEdit({ item }: Props) {
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Dashboard',
-            href: admin.dashboard().url,
+            href: admin.dashboard.index(),
         },
         {
             title: 'Etiketler',

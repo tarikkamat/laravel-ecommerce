@@ -16,7 +16,7 @@ import type { BreadcrumbItem, IngredientFormData } from '@/types';
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Dashboard',
-        href: admin.dashboard().url,
+        href: admin.dashboard.index(),
     },
     {
         title: 'İçerikler',
