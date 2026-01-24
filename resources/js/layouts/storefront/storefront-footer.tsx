@@ -1,5 +1,4 @@
 import { Link } from '@inertiajs/react';
-import storefront from '@/routes/storefront';
 
 export function StorefrontFooter() {
     return (
@@ -66,7 +65,7 @@ export function StorefrontFooter() {
                         <ul className="flex flex-col gap-3 text-sm text-gray-500 dark:text-gray-400">
                             <li>
                                 <Link
-                                    href={storefront.products.index.url()}
+                                    href="#"
                                     className="transition-colors hover:text-[#ec135b]"
                                 >
                                     All Products
@@ -74,7 +73,7 @@ export function StorefrontFooter() {
                             </li>
                             <li>
                                 <Link
-                                    href={storefront.categories.index.url()}
+                                    href="#"
                                     className="transition-colors hover:text-[#ec135b]"
                                 >
                                     Categories
@@ -82,7 +81,7 @@ export function StorefrontFooter() {
                             </li>
                             <li>
                                 <Link
-                                    href={storefront.brands.index.url()}
+                                    href="#"
                                     className="transition-colors hover:text-[#ec135b]"
                                 >
                                     Brands

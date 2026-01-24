@@ -6,42 +6,15 @@ import { ProductGrid } from './components/ProductGrid';
 import { FeatureBlock } from './components/FeatureBlock';
 import { TestimonialSection } from './components/TestimonialSection';
 
-type Category = {
-    id: number;
-    name: string;
-    slug: string;
-    image?: string;
-};
-
-type Product = {
-    id: number;
-    name: string;
-    slug: string;
-    price: string | number;
-    description?: string;
-    image?: string;
-};
-
-type Brand = {
-    id: number;
-    title: string;
-    slug: string;
-    image?: {
-        path: string;
+type HomePageProps = {
+    apiEndpoints: {
+        categories: string;
+        products: string;
+        brands: string;
     };
 };
 
-type HomePageProps = {
-    categories: Category[];
-    featuredProducts: Product[];
-    brands: Brand[];
-};
-
-export default function HomePage({
-    categories = [],
-    featuredProducts = [],
-    brands = [],
-}: HomePageProps) {
+export default function HomePage({ apiEndpoints }: HomePageProps) {
     return (
         <StorefrontLayout title="Home">
             <div className="w-full">
@@ -49,13 +22,13 @@ export default function HomePage({
                 <HeroSection />
 
                 {/* Brands Section */}
-                <BrandsSection brands={brands} />
+                <BrandsSection endpoint={apiEndpoints.brands} />
 
-                {/* Feature Block */}
-                <FeatureBlock />
+                {/* Categories Section */}
+                <CategoryGrid endpoint={apiEndpoints.categories} />
 
-                {/* Testimonial Section */}
-                <TestimonialSection />
+                {/* Featured Products Section */}
+                <ProductGrid endpoint={apiEndpoints.products} />
             </div>
         </StorefrontLayout>
     );

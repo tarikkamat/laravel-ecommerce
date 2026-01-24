@@ -1,5 +1,4 @@
 import { Link } from '@inertiajs/react';
-import storefront from '@/routes/storefront';
 
 export function HeroSection() {
     return (
@@ -44,7 +43,7 @@ export function HeroSection() {
                         {/* CTA Buttons */}
                         <div className="flex flex-col gap-4 sm:flex-row">
                             <Link
-                                href={storefront.products.index.url()}
+                                href="#"
                                 className="inline-flex h-12 items-center justify-center rounded-full bg-[#ec135b] px-8 text-base font-bold text-white shadow-lg shadow-[#ec135b]/30 transition-all hover:scale-105 hover:bg-[#ec135b]/90"
                             >
                                 Shop Collection

@@ -1,7 +1,7 @@
 import { Head, Link } from '@inertiajs/react';
 import type { ReactNode } from 'react';
-import { StorefrontNav } from './storefront-nav';
-import { StorefrontFooter } from './storefront-footer';
+import { StorefrontNav } from '@/layouts/storefront/storefront-nav';
+import { StorefrontFooter } from '@/layouts/storefront/storefront-footer';
 
 type Props = {
     children: ReactNode;

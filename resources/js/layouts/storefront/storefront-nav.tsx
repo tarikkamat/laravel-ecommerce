@@ -9,7 +9,7 @@ export function StorefrontNav() {
         <header className="glass-nav fixed left-0 right-0 top-0 z-50 transition-colors duration-300">
             <div className="mx-auto flex h-20 max-w-[1440px] items-center justify-between px-6 lg:px-12">
                 {/* Logo */}
-                <Link href={storefront.home.index.url()} className="flex items-center gap-2">
+                <Link href="#" className="flex items-center gap-2">
                     <div className="flex size-8 items-center justify-center rounded-lg bg-[#ec135b]/10 text-[#ec135b] dark:bg-[#ec135b]/20">
                         <span className="material-symbols-outlined !text-[24px]">
                             spa
@@ -23,19 +23,19 @@ export function StorefrontNav() {
                 {/* Navigation Links */}
                 <nav className="hidden items-center gap-8 md:flex">
                     <Link
-                        href={storefront.products.index.url()}
+                        href="#"
                         className="text-sm font-semibold transition-colors hover:text-[#ec135b]"
                     >
                         Shop
                     </Link>
                     <Link
-                        href={storefront.categories.index.url()}
+                        href="#"
                         className="text-sm font-semibold transition-colors hover:text-[#ec135b]"
                     >
                         Categories
                     </Link>
                     <Link
-                        href={storefront.brands.index.url()}
+                        href="#"
                         className="text-sm font-semibold transition-colors hover:text-[#ec135b]"
                     >
                         Brands
