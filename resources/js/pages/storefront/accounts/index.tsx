@@ -1,11 +1,12 @@
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
+import storefront from '@/routes/storefront';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Account',
-        href: '/hesabim',
+        title: 'Hesabım',
+        href: storefront.accounts.index.url(),
     },
 ];
 

@@ -18,7 +18,7 @@ class RegisterResponse implements RegisterResponseContract
         }
 
         if ($user?->role === Role::CUSTOMER) {
-            return redirect()->intended(route('account'));
+            return redirect()->intended(route('storefront.accounts.index'));
         }
 
         return redirect()->intended(route('admin.dashboard.index'));

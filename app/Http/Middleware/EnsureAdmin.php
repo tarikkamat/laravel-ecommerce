@@ -17,7 +17,7 @@ class EnsureAdmin
         $user = $request->user();
 
         if (! $user || $user->role !== Role::ADMIN) {
-            return redirect()->route('account');
+            return redirect()->route('storefront.accounts.index');
         }
 
         return $next($request);

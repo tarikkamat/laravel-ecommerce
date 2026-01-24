@@ -13,7 +13,7 @@ class LoginResponse implements LoginResponseContract
         $user = $request->user();
 
         if ($user?->role === Role::CUSTOMER) {
-            return redirect()->intended(route('account'));
+            return redirect()->intended(route('storefront.accounts.index'));
         }
 
         return redirect()->intended(route('admin.dashboard.index'));
