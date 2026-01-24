@@ -2,6 +2,8 @@ export type * from './auth';
 export type * from './navigation';
 export type * from './ui';
 export type * from './brand';
+export type * from './category';
+export type * from './image';
 
 import type { Auth } from './auth';
 

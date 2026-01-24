@@ -18,8 +18,7 @@ class TagController extends Controller
         $perPage = (int) $request->integer('per_page', 15);
 
         return Inertia::render('admin/tags/index', [
-            'items' => $this->service->paginate($perPage),
-            'options' => new \stdClass,
+            'items' => $this->service->paginate($perPage)
         ]);
     }
 
@@ -38,8 +37,7 @@ class TagController extends Controller
     public function show(int $id)
     {
         return Inertia::render('admin/tags/show', [
-            'item' => $this->service->findOrFail($id),
-            'options' => new \stdClass,
+            'item' => $this->service->findOrFail($id)
         ]);
     }
 

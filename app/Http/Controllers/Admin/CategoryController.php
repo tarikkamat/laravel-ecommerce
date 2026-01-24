@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\CategoryStoreRequest;
 use App\Http\Requests\Admin\CategoryUpdateRequest;
-use App\Models\Category;
 use App\Services\Contracts\ICategoryService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -19,14 +18,15 @@ class CategoryController extends Controller
         $perPage = (int) $request->integer('per_page', 15);
 
         return Inertia::render('admin/categories/index', [
-            'items' => $this->service->paginate($perPage),
-            'options' => $this->options(),
+            'items' => $this->service->paginate($perPage, ['*'], ['parent']),
         ]);
     }
 
     public function create()
     {
-        return Inertia::render('admin/categories/create');
+        return Inertia::render('admin/categories/create', [
+            'categories' => $this->service->all(['*'], ['children']),
+        ]);
     }
 
     public function store(CategoryStoreRequest $request)
@@ -39,8 +39,15 @@ class CategoryController extends Controller
     public function show(int $id)
     {
         return Inertia::render('admin/categories/show', [
-            'item' => $this->service->findOrFail($id),
-            'options' => $this->options(),
+            'item' => $this->service->findOrFail($id, ['*'], ['parent', 'children']),
+        ]);
+    }
+
+    public function edit(int $id)
+    {
+        return Inertia::render('admin/categories/edit', [
+            'item' => $this->service->findOrFail($id, ['*'], ['children']),
+            'categories' => $this->service->all(['*'], ['children']),
         ]);
     }
 

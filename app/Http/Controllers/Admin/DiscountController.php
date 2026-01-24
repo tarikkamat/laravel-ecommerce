@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Enums\DiscountType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\DiscountStoreRequest;
 use App\Http\Requests\Admin\DiscountUpdateRequest;
@@ -19,8 +18,7 @@ class DiscountController extends Controller
         $perPage = (int) $request->integer('per_page', 15);
 
         return Inertia::render('admin/discounts/index', [
-            'items' => $this->service->paginate($perPage),
-            'options' => $this->options(),
+            'items' => $this->service->paginate($perPage)
         ]);
     }
 
@@ -39,8 +37,7 @@ class DiscountController extends Controller
     public function show(int $id)
     {
         return Inertia::render('admin/discounts/show', [
-            'item' => $this->service->findOrFail($id),
-            'options' => $this->options(),
+            'item' => $this->service->findOrFail($id)
         ]);
     }
 
@@ -56,18 +53,5 @@ class DiscountController extends Controller
         $this->service->delete($id);
 
         return redirect()->route('admin.discounts.index');
-    }
-
-    private function options(): array
-    {
-        return [
-            'types' => collect(DiscountType::cases())
-                ->map(fn (DiscountType $type): array => [
-                    'value' => $type->value,
-                    'label' => $type->label(),
-                ])
-                ->values()
-                ->all(),
-        ];
     }
 }
