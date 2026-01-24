@@ -29,10 +29,11 @@ import { UserMenuContent } from '@/components/user-menu-content';
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import { useInitials } from '@/hooks/use-initials';
 import { cn, toUrl } from '@/lib/utils';
-import { dashboard } from '@/routes';
+import { home } from '@/routes';
+import admin from '@/routes/admin';
 import type { BreadcrumbItem, NavItem, SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, Menu, Search } from 'lucide-react';
+import { BookOpen, Folder, Image as ImageIcon, LayoutGrid, Layers, Leaf, MapPin, Menu, Package, Percent, Search, Tag, User } from 'lucide-react';
 import AppLogo from './app-logo';
 import AppLogoIcon from './app-logo-icon';
 
@@ -40,11 +41,51 @@ type Props = {
     breadcrumbs?: BreadcrumbItem[];
 };
 
-const mainNavItems: NavItem[] = [
+const adminNavItems: NavItem[] = [
     {
-        title: 'Dashboard',
-        href: dashboard(),
+        title: 'Gösterge Paneli',
+        href: admin.dashboard(),
         icon: LayoutGrid,
+    },
+    {
+        title: 'Ürün',
+        href: admin.products.index(),
+        icon: Package,
+    },
+    {
+        title: 'Kategori',
+        href: admin.categories.index(),
+        icon: Layers,
+    },
+    {
+        title: 'Marka',
+        href: admin.brands.index(),
+        icon: Tag,
+    },
+    {
+        title: 'Malzeme',
+        href: admin.ingredients.index(),
+        icon: Leaf,
+    },
+    {
+        title: 'Görsel',
+        href: admin.images.index(),
+        icon: ImageIcon,
+    },
+    {
+        title: 'İndirim',
+        href: admin.discounts.index(),
+        icon: Percent,
+    },
+    {
+        title: 'Kullanıcı',
+        href: admin.users.index(),
+        icon: User,
+    },
+    {
+        title: 'Etiket',
+        href: admin.tags.index(),
+        icon: Tag,
     },
 ];
 
@@ -69,6 +110,9 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
     const { auth } = page.props;
     const getInitials = useInitials();
     const { isCurrentUrl, whenCurrentUrl } = useCurrentUrl();
+    const isAdminArea = page.url.startsWith('/suug');
+    const mainNavItems = isAdminArea ? adminNavItems : [];
+    const logoHref = isAdminArea ? admin.dashboard() : home();
     return (
         <>
             <div className="border-b border-sidebar-border/80">
@@ -135,7 +179,7 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                     </div>
 
                     <Link
-                        href={dashboard()}
+                        href={logoHref}
                         prefetch
                         className="flex items-center space-x-2"
                     >

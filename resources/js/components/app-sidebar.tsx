@@ -1,50 +1,145 @@
-import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
-import { NavUser } from '@/components/nav-user';
 import {
     Sidebar,
     SidebarContent,
-    SidebarFooter,
     SidebarHeader,
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { dashboard } from '@/routes';
+import { home } from '@/routes';
+import admin from '@/routes/admin';
 import type { NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid } from 'lucide-react';
+import {
+    Image as ImageIcon,
+    LayoutGrid,
+    Package,
+    Percent,
+    Tag,
+    User,
+    Layers,
+    Leaf,
+    List,
+    Plus,
+} from 'lucide-react';
 import AppLogo from './app-logo';
+import { useCurrentUrl } from '@/hooks/use-current-url';
 
-const mainNavItems: NavItem[] = [
+const adminNavItems: NavItem[] = [
     {
-        title: 'Dashboard',
-        href: dashboard(),
+        title: 'Gösterge Paneli',
+        href: admin.dashboard(),
         icon: LayoutGrid,
+    },
+    {
+        title: 'Ürün',
+        href: admin.products.index(),
+        icon: Package,
+    },
+    {
+        title: 'Görsel',
+        href: admin.images.index(),
+        icon: ImageIcon,
+    },
+    {
+        title: 'İndirim',
+        href: admin.discounts.index(),
+        icon: Percent,
+    },
+    {
+        title: 'Kullanıcılar',
+        href: admin.users.index(),
+        icon: User,
     },
 ];
 
-const footerNavItems: NavItem[] = [
+const definitionsNavItems: NavItem[] = [
     {
-        title: 'Repository',
-        href: 'https://github.com/laravel/react-starter-kit',
-        icon: Folder,
+        title: 'Kategori',
+        href: admin.categories.index(),
+        icon: Layers,
+        children: [
+            {
+                title: 'Listele',
+                href: admin.categories.index(),
+                icon: List,
+            },
+            {
+                title: 'Ekle',
+                href: admin.categories.create(),
+                icon: Plus,
+            },
+        ],
     },
     {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#react',
-        icon: BookOpen,
+        title: 'Etiket',
+        href: admin.tags.index(),
+        icon: Tag,
+        children: [
+            {
+                title: 'Listele',
+                href: admin.tags.index(),
+                icon: List,
+            },
+            {
+                title: 'Ekle',
+                href: admin.tags.create(),
+                icon: Plus,
+            }
+        ],
+    },
+    {
+        title: 'Marka',
+        href: admin.brands.index(),
+        icon: Tag,
+        children: [
+            {
+                title: 'Listele',
+                href: admin.brands.index(),
+                icon: List,
+            },
+            {
+                title: 'Ekle',
+                href: admin.brands.create(),
+                icon: Plus,
+            },
+        ],
+    },
+    {
+        title: 'Malzeme',
+        href: admin.ingredients.index(),
+        icon: Leaf,
+        children: [
+            {
+                title: 'Listele',
+                href: admin.ingredients.index(),
+                icon: List,
+            },
+            {
+                title: 'Ekle',
+                href: admin.ingredients.create(),
+                icon: Plus,
+            },
+        ],
     },
 ];
 
 export function AppSidebar() {
+    const { currentUrl } = useCurrentUrl();
+    const isAdminArea = currentUrl.startsWith('/suug');
+    const mainNavItems = isAdminArea ? adminNavItems : [];
+    const definitionItems = isAdminArea ? definitionsNavItems : [];
+
+    const logoHref = isAdminArea ? admin.dashboard() : home();
+
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <Link href={dashboard()} prefetch>
+                            <Link href={logoHref} prefetch>
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>
@@ -54,12 +149,8 @@ export function AppSidebar() {
 
             <SidebarContent>
                 <NavMain items={mainNavItems} />
+                <NavMain items={definitionItems} label="Tanımlamalar" />
             </SidebarContent>
-
-            <SidebarFooter>
-                <NavFooter items={footerNavItems} className="mt-auto" />
-                <NavUser />
-            </SidebarFooter>
         </Sidebar>
     );
 }

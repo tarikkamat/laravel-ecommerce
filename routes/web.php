@@ -10,16 +10,6 @@ Route::get('/', function () {
     ]);
 })->name('home');
 
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('hesabim', function () {
-        return Inertia::render('account');
-    })->name('account');
-
-    Route::middleware(['role.admin'])->prefix('suug')->group(function () {
-        Route::get('dashboard', function () {
-            return Inertia::render('dashboard');
-        })->name('dashboard');
-    });
-});
-
+require __DIR__.'/storefront.php';
+require __DIR__.'/admin.php';
 require __DIR__.'/settings.php';
