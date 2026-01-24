@@ -1,18 +1,6 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { Calendar, ChevronRight, FolderTree, Globe, Info, Pencil, Trash2 } from 'lucide-react';
+import { Calendar, Globe, Info, Pencil, Trash2 } from 'lucide-react';
 
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogMedia,
-    AlertDialogTitle,
-    AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { CardContent, CardHeader } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -20,27 +8,33 @@ import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AppLayout from '@/layouts/app-layout';
 import admin from '@/routes/admin';
-import type { BreadcrumbItem, Category } from '@/types';
+import type { BreadcrumbItem, Tag } from '@/types';
 
 interface Props {
-    item: Category;
+    item: Tag;
 }
 
-export default function CategoriesShow({ item }: Props) {
+export default function TagsShow({ item }: Props) {
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Dashboard',
             href: admin.dashboard().url,
         },
         {
-            title: 'Kategoriler',
-            href: admin.categories.index().url,
+            title: 'Etiketler',
+            href: admin.tags.index().url,
         },
         {
             title: item.title,
-            href: admin.categories.show(item.id).url,
+            href: admin.tags.show(item.id).url,
         },
     ];
+
+    const handleDelete = () => {
+        if (confirm('Bu etiketi silmek istediğinize emin misiniz?')) {
+            router.delete(admin.tags.destroy(item.id).url);
+        }
+    };
 
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleDateString('tr-TR', {
@@ -63,44 +57,20 @@ export default function CategoriesShow({ item }: Props) {
                         <div>
                             <h1 className="text-2xl font-bold tracking-tight">{item.title}</h1>
                             <p className="text-muted-foreground">
-                                Kategori detaylarını görüntülüyorsunuz.
+                                Etiket detaylarını görüntülüyorsunuz.
                             </p>
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
                         <Button variant="ghost" asChild>
-                            <Link href={admin.categories.index().url}>Kategori Listesine Dön</Link>
+                            <Link href={admin.tags.index().url}>Etiket Listesine Dön</Link>
                         </Button>
-                        <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                                <Button variant="outline">
-                                    <Trash2 className="mr-2 h-4 w-4 text-destructive" />
-                                    Sil
-                                </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent size="sm">
-                                <AlertDialogHeader>
-                                    <AlertDialogMedia className="bg-destructive/10 text-destructive dark:bg-destructive/20 dark:text-destructive">
-                                        <Trash2 />
-                                    </AlertDialogMedia>
-                                    <AlertDialogTitle>Kategoriyi sil?</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                        Bu işlem "{item.title}" kategorisini kalıcı olarak silecektir.
-                                    </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                    <AlertDialogCancel variant="outline">İptal</AlertDialogCancel>
-                                    <AlertDialogAction
-                                        variant="destructive"
-                                        onClick={() => router.delete(admin.categories.destroy(item.id).url)}
-                                    >
-                                        Sil
-                                    </AlertDialogAction>
-                                </AlertDialogFooter>
-                            </AlertDialogContent>
-                        </AlertDialog>
+                        <Button variant="outline" onClick={handleDelete}>
+                            <Trash2 className="mr-2 h-4 w-4 text-destructive" />
+                            Sil
+                        </Button>
                         <Button asChild>
-                            <Link href={admin.categories.edit(item.id).url}>
+                            <Link href={admin.tags.edit(item.id).url}>
                                 <Pencil className="mr-2 h-4 w-4" />
                                 Düzenle
                             </Link>
@@ -129,7 +99,7 @@ export default function CategoriesShow({ item }: Props) {
                             <CardContent className="pt-6">
                                 <TabsContent value="general" className="mt-0 space-y-5">
                                     <div className="space-y-2">
-                                        <Label className="text-muted-foreground">Kategori Adı</Label>
+                                        <Label className="text-muted-foreground">Etiket Adı</Label>
                                         <p className="text-sm font-medium">{item.title}</p>
                                     </div>
 
@@ -137,7 +107,7 @@ export default function CategoriesShow({ item }: Props) {
                                         <Label className="text-muted-foreground">URL Adresi (Slug)</Label>
                                         <p className="text-sm font-medium">
                                             <span className="text-muted-foreground">
-                                                suug.istanbul/kategoriler/
+                                                suug.istanbul/etiketler/
                                             </span>
                                             {item.slug}
                                         </p>
@@ -184,53 +154,6 @@ export default function CategoriesShow({ item }: Props) {
 
                     {/* Sidebar */}
                     <div className="space-y-6">
-                        {/* Parent Category */}
-                        <div className="space-y-3">
-                            <div className="flex items-center gap-2">
-                                <FolderTree className="h-4 w-4 text-primary" />
-                                <Label className="font-semibold">Üst Kategori</Label>
-                            </div>
-                            {item.parent ? (
-                                <div className="flex items-center gap-2 text-sm">
-                                    <Link
-                                        href={admin.categories.show(item.parent.id).url}
-                                        className="text-primary hover:underline"
-                                    >
-                                        {item.parent.title}
-                                    </Link>
-                                    <ChevronRight className="h-3 w-3 text-muted-foreground" />
-                                    <span className="font-medium">{item.title}</span>
-                                </div>
-                            ) : (
-                                <p className="text-sm text-muted-foreground italic">
-                                    Ana Kategori (Üst kategori yok)
-                                </p>
-                            )}
-                        </div>
-
-                        {/* Children Categories */}
-                        {item.children && item.children.length > 0 && (
-                            <div className="space-y-3">
-                                <div className="flex items-center gap-2">
-                                    <FolderTree className="h-4 w-4 text-primary" />
-                                    <Label className="font-semibold">
-                                        Alt Kategoriler ({item.children.length})
-                                    </Label>
-                                </div>
-                                <div className="space-y-1">
-                                    {item.children.map((child) => (
-                                        <Link
-                                            key={child.id}
-                                            href={admin.categories.show(child.id).url}
-                                            className="block text-sm text-primary hover:underline"
-                                        >
-                                            {child.title}
-                                        </Link>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
                         {/* Dates */}
                         <div className="space-y-3">
                             <div className="flex items-center gap-2">

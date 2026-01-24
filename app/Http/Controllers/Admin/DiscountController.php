@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\DiscountType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\DiscountStoreRequest;
 use App\Http\Requests\Admin\DiscountUpdateRequest;
@@ -24,7 +25,7 @@ class DiscountController extends Controller
 
     public function create()
     {
-        return Inertia::render('admin/discounts/create');
+        return Inertia::render('admin/discounts/create', $this->options());
     }
 
     public function store(DiscountStoreRequest $request)
@@ -41,6 +42,14 @@ class DiscountController extends Controller
         ]);
     }
 
+    public function edit(int $id)
+    {
+        return Inertia::render('admin/discounts/edit', [
+            'item' => $this->service->findOrFail($id),
+            ...$this->options()
+        ]);
+    }
+
     public function update(DiscountUpdateRequest $request, int $id)
     {
         $this->service->update($id, $request->validated());
@@ -53,5 +62,18 @@ class DiscountController extends Controller
         $this->service->delete($id);
 
         return redirect()->route('admin.discounts.index');
+    }
+
+    private function options(): array
+    {
+        return [
+            'discountTypes' => collect(DiscountType::cases())
+                ->map(fn (DiscountType $type): array => [
+                    'value' => $type->value,
+                    'label' => $type->label(),
+                ])
+                ->values()
+                ->all(),
+        ];
     }
 }

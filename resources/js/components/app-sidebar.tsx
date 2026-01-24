@@ -36,6 +36,18 @@ const adminNavItems: NavItem[] = [
         title: 'Ürün',
         href: admin.products.index(),
         icon: Package,
+        children: [
+            {
+                title: 'Listele',
+                href: admin.products.index(),
+                icon: List,
+            },
+            {
+                title: 'Ekle',
+                href: admin.products.create(),
+                icon: Plus,
+            },
+        ]
     },
     {
         title: 'Görsel',
@@ -46,11 +58,35 @@ const adminNavItems: NavItem[] = [
         title: 'İndirim',
         href: admin.discounts.index(),
         icon: Percent,
+        children: [
+            {
+                title: 'Listele',
+                href: admin.discounts.index(),
+                icon: List,
+            },
+            {
+                title: 'Ekle',
+                href: admin.discounts.create(),
+                icon: Plus,
+            },
+        ],
     },
     {
         title: 'Kullanıcılar',
         href: admin.users.index(),
         icon: User,
+        children: [
+            {
+                title: 'Listele',
+                href: admin.users.index(),
+                icon: List,
+            },
+            {
+                title: 'Ekle',
+                href: admin.users.create(),
+                icon: Plus,
+            },
+        ],
     },
 ];
 

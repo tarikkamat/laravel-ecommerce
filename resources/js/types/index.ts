@@ -3,7 +3,12 @@ export type * from './navigation';
 export type * from './ui';
 export type * from './brand';
 export type * from './category';
+export type * from './discount';
 export type * from './image';
+export type * from './ingredient';
+export type * from './product';
+export type * from './tag';
+export type * from './user';
 
 import type { Auth } from './auth';
 

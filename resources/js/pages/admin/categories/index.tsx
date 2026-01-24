@@ -1,6 +1,18 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { ChevronRight, Eye, FolderTree, Pencil, Plus, Trash2 } from 'lucide-react';
 
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogMedia,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import {
     Empty,
@@ -37,12 +49,6 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function CategoriesIndex({ items }: Props) {
-    const handleDelete = (id: number) => {
-        if (confirm('Bu kategoriyi silmek istediğinize emin misiniz?')) {
-            router.delete(admin.categories.destroy(id).url);
-        }
-    };
-
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Kategoriler" />
@@ -145,13 +151,33 @@ export default function CategoriesIndex({ items }: Props) {
                                                         <Pencil className="h-4 w-4" />
                                                     </Link>
                                                 </Button>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    onClick={() => handleDelete(category.id)}
-                                                >
-                                                    <Trash2 className="h-4 w-4 text-destructive" />
-                                                </Button>
+                                                <AlertDialog>
+                                                    <AlertDialogTrigger asChild>
+                                                        <Button variant="ghost" size="icon">
+                                                            <Trash2 className="h-4 w-4 text-destructive" />
+                                                        </Button>
+                                                    </AlertDialogTrigger>
+                                                    <AlertDialogContent size="sm">
+                                                        <AlertDialogHeader>
+                                                            <AlertDialogMedia className="bg-destructive/10 text-destructive dark:bg-destructive/20 dark:text-destructive">
+                                                                <Trash2 />
+                                                            </AlertDialogMedia>
+                                                            <AlertDialogTitle>Kategoriyi sil?</AlertDialogTitle>
+                                                            <AlertDialogDescription>
+                                                                Bu işlem "{category.title}" kategorisini kalıcı olarak silecektir.
+                                                            </AlertDialogDescription>
+                                                        </AlertDialogHeader>
+                                                        <AlertDialogFooter>
+                                                            <AlertDialogCancel variant="outline">İptal</AlertDialogCancel>
+                                                            <AlertDialogAction
+                                                                variant="destructive"
+                                                                onClick={() => router.delete(admin.categories.destroy(category.id).url)}
+                                                            >
+                                                                Sil
+                                                            </AlertDialogAction>
+                                                        </AlertDialogFooter>
+                                                    </AlertDialogContent>
+                                                </AlertDialog>
                                             </div>
                                         </TableCell>
                                     </TableRow>

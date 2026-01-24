@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { Calendar, ChevronRight, FolderTree, Globe, Info, Pencil, Trash2 } from 'lucide-react';
+import { Calendar, Hash, Info, Pencil, Percent, Trash2 } from 'lucide-react';
 
 import {
     AlertDialog,
@@ -13,6 +13,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { CardContent, CardHeader } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -20,29 +21,35 @@ import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AppLayout from '@/layouts/app-layout';
 import admin from '@/routes/admin';
-import type { BreadcrumbItem, Category } from '@/types';
+import type { BreadcrumbItem, Discount } from '@/types';
 
 interface Props {
-    item: Category;
+    item: Discount;
 }
 
-export default function CategoriesShow({ item }: Props) {
+const typeLabels: Record<string, string> = {
+    percentage: 'Yüzde',
+    fixed_amount: 'Sabit Tutar',
+};
+
+export default function DiscountsShow({ item }: Props) {
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Dashboard',
             href: admin.dashboard().url,
         },
         {
-            title: 'Kategoriler',
-            href: admin.categories.index().url,
+            title: 'İndirimler',
+            href: admin.discounts.index().url,
         },
         {
             title: item.title,
-            href: admin.categories.show(item.id).url,
+            href: admin.discounts.show(item.id).url,
         },
     ];
 
-    const formatDate = (dateString: string) => {
+    const formatDate = (dateString: string | null) => {
+        if (!dateString) return null;
         return new Date(dateString).toLocaleDateString('tr-TR', {
             year: 'numeric',
             month: 'long',
@@ -50,6 +57,23 @@ export default function CategoriesShow({ item }: Props) {
             hour: '2-digit',
             minute: '2-digit',
         });
+    };
+
+    const formatValue = () => {
+        if (item.type === 'percentage') {
+            return `%${item.value}`;
+        }
+        return `₺${item.value.toFixed(2)}`;
+    };
+
+    const isActive = () => {
+        const now = new Date();
+        const startsAt = item.starts_at ? new Date(item.starts_at) : null;
+        const endsAt = item.ends_at ? new Date(item.ends_at) : null;
+
+        if (startsAt && now < startsAt) return false;
+        if (endsAt && now > endsAt) return false;
+        return true;
     };
 
     return (
@@ -61,15 +85,20 @@ export default function CategoriesShow({ item }: Props) {
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex items-center gap-4">
                         <div>
-                            <h1 className="text-2xl font-bold tracking-tight">{item.title}</h1>
+                            <div className="flex items-center gap-2">
+                                <h1 className="text-2xl font-bold tracking-tight">{item.title}</h1>
+                                <Badge variant={isActive() ? 'default' : 'secondary'}>
+                                    {isActive() ? 'Aktif' : 'Pasif'}
+                                </Badge>
+                            </div>
                             <p className="text-muted-foreground">
-                                Kategori detaylarını görüntülüyorsunuz.
+                                İndirim detaylarını görüntülüyorsunuz.
                             </p>
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
                         <Button variant="ghost" asChild>
-                            <Link href={admin.categories.index().url}>Kategori Listesine Dön</Link>
+                            <Link href={admin.discounts.index().url}>İndirim Listesine Dön</Link>
                         </Button>
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
@@ -83,16 +112,16 @@ export default function CategoriesShow({ item }: Props) {
                                     <AlertDialogMedia className="bg-destructive/10 text-destructive dark:bg-destructive/20 dark:text-destructive">
                                         <Trash2 />
                                     </AlertDialogMedia>
-                                    <AlertDialogTitle>Kategoriyi sil?</AlertDialogTitle>
+                                    <AlertDialogTitle>İndirimi sil?</AlertDialogTitle>
                                     <AlertDialogDescription>
-                                        Bu işlem "{item.title}" kategorisini kalıcı olarak silecektir.
+                                        Bu işlem "{item.title}" indirimini kalıcı olarak silecektir.
                                     </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                     <AlertDialogCancel variant="outline">İptal</AlertDialogCancel>
                                     <AlertDialogAction
                                         variant="destructive"
-                                        onClick={() => router.delete(admin.categories.destroy(item.id).url)}
+                                        onClick={() => router.delete(admin.discounts.destroy(item.id).url)}
                                     >
                                         Sil
                                     </AlertDialogAction>
@@ -100,7 +129,7 @@ export default function CategoriesShow({ item }: Props) {
                             </AlertDialogContent>
                         </AlertDialog>
                         <Button asChild>
-                            <Link href={admin.categories.edit(item.id).url}>
+                            <Link href={admin.discounts.edit(item.id).url}>
                                 <Pencil className="mr-2 h-4 w-4" />
                                 Düzenle
                             </Link>
@@ -120,27 +149,17 @@ export default function CategoriesShow({ item }: Props) {
                                         <Info className="mr-1.5 h-4 w-4" />
                                         Genel Bilgiler
                                     </TabsTrigger>
-                                    <TabsTrigger value="seo">
-                                        <Globe className="mr-1.5 h-4 w-4" />
-                                        SEO
+                                    <TabsTrigger value="validity">
+                                        <Calendar className="mr-1.5 h-4 w-4" />
+                                        Geçerlilik
                                     </TabsTrigger>
                                 </TabsList>
                             </CardHeader>
                             <CardContent className="pt-6">
                                 <TabsContent value="general" className="mt-0 space-y-5">
                                     <div className="space-y-2">
-                                        <Label className="text-muted-foreground">Kategori Adı</Label>
+                                        <Label className="text-muted-foreground">İndirim Başlığı</Label>
                                         <p className="text-sm font-medium">{item.title}</p>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label className="text-muted-foreground">URL Adresi (Slug)</Label>
-                                        <p className="text-sm font-medium">
-                                            <span className="text-muted-foreground">
-                                                suug.istanbul/kategoriler/
-                                            </span>
-                                            {item.slug}
-                                        </p>
                                     </div>
 
                                     <div className="space-y-2">
@@ -153,29 +172,82 @@ export default function CategoriesShow({ item }: Props) {
                                             )}
                                         </p>
                                     </div>
+
+                                    <div className="grid gap-4 sm:grid-cols-2">
+                                        <div className="space-y-2">
+                                            <Label className="text-muted-foreground">İndirim Tipi</Label>
+                                            <div>
+                                                <Badge variant="outline">
+                                                    {typeLabels[item.type] || item.type}
+                                                </Badge>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <Label className="text-muted-foreground">İndirim Değeri</Label>
+                                            <p className="text-lg font-bold text-primary">
+                                                {formatValue()}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label className="text-muted-foreground">Kupon Kodu</Label>
+                                        {item.code ? (
+                                            <code className="block rounded bg-muted px-3 py-2 text-sm font-mono">
+                                                {item.code}
+                                            </code>
+                                        ) : (
+                                            <p className="text-sm text-muted-foreground italic">
+                                                Kupon kodu tanımlanmamış
+                                            </p>
+                                        )}
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label className="text-muted-foreground">Kullanım Limiti</Label>
+                                        <p className="text-sm">
+                                            {item.usage_limit !== null ? (
+                                                <span className="font-medium">{item.usage_limit} kullanım</span>
+                                            ) : (
+                                                <span className="text-muted-foreground italic">
+                                                    Sınırsız
+                                                </span>
+                                            )}
+                                        </p>
+                                    </div>
                                 </TabsContent>
 
-                                <TabsContent value="seo" className="mt-0 space-y-5">
+                                <TabsContent value="validity" className="mt-0 space-y-5">
                                     <div className="space-y-2">
-                                        <Label className="text-muted-foreground">SEO Başlığı</Label>
+                                        <Label className="text-muted-foreground">Başlangıç Tarihi</Label>
                                         <p className="text-sm">
-                                            {item.seo_title || (
+                                            {formatDate(item.starts_at) || (
                                                 <span className="text-muted-foreground italic">
-                                                    SEO başlığı girilmemiş
+                                                    Belirtilmemiş (hemen geçerli)
                                                 </span>
                                             )}
                                         </p>
                                     </div>
 
                                     <div className="space-y-2">
-                                        <Label className="text-muted-foreground">SEO Açıklaması</Label>
-                                        <p className="text-sm whitespace-pre-wrap">
-                                            {item.seo_description || (
+                                        <Label className="text-muted-foreground">Bitiş Tarihi</Label>
+                                        <p className="text-sm">
+                                            {formatDate(item.ends_at) || (
                                                 <span className="text-muted-foreground italic">
-                                                    SEO açıklaması girilmemiş
+                                                    Belirtilmemiş (süresiz)
                                                 </span>
                                             )}
                                         </p>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label className="text-muted-foreground">Durum</Label>
+                                        <div>
+                                            <Badge variant={isActive() ? 'default' : 'secondary'}>
+                                                {isActive() ? 'Aktif' : 'Pasif'}
+                                            </Badge>
+                                        </div>
                                     </div>
                                 </TabsContent>
                             </CardContent>
@@ -184,52 +256,29 @@ export default function CategoriesShow({ item }: Props) {
 
                     {/* Sidebar */}
                     <div className="space-y-6">
-                        {/* Parent Category */}
+                        {/* Quick Info */}
                         <div className="space-y-3">
                             <div className="flex items-center gap-2">
-                                <FolderTree className="h-4 w-4 text-primary" />
-                                <Label className="font-semibold">Üst Kategori</Label>
+                                <Percent className="h-4 w-4 text-primary" />
+                                <Label className="font-semibold">İndirim Özeti</Label>
                             </div>
-                            {item.parent ? (
-                                <div className="flex items-center gap-2 text-sm">
-                                    <Link
-                                        href={admin.categories.show(item.parent.id).url}
-                                        className="text-primary hover:underline"
-                                    >
-                                        {item.parent.title}
-                                    </Link>
-                                    <ChevronRight className="h-3 w-3 text-muted-foreground" />
-                                    <span className="font-medium">{item.title}</span>
+                            <div className="rounded-lg border p-4 space-y-3">
+                                <div className="text-center">
+                                    <p className="text-3xl font-bold text-primary">{formatValue()}</p>
+                                    <p className="text-sm text-muted-foreground">
+                                        {typeLabels[item.type] || item.type}
+                                    </p>
                                 </div>
-                            ) : (
-                                <p className="text-sm text-muted-foreground italic">
-                                    Ana Kategori (Üst kategori yok)
-                                </p>
-                            )}
+                                {item.code && (
+                                    <div className="pt-2 border-t">
+                                        <p className="text-xs text-muted-foreground text-center mb-1">Kupon Kodu</p>
+                                        <code className="block text-center rounded bg-muted px-2 py-1 text-sm font-mono">
+                                            {item.code}
+                                        </code>
+                                    </div>
+                                )}
+                            </div>
                         </div>
-
-                        {/* Children Categories */}
-                        {item.children && item.children.length > 0 && (
-                            <div className="space-y-3">
-                                <div className="flex items-center gap-2">
-                                    <FolderTree className="h-4 w-4 text-primary" />
-                                    <Label className="font-semibold">
-                                        Alt Kategoriler ({item.children.length})
-                                    </Label>
-                                </div>
-                                <div className="space-y-1">
-                                    {item.children.map((child) => (
-                                        <Link
-                                            key={child.id}
-                                            href={admin.categories.show(child.id).url}
-                                            className="block text-sm text-primary hover:underline"
-                                        >
-                                            {child.title}
-                                        </Link>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
 
                         {/* Dates */}
                         <div className="space-y-3">

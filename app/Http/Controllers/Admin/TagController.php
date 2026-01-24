@@ -37,7 +37,14 @@ class TagController extends Controller
     public function show(int $id)
     {
         return Inertia::render('admin/tags/show', [
-            'item' => $this->service->findOrFail($id)
+            'item' => $this->service->findOrFail($id),
+        ]);
+    }
+
+    public function edit(int $id)
+    {
+        return Inertia::render('admin/tags/edit', [
+            'item' => $this->service->findOrFail($id),
         ]);
     }
 

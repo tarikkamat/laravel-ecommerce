@@ -35,8 +35,31 @@ class ProductUpdateRequest extends FormRequest
             'tag_ids.*' => ['integer', 'exists:tags,id'],
             'ingredient_ids' => ['nullable', 'array'],
             'ingredient_ids.*' => ['integer', 'exists:ingredients,id'],
-            'image_ids' => ['nullable', 'array'],
-            'image_ids.*' => ['integer', 'exists:images,id'],
+            // Existing images to keep
+            'existing_image_ids' => ['nullable', 'array'],
+            'existing_image_ids.*' => ['integer', 'exists:images,id'],
+            // New image file uploads
+            'image_files' => ['nullable', 'array'],
+            'image_files.*' => ['image', 'mimes:png,jpg,jpeg,webp', 'max:5120'],
+            'image_titles' => ['nullable', 'array'],
+            'image_titles.*' => ['nullable', 'string'],
+            'image_slugs' => ['nullable', 'array'],
+            'image_slugs.*' => ['nullable', 'string'],
+            'image_descriptions' => ['nullable', 'array'],
+            'image_descriptions.*' => ['nullable', 'string'],
+            'image_seo_titles' => ['nullable', 'array'],
+            'image_seo_titles.*' => ['nullable', 'string'],
+            'image_seo_descriptions' => ['nullable', 'array'],
+            'image_seo_descriptions.*' => ['nullable', 'string'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'image_files.*.image' => 'Dosya geçerli bir resim olmalıdır.',
+            'image_files.*.mimes' => 'Resim sadece PNG, JPG, JPEG veya WebP formatında olabilir.',
+            'image_files.*.max' => 'Resim en fazla 5MB olabilir.',
         ];
     }
 }

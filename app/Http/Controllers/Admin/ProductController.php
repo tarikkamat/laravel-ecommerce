@@ -7,7 +7,6 @@ use App\Http\Requests\Admin\ProductStoreRequest;
 use App\Http\Requests\Admin\ProductUpdateRequest;
 use App\Models\Brand;
 use App\Models\Category;
-use App\Models\Image;
 use App\Models\Ingredient;
 use App\Models\Product;
 use App\Models\Tag;
@@ -30,7 +29,7 @@ class ProductController extends Controller
 
     public function create()
     {
-        return Inertia::render('admin/products/create');
+        return Inertia::render('admin/products/create', $this->options());
     }
 
     public function store(ProductStoreRequest $request)
@@ -39,15 +38,13 @@ class ProductController extends Controller
         $categoryIds = $data['category_ids'] ?? null;
         $tagIds = $data['tag_ids'] ?? null;
         $ingredientIds = $data['ingredient_ids'] ?? null;
-        $imageIds = $data['image_ids'] ?? null;
-        unset($data['category_ids'], $data['tag_ids'], $data['ingredient_ids'], $data['image_ids']);
+        unset($data['category_ids'], $data['tag_ids'], $data['ingredient_ids']);
 
         /** @var Product $product */
         $product = $this->service->create($data);
         $this->syncMany($product, 'categories', $categoryIds);
         $this->syncMany($product, 'tags', $tagIds);
         $this->syncMany($product, 'ingredients', $ingredientIds);
-        $this->syncMany($product, 'images', $imageIds);
 
         return redirect()->route('admin.products.index');
     }
@@ -55,6 +52,21 @@ class ProductController extends Controller
     public function show(int $id)
     {
         $product = $this->service->findOrFail($id);
+
+        // Load all relationships for display
+        $product->load(['brand', 'categories', 'tags', 'ingredients', 'images']);
+
+        return Inertia::render('admin/products/show', [
+            'item' => $product
+        ]);
+    }
+
+    public function edit(int $id)
+    {
+        $product = $this->service->findOrFail($id);
+
+        // Load relationships
+        $product->load(['images', 'brand']);
 
         $product->setAttribute(
             'category_ids',
@@ -68,13 +80,10 @@ class ProductController extends Controller
             'ingredient_ids',
             $product->ingredients()->pluck('ingredients.id')->values()->all()
         );
-        $product->setAttribute(
-            'image_ids',
-            $product->images()->pluck('images.id')->values()->all()
-        );
 
-        return Inertia::render('admin/products/show', [
-            'item' => $product
+        return Inertia::render('admin/products/edit', [
+            'item' => $product,
+            ...$this->options()
         ]);
     }
 
@@ -84,15 +93,13 @@ class ProductController extends Controller
         $categoryIds = $data['category_ids'] ?? null;
         $tagIds = $data['tag_ids'] ?? null;
         $ingredientIds = $data['ingredient_ids'] ?? null;
-        $imageIds = $data['image_ids'] ?? null;
-        unset($data['category_ids'], $data['tag_ids'], $data['ingredient_ids'], $data['image_ids']);
+        unset($data['category_ids'], $data['tag_ids'], $data['ingredient_ids']);
 
         /** @var Product $product */
         $product = $this->service->update($id, $data);
         $this->syncMany($product, 'categories', $categoryIds);
         $this->syncMany($product, 'tags', $tagIds);
         $this->syncMany($product, 'ingredients', $ingredientIds);
-        $this->syncMany($product, 'images', $imageIds);
 
         return redirect()->route('admin.products.index');
     }
@@ -117,16 +124,7 @@ class ProductController extends Controller
                 ])
                 ->values()
                 ->all(),
-            'categories' => Category::query()
-                ->select(['id', 'title'])
-                ->orderBy('title')
-                ->get()
-                ->map(fn (Category $category): array => [
-                    'value' => $category->id,
-                    'label' => $category->title,
-                ])
-                ->values()
-                ->all(),
+            'categories' => $this->buildCategoryTree(),
             'tags' => Tag::query()
                 ->select(['id', 'title'])
                 ->orderBy('title')
@@ -147,17 +145,35 @@ class ProductController extends Controller
                 ])
                 ->values()
                 ->all(),
-            'images' => Image::query()
-                ->select(['id', 'title', 'path'])
-                ->orderBy('id')
-                ->get()
-                ->map(fn (Image $image): array => [
-                    'value' => $image->id,
-                    'label' => $image->title ?: $image->path,
-                ])
-                ->values()
-                ->all(),
         ];
+    }
+
+    private function buildCategoryTree(): array
+    {
+        $categories = Category::query()
+            ->select(['id', 'parent_id', 'title'])
+            ->orderBy('title')
+            ->get();
+
+        return $this->buildTree($categories->toArray(), null);
+    }
+
+    private function buildTree(array $categories, ?int $parentId): array
+    {
+        $tree = [];
+
+        foreach ($categories as $category) {
+            if ($category['parent_id'] === $parentId) {
+                $children = $this->buildTree($categories, $category['id']);
+                $tree[] = [
+                    'value' => $category['id'],
+                    'label' => $category['title'],
+                    'children' => $children,
+                ];
+            }
+        }
+
+        return $tree;
     }
 
     private function syncMany(Product $product, string $relation, mixed $ids): void

@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { Eye, Pencil, Plus, Tag, Trash2 } from 'lucide-react';
+import { Eye, Pencil, Plus, Tag as TagIcon, Trash2 } from 'lucide-react';
 
 import {
     AlertDialog,
@@ -31,10 +31,10 @@ import {
 } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import admin from '@/routes/admin';
-import type { BreadcrumbItem, PaginatedData, Brand } from '@/types';
+import type { BreadcrumbItem, PaginatedData, Tag } from '@/types';
 
 interface Props {
-    items: PaginatedData<Brand>;
+    items: PaginatedData<Tag>;
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -43,29 +43,29 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: admin.dashboard().url,
     },
     {
-        title: 'Markalar',
-        href: admin.brands.index().url,
+        title: 'Etiketler',
+        href: admin.tags.index().url,
     },
 ];
 
-export default function BrandsIndex({ items }: Props) {
+export default function TagsIndex({ items }: Props) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Markalar" />
+            <Head title="Etiketler" />
 
             <div className="flex h-full flex-1 flex-col gap-4 p-4">
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight">Markalar</h1>
+                        <h1 className="text-2xl font-bold tracking-tight">Etiketler</h1>
                         <p className="text-muted-foreground">
-                            Toplam {items.total} marka bulunmaktadır.
+                            Toplam {items.total} etiket bulunmaktadır.
                         </p>
                     </div>
                     <Button asChild>
-                        <Link href={admin.brands.create().url}>
+                        <Link href={admin.tags.create().url}>
                             <Plus className="mr-2 h-4 w-4" />
-                            Yeni Marka
+                            Yeni Etiket
                         </Link>
                     </Button>
                 </div>
@@ -75,17 +75,17 @@ export default function BrandsIndex({ items }: Props) {
                     <Empty className="flex-1 border">
                         <EmptyHeader>
                             <EmptyMedia variant="icon">
-                                <Tag className="h-6 w-6" />
+                                <TagIcon className="h-6 w-6" />
                             </EmptyMedia>
-                            <EmptyTitle>Henüz marka bulunmuyor</EmptyTitle>
+                            <EmptyTitle>Henüz etiket bulunmuyor</EmptyTitle>
                             <EmptyDescription>
-                                Ürünlerinizi organize etmek için ilk markanızı ekleyin.
+                                Ürünlerinizi etiketlemek için ilk etiketinizi ekleyin.
                             </EmptyDescription>
                         </EmptyHeader>
                         <Button asChild>
-                            <Link href={admin.brands.create().url}>
+                            <Link href={admin.tags.create().url}>
                                 <Plus className="mr-2 h-4 w-4" />
-                                Yeni Marka Ekle
+                                Yeni Etiket Ekle
                             </Link>
                         </Button>
                     </Empty>
@@ -103,48 +103,31 @@ export default function BrandsIndex({ items }: Props) {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {items.data.map((brand) => (
-                                    <TableRow key={brand.id}>
-                                        <TableCell className="font-medium">{brand.id}</TableCell>
+                                {items.data.map((tag) => (
+                                    <TableRow key={tag.id}>
+                                        <TableCell className="font-medium">{tag.id}</TableCell>
                                         <TableCell>
-                                            <div className="flex items-center gap-3">
-                                                {brand.image?.path && (
-                                                    <img
-                                                        src={`/storage/${brand.image.path}`}
-                                                        alt={brand.image.title || brand.title}
-                                                        className="h-8 w-8 rounded object-cover"
-                                                    />
-                                                )}
-                                                <span className="font-medium">{brand.title}</span>
-                                            </div>
+                                            <span className="font-medium">{tag.title}</span>
                                         </TableCell>
                                         <TableCell className="text-muted-foreground">
-                                            {brand.slug}
+                                            {tag.slug}
                                         </TableCell>
                                         <TableCell className="hidden md:table-cell text-muted-foreground">
-                                            {brand.description
-                                                ? brand.description.length > 50
-                                                    ? `${brand.description.substring(0, 50)}...`
-                                                    : brand.description
+                                            {tag.description
+                                                ? tag.description.length > 50
+                                                    ? `${tag.description.substring(0, 50)}...`
+                                                    : tag.description
                                                 : '-'}
                                         </TableCell>
                                         <TableCell className="text-right">
                                             <div className="flex items-center justify-end gap-1">
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    asChild
-                                                >
-                                                    <Link href={admin.brands.show(brand.id).url}>
+                                                <Button variant="ghost" size="icon" asChild>
+                                                    <Link href={admin.tags.show(tag.id).url}>
                                                         <Eye className="h-4 w-4" />
                                                     </Link>
                                                 </Button>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    asChild
-                                                >
-                                                    <Link href={admin.brands.edit(brand.id).url}>
+                                                <Button variant="ghost" size="icon" asChild>
+                                                    <Link href={admin.tags.edit(tag.id).url}>
                                                         <Pencil className="h-4 w-4" />
                                                     </Link>
                                                 </Button>
@@ -159,16 +142,16 @@ export default function BrandsIndex({ items }: Props) {
                                                             <AlertDialogMedia className="bg-destructive/10 text-destructive dark:bg-destructive/20 dark:text-destructive">
                                                                 <Trash2 />
                                                             </AlertDialogMedia>
-                                                            <AlertDialogTitle>Markayı sil?</AlertDialogTitle>
+                                                            <AlertDialogTitle>Etiketi sil?</AlertDialogTitle>
                                                             <AlertDialogDescription>
-                                                                Bu işlem "{brand.title}" markasını kalıcı olarak silecektir.
+                                                                Bu işlem "{tag.title}" etiketini kalıcı olarak silecektir.
                                                             </AlertDialogDescription>
                                                         </AlertDialogHeader>
                                                         <AlertDialogFooter>
                                                             <AlertDialogCancel variant="outline">İptal</AlertDialogCancel>
                                                             <AlertDialogAction
                                                                 variant="destructive"
-                                                                onClick={() => router.delete(admin.brands.destroy(brand.id).url)}
+                                                                onClick={() => router.delete(admin.tags.destroy(tag.id).url)}
                                                             >
                                                                 Sil
                                                             </AlertDialogAction>

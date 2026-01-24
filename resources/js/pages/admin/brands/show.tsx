@@ -1,5 +1,17 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { ArrowLeft, Calendar, Globe, ImageIcon, Info, Pencil, Trash2 } from 'lucide-react';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogMedia,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { CardContent, CardHeader } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -28,12 +40,6 @@ export default function BrandsShow({ item }: Props) {
             href: admin.brands.show(item.id).url,
         },
     ];
-
-    const handleDelete = () => {
-        if (confirm('Bu markayı silmek istediğinize emin misiniz?')) {
-            router.delete(admin.brands.destroy(item.id).url);
-        }
-    };
 
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleDateString('tr-TR', {
@@ -66,10 +72,34 @@ export default function BrandsShow({ item }: Props) {
                                 Marka Listesine Dön
                             </Link>
                         </Button>
-                        <Button variant="outline" onClick={handleDelete}>
-                            <Trash2 className="mr-2 h-4 w-4 text-destructive" />
-                            Sil
-                        </Button>
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button variant="outline">
+                                    <Trash2 className="mr-2 h-4 w-4 text-destructive" />
+                                    Sil
+                                </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent size="sm">
+                                <AlertDialogHeader>
+                                    <AlertDialogMedia className="bg-destructive/10 text-destructive dark:bg-destructive/20 dark:text-destructive">
+                                        <Trash2 />
+                                    </AlertDialogMedia>
+                                    <AlertDialogTitle>Markayı sil?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        Bu işlem "{item.title}" markasını kalıcı olarak silecektir.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel variant="outline">İptal</AlertDialogCancel>
+                                    <AlertDialogAction
+                                        variant="destructive"
+                                        onClick={() => router.delete(admin.brands.destroy(item.id).url)}
+                                    >
+                                        Sil
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
                         <Button asChild>
                             <Link href={admin.brands.edit(item.id).url}>
                                 <Pencil className="mr-2 h-4 w-4" />

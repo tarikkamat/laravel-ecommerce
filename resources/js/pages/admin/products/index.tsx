@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { Eye, Pencil, Plus, Tag, Trash2 } from 'lucide-react';
+import { Eye, Package, Pencil, Plus, Trash2 } from 'lucide-react';
 
 import {
     AlertDialog,
@@ -13,6 +13,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
     Empty,
@@ -31,10 +32,10 @@ import {
 } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import admin from '@/routes/admin';
-import type { BreadcrumbItem, PaginatedData, Brand } from '@/types';
+import type { BreadcrumbItem, PaginatedData, Product } from '@/types';
 
 interface Props {
-    items: PaginatedData<Brand>;
+    items: PaginatedData<Product>;
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -43,29 +44,36 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: admin.dashboard().url,
     },
     {
-        title: 'Markalar',
-        href: admin.brands.index().url,
+        title: 'Ürünler',
+        href: admin.products.index().url,
     },
 ];
 
-export default function BrandsIndex({ items }: Props) {
+export default function ProductsIndex({ items }: Props) {
+    const formatPrice = (price: number) => {
+        return new Intl.NumberFormat('tr-TR', {
+            style: 'currency',
+            currency: 'TRY',
+        }).format(price);
+    };
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Markalar" />
+            <Head title="Ürünler" />
 
             <div className="flex h-full flex-1 flex-col gap-4 p-4">
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight">Markalar</h1>
+                        <h1 className="text-2xl font-bold tracking-tight">Ürünler</h1>
                         <p className="text-muted-foreground">
-                            Toplam {items.total} marka bulunmaktadır.
+                            Toplam {items.total} ürün bulunmaktadır.
                         </p>
                     </div>
                     <Button asChild>
-                        <Link href={admin.brands.create().url}>
+                        <Link href={admin.products.create().url}>
                             <Plus className="mr-2 h-4 w-4" />
-                            Yeni Marka
+                            Yeni Ürün
                         </Link>
                     </Button>
                 </div>
@@ -75,17 +83,17 @@ export default function BrandsIndex({ items }: Props) {
                     <Empty className="flex-1 border">
                         <EmptyHeader>
                             <EmptyMedia variant="icon">
-                                <Tag className="h-6 w-6" />
+                                <Package className="h-6 w-6" />
                             </EmptyMedia>
-                            <EmptyTitle>Henüz marka bulunmuyor</EmptyTitle>
+                            <EmptyTitle>Henüz ürün bulunmuyor</EmptyTitle>
                             <EmptyDescription>
-                                Ürünlerinizi organize etmek için ilk markanızı ekleyin.
+                                Mağazanıza yeni ürünler ekleyerek başlayın.
                             </EmptyDescription>
                         </EmptyHeader>
                         <Button asChild>
-                            <Link href={admin.brands.create().url}>
+                            <Link href={admin.products.create().url}>
                                 <Plus className="mr-2 h-4 w-4" />
-                                Yeni Marka Ekle
+                                Yeni Ürün Ekle
                             </Link>
                         </Button>
                     </Empty>
@@ -96,55 +104,75 @@ export default function BrandsIndex({ items }: Props) {
                             <TableHeader>
                                 <TableRow>
                                     <TableHead className="w-[80px]">ID</TableHead>
-                                    <TableHead>Başlık</TableHead>
-                                    <TableHead>Slug</TableHead>
-                                    <TableHead className="hidden md:table-cell">Açıklama</TableHead>
+                                    <TableHead>Ürün</TableHead>
+                                    <TableHead>SKU</TableHead>
+                                    <TableHead>Fiyat</TableHead>
+                                    <TableHead className="hidden md:table-cell">Stok</TableHead>
+                                    <TableHead>Durum</TableHead>
                                     <TableHead className="w-[120px] text-right">İşlemler</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {items.data.map((brand) => (
-                                    <TableRow key={brand.id}>
-                                        <TableCell className="font-medium">{brand.id}</TableCell>
+                                {items.data.map((product) => (
+                                    <TableRow key={product.id}>
+                                        <TableCell className="font-medium">{product.id}</TableCell>
                                         <TableCell>
                                             <div className="flex items-center gap-3">
-                                                {brand.image?.path && (
+                                                {product.images?.[0]?.path && (
                                                     <img
-                                                        src={`/storage/${brand.image.path}`}
-                                                        alt={brand.image.title || brand.title}
-                                                        className="h-8 w-8 rounded object-cover"
+                                                        src={`/storage/${product.images[0].path}`}
+                                                        alt={product.title}
+                                                        className="h-10 w-10 rounded object-cover"
                                                     />
                                                 )}
-                                                <span className="font-medium">{brand.title}</span>
+                                                <div>
+                                                    <p className="font-medium">{product.title}</p>
+                                                    <p className="text-sm text-muted-foreground">
+                                                        {product.brand?.title || '-'}
+                                                    </p>
+                                                </div>
                                             </div>
                                         </TableCell>
-                                        <TableCell className="text-muted-foreground">
-                                            {brand.slug}
+                                        <TableCell>
+                                            <code className="rounded bg-muted px-1.5 py-0.5 text-sm font-mono">
+                                                {product.sku}
+                                            </code>
                                         </TableCell>
-                                        <TableCell className="hidden md:table-cell text-muted-foreground">
-                                            {brand.description
-                                                ? brand.description.length > 50
-                                                    ? `${brand.description.substring(0, 50)}...`
-                                                    : brand.description
-                                                : '-'}
+                                        <TableCell>
+                                            <div>
+                                                {product.sale_price ? (
+                                                    <>
+                                                        <p className="font-medium text-destructive">
+                                                            {formatPrice(product.sale_price)}
+                                                        </p>
+                                                        <p className="text-sm text-muted-foreground line-through">
+                                                            {formatPrice(product.price)}
+                                                        </p>
+                                                    </>
+                                                ) : (
+                                                    <p className="font-medium">{formatPrice(product.price)}</p>
+                                                )}
+                                            </div>
+                                        </TableCell>
+                                        <TableCell className="hidden md:table-cell">
+                                            <Badge variant={product.stock > 0 ? 'secondary' : 'destructive'}>
+                                                {product.stock > 0 ? `${product.stock} adet` : 'Tükendi'}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell>
+                                            <Badge variant={product.active ? 'default' : 'secondary'}>
+                                                {product.active ? 'Aktif' : 'Pasif'}
+                                            </Badge>
                                         </TableCell>
                                         <TableCell className="text-right">
                                             <div className="flex items-center justify-end gap-1">
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    asChild
-                                                >
-                                                    <Link href={admin.brands.show(brand.id).url}>
+                                                <Button variant="ghost" size="icon" asChild>
+                                                    <Link href={admin.products.show(product.id).url}>
                                                         <Eye className="h-4 w-4" />
                                                     </Link>
                                                 </Button>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    asChild
-                                                >
-                                                    <Link href={admin.brands.edit(brand.id).url}>
+                                                <Button variant="ghost" size="icon" asChild>
+                                                    <Link href={admin.products.edit(product.id).url}>
                                                         <Pencil className="h-4 w-4" />
                                                     </Link>
                                                 </Button>
@@ -159,16 +187,16 @@ export default function BrandsIndex({ items }: Props) {
                                                             <AlertDialogMedia className="bg-destructive/10 text-destructive dark:bg-destructive/20 dark:text-destructive">
                                                                 <Trash2 />
                                                             </AlertDialogMedia>
-                                                            <AlertDialogTitle>Markayı sil?</AlertDialogTitle>
+                                                            <AlertDialogTitle>Ürünü sil?</AlertDialogTitle>
                                                             <AlertDialogDescription>
-                                                                Bu işlem "{brand.title}" markasını kalıcı olarak silecektir.
+                                                                Bu işlem "{product.title}" ürününü kalıcı olarak silecektir.
                                                             </AlertDialogDescription>
                                                         </AlertDialogHeader>
                                                         <AlertDialogFooter>
                                                             <AlertDialogCancel variant="outline">İptal</AlertDialogCancel>
                                                             <AlertDialogAction
                                                                 variant="destructive"
-                                                                onClick={() => router.delete(admin.brands.destroy(brand.id).url)}
+                                                                onClick={() => router.delete(admin.products.destroy(product.id).url)}
                                                             >
                                                                 Sil
                                                             </AlertDialogAction>

@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { Eye, Pencil, Plus, Tag, Trash2 } from 'lucide-react';
+import { Eye, FlaskConical, Pencil, Plus, Trash2 } from 'lucide-react';
 
 import {
     AlertDialog,
@@ -13,6 +13,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
     Empty,
@@ -31,10 +32,10 @@ import {
 } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import admin from '@/routes/admin';
-import type { BreadcrumbItem, PaginatedData, Brand } from '@/types';
+import type { BreadcrumbItem, Ingredient, PaginatedData } from '@/types';
 
 interface Props {
-    items: PaginatedData<Brand>;
+    items: PaginatedData<Ingredient>;
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -43,29 +44,29 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: admin.dashboard().url,
     },
     {
-        title: 'Markalar',
-        href: admin.brands.index().url,
+        title: 'İçerikler',
+        href: admin.ingredients.index().url,
     },
 ];
 
-export default function BrandsIndex({ items }: Props) {
+export default function IngredientsIndex({ items }: Props) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Markalar" />
+            <Head title="İçerikler" />
 
             <div className="flex h-full flex-1 flex-col gap-4 p-4">
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight">Markalar</h1>
+                        <h1 className="text-2xl font-bold tracking-tight">İçerikler</h1>
                         <p className="text-muted-foreground">
-                            Toplam {items.total} marka bulunmaktadır.
+                            Toplam {items.total} içerik bulunmaktadır.
                         </p>
                     </div>
                     <Button asChild>
-                        <Link href={admin.brands.create().url}>
+                        <Link href={admin.ingredients.create().url}>
                             <Plus className="mr-2 h-4 w-4" />
-                            Yeni Marka
+                            Yeni İçerik
                         </Link>
                     </Button>
                 </div>
@@ -75,17 +76,17 @@ export default function BrandsIndex({ items }: Props) {
                     <Empty className="flex-1 border">
                         <EmptyHeader>
                             <EmptyMedia variant="icon">
-                                <Tag className="h-6 w-6" />
+                                <FlaskConical className="h-6 w-6" />
                             </EmptyMedia>
-                            <EmptyTitle>Henüz marka bulunmuyor</EmptyTitle>
+                            <EmptyTitle>Henüz içerik bulunmuyor</EmptyTitle>
                             <EmptyDescription>
-                                Ürünlerinizi organize etmek için ilk markanızı ekleyin.
+                                Ürünlerinizin içeriklerini tanımlayarak başlayın.
                             </EmptyDescription>
                         </EmptyHeader>
                         <Button asChild>
-                            <Link href={admin.brands.create().url}>
+                            <Link href={admin.ingredients.create().url}>
                                 <Plus className="mr-2 h-4 w-4" />
-                                Yeni Marka Ekle
+                                Yeni İçerik Ekle
                             </Link>
                         </Button>
                     </Empty>
@@ -99,52 +100,41 @@ export default function BrandsIndex({ items }: Props) {
                                     <TableHead>Başlık</TableHead>
                                     <TableHead>Slug</TableHead>
                                     <TableHead className="hidden md:table-cell">Açıklama</TableHead>
+                                    <TableHead>Ürün Sayısı</TableHead>
                                     <TableHead className="w-[120px] text-right">İşlemler</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {items.data.map((brand) => (
-                                    <TableRow key={brand.id}>
-                                        <TableCell className="font-medium">{brand.id}</TableCell>
+                                {items.data.map((ingredient) => (
+                                    <TableRow key={ingredient.id}>
+                                        <TableCell className="font-medium">{ingredient.id}</TableCell>
                                         <TableCell>
-                                            <div className="flex items-center gap-3">
-                                                {brand.image?.path && (
-                                                    <img
-                                                        src={`/storage/${brand.image.path}`}
-                                                        alt={brand.image.title || brand.title}
-                                                        className="h-8 w-8 rounded object-cover"
-                                                    />
-                                                )}
-                                                <span className="font-medium">{brand.title}</span>
-                                            </div>
+                                            <span className="font-medium">{ingredient.title}</span>
                                         </TableCell>
                                         <TableCell className="text-muted-foreground">
-                                            {brand.slug}
+                                            {ingredient.slug}
                                         </TableCell>
                                         <TableCell className="hidden md:table-cell text-muted-foreground">
-                                            {brand.description
-                                                ? brand.description.length > 50
-                                                    ? `${brand.description.substring(0, 50)}...`
-                                                    : brand.description
+                                            {ingredient.description
+                                                ? ingredient.description.length > 50
+                                                    ? `${ingredient.description.substring(0, 50)}...`
+                                                    : ingredient.description
                                                 : '-'}
+                                        </TableCell>
+                                        <TableCell>
+                                            <Badge variant="secondary">
+                                                {ingredient.products_count ?? ingredient.products?.length ?? 0} ürün
+                                            </Badge>
                                         </TableCell>
                                         <TableCell className="text-right">
                                             <div className="flex items-center justify-end gap-1">
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    asChild
-                                                >
-                                                    <Link href={admin.brands.show(brand.id).url}>
+                                                <Button variant="ghost" size="icon" asChild>
+                                                    <Link href={admin.ingredients.show(ingredient.id).url}>
                                                         <Eye className="h-4 w-4" />
                                                     </Link>
                                                 </Button>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    asChild
-                                                >
-                                                    <Link href={admin.brands.edit(brand.id).url}>
+                                                <Button variant="ghost" size="icon" asChild>
+                                                    <Link href={admin.ingredients.edit(ingredient.id).url}>
                                                         <Pencil className="h-4 w-4" />
                                                     </Link>
                                                 </Button>
@@ -159,16 +149,16 @@ export default function BrandsIndex({ items }: Props) {
                                                             <AlertDialogMedia className="bg-destructive/10 text-destructive dark:bg-destructive/20 dark:text-destructive">
                                                                 <Trash2 />
                                                             </AlertDialogMedia>
-                                                            <AlertDialogTitle>Markayı sil?</AlertDialogTitle>
+                                                            <AlertDialogTitle>İçeriği sil?</AlertDialogTitle>
                                                             <AlertDialogDescription>
-                                                                Bu işlem "{brand.title}" markasını kalıcı olarak silecektir.
+                                                                Bu işlem "{ingredient.title}" içeriğini kalıcı olarak silecektir.
                                                             </AlertDialogDescription>
                                                         </AlertDialogHeader>
                                                         <AlertDialogFooter>
                                                             <AlertDialogCancel variant="outline">İptal</AlertDialogCancel>
                                                             <AlertDialogAction
                                                                 variant="destructive"
-                                                                onClick={() => router.delete(admin.brands.destroy(brand.id).url)}
+                                                                onClick={() => router.delete(admin.ingredients.destroy(ingredient.id).url)}
                                                             >
                                                                 Sil
                                                             </AlertDialogAction>

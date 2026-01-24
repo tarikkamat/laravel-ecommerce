@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { Calendar, ChevronRight, FolderTree, Globe, Info, Pencil, Trash2 } from 'lucide-react';
+import { Calendar, Globe, Info, Package, Pencil, Trash2 } from 'lucide-react';
 
 import {
     AlertDialog,
@@ -13,32 +13,41 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { CardContent, CardHeader } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AppLayout from '@/layouts/app-layout';
 import admin from '@/routes/admin';
-import type { BreadcrumbItem, Category } from '@/types';
+import type { BreadcrumbItem, Ingredient } from '@/types';
 
 interface Props {
-    item: Category;
+    item: Ingredient;
 }
 
-export default function CategoriesShow({ item }: Props) {
+export default function IngredientsShow({ item }: Props) {
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Dashboard',
             href: admin.dashboard().url,
         },
         {
-            title: 'Kategoriler',
-            href: admin.categories.index().url,
+            title: 'İçerikler',
+            href: admin.ingredients.index().url,
         },
         {
             title: item.title,
-            href: admin.categories.show(item.id).url,
+            href: admin.ingredients.show(item.id).url,
         },
     ];
 
@@ -52,6 +61,13 @@ export default function CategoriesShow({ item }: Props) {
         });
     };
 
+    const formatPrice = (price: number) => {
+        return new Intl.NumberFormat('tr-TR', {
+            style: 'currency',
+            currency: 'TRY',
+        }).format(price);
+    };
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={item.title} />
@@ -61,15 +77,20 @@ export default function CategoriesShow({ item }: Props) {
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex items-center gap-4">
                         <div>
-                            <h1 className="text-2xl font-bold tracking-tight">{item.title}</h1>
+                            <div className="flex items-center gap-2">
+                                <h1 className="text-2xl font-bold tracking-tight">{item.title}</h1>
+                                <Badge variant="secondary">
+                                    {item.products?.length || 0} ürün
+                                </Badge>
+                            </div>
                             <p className="text-muted-foreground">
-                                Kategori detaylarını görüntülüyorsunuz.
+                                İçerik detaylarını görüntülüyorsunuz.
                             </p>
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
                         <Button variant="ghost" asChild>
-                            <Link href={admin.categories.index().url}>Kategori Listesine Dön</Link>
+                            <Link href={admin.ingredients.index().url}>İçerik Listesine Dön</Link>
                         </Button>
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
@@ -83,16 +104,16 @@ export default function CategoriesShow({ item }: Props) {
                                     <AlertDialogMedia className="bg-destructive/10 text-destructive dark:bg-destructive/20 dark:text-destructive">
                                         <Trash2 />
                                     </AlertDialogMedia>
-                                    <AlertDialogTitle>Kategoriyi sil?</AlertDialogTitle>
+                                    <AlertDialogTitle>İçeriği sil?</AlertDialogTitle>
                                     <AlertDialogDescription>
-                                        Bu işlem "{item.title}" kategorisini kalıcı olarak silecektir.
+                                        Bu işlem "{item.title}" içeriğini kalıcı olarak silecektir.
                                     </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                     <AlertDialogCancel variant="outline">İptal</AlertDialogCancel>
                                     <AlertDialogAction
                                         variant="destructive"
-                                        onClick={() => router.delete(admin.categories.destroy(item.id).url)}
+                                        onClick={() => router.delete(admin.ingredients.destroy(item.id).url)}
                                     >
                                         Sil
                                     </AlertDialogAction>
@@ -100,7 +121,7 @@ export default function CategoriesShow({ item }: Props) {
                             </AlertDialogContent>
                         </AlertDialog>
                         <Button asChild>
-                            <Link href={admin.categories.edit(item.id).url}>
+                            <Link href={admin.ingredients.edit(item.id).url}>
                                 <Pencil className="mr-2 h-4 w-4" />
                                 Düzenle
                             </Link>
@@ -124,12 +145,16 @@ export default function CategoriesShow({ item }: Props) {
                                         <Globe className="mr-1.5 h-4 w-4" />
                                         SEO
                                     </TabsTrigger>
+                                    <TabsTrigger value="products">
+                                        <Package className="mr-1.5 h-4 w-4" />
+                                        Ürünler ({item.products?.length || 0})
+                                    </TabsTrigger>
                                 </TabsList>
                             </CardHeader>
                             <CardContent className="pt-6">
                                 <TabsContent value="general" className="mt-0 space-y-5">
                                     <div className="space-y-2">
-                                        <Label className="text-muted-foreground">Kategori Adı</Label>
+                                        <Label className="text-muted-foreground">İçerik Adı</Label>
                                         <p className="text-sm font-medium">{item.title}</p>
                                     </div>
 
@@ -137,7 +162,7 @@ export default function CategoriesShow({ item }: Props) {
                                         <Label className="text-muted-foreground">URL Adresi (Slug)</Label>
                                         <p className="text-sm font-medium">
                                             <span className="text-muted-foreground">
-                                                suug.istanbul/kategoriler/
+                                                suug.istanbul/icerikler/
                                             </span>
                                             {item.slug}
                                         </p>
@@ -178,58 +203,76 @@ export default function CategoriesShow({ item }: Props) {
                                         </p>
                                     </div>
                                 </TabsContent>
+
+                                <TabsContent value="products" className="mt-0">
+                                    {item.products && item.products.length > 0 ? (
+                                        <div className="rounded-lg border">
+                                            <Table>
+                                                <TableHeader>
+                                                    <TableRow>
+                                                        <TableHead>Ürün</TableHead>
+                                                        <TableHead>SKU</TableHead>
+                                                        <TableHead>Fiyat</TableHead>
+                                                        <TableHead>Durum</TableHead>
+                                                    </TableRow>
+                                                </TableHeader>
+                                                <TableBody>
+                                                    {item.products.map((product) => (
+                                                        <TableRow key={product.id}>
+                                                            <TableCell>
+                                                                <Link
+                                                                    href={admin.products.show(product.id).url}
+                                                                    className="font-medium text-primary hover:underline"
+                                                                >
+                                                                    {product.title}
+                                                                </Link>
+                                                            </TableCell>
+                                                            <TableCell className="text-muted-foreground">
+                                                                {product.sku || '-'}
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                {formatPrice(product.price)}
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <Badge variant={product.active ? 'default' : 'secondary'}>
+                                                                    {product.active ? 'Aktif' : 'Pasif'}
+                                                                </Badge>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    ))}
+                                                </TableBody>
+                                            </Table>
+                                        </div>
+                                    ) : (
+                                        <div className="text-center py-8 text-muted-foreground">
+                                            <Package className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                                            <p className="text-sm">Bu içerik henüz hiçbir ürüne eklenmemiş.</p>
+                                        </div>
+                                    )}
+                                </TabsContent>
                             </CardContent>
                         </Tabs>
                     </div>
 
                     {/* Sidebar */}
                     <div className="space-y-6">
-                        {/* Parent Category */}
+                        {/* Quick Stats */}
                         <div className="space-y-3">
                             <div className="flex items-center gap-2">
-                                <FolderTree className="h-4 w-4 text-primary" />
-                                <Label className="font-semibold">Üst Kategori</Label>
+                                <Package className="h-4 w-4 text-primary" />
+                                <Label className="font-semibold">İstatistikler</Label>
                             </div>
-                            {item.parent ? (
-                                <div className="flex items-center gap-2 text-sm">
-                                    <Link
-                                        href={admin.categories.show(item.parent.id).url}
-                                        className="text-primary hover:underline"
-                                    >
-                                        {item.parent.title}
-                                    </Link>
-                                    <ChevronRight className="h-3 w-3 text-muted-foreground" />
-                                    <span className="font-medium">{item.title}</span>
+                            <div className="rounded-lg border p-4">
+                                <div className="text-center">
+                                    <p className="text-3xl font-bold text-primary">
+                                        {item.products?.length || 0}
+                                    </p>
+                                    <p className="text-sm text-muted-foreground">
+                                        Bağlı Ürün
+                                    </p>
                                 </div>
-                            ) : (
-                                <p className="text-sm text-muted-foreground italic">
-                                    Ana Kategori (Üst kategori yok)
-                                </p>
-                            )}
+                            </div>
                         </div>
-
-                        {/* Children Categories */}
-                        {item.children && item.children.length > 0 && (
-                            <div className="space-y-3">
-                                <div className="flex items-center gap-2">
-                                    <FolderTree className="h-4 w-4 text-primary" />
-                                    <Label className="font-semibold">
-                                        Alt Kategoriler ({item.children.length})
-                                    </Label>
-                                </div>
-                                <div className="space-y-1">
-                                    {item.children.map((child) => (
-                                        <Link
-                                            key={child.id}
-                                            href={admin.categories.show(child.id).url}
-                                            className="block text-sm text-primary hover:underline"
-                                        >
-                                            {child.title}
-                                        </Link>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
 
                         {/* Dates */}
                         <div className="space-y-3">

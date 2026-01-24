@@ -41,6 +41,13 @@ class IngredientController extends Controller
         ]);
     }
 
+    public function edit(int $id)
+    {
+        return Inertia::render('admin/ingredients/edit', [
+            'item' => $this->service->findOrFail($id)
+        ]);
+    }
+
     public function update(IngredientUpdateRequest $request, int $id)
     {
         $this->service->update($id, $request->validated());

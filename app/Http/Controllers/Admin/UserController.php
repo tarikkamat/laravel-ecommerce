@@ -25,7 +25,7 @@ class UserController extends Controller
 
     public function create()
     {
-        return Inertia::render('admin/users/create');
+        return Inertia::render('admin/users/create', $this->options());
     }
 
     public function store(UserStoreRequest $request)
@@ -39,6 +39,14 @@ class UserController extends Controller
     {
         return Inertia::render('admin/users/show', [
             'item' => $this->service->findOrFail($id)
+        ]);
+    }
+
+    public function edit(int $id)
+    {
+        return Inertia::render('admin/users/edit', [
+            'item' => $this->service->findOrFail($id),
+            ...$this->options()
         ]);
     }
 
@@ -67,7 +75,7 @@ class UserController extends Controller
             'roles' => collect(Role::cases())
                 ->map(fn (Role $role): array => [
                     'value' => $role->value,
-                    'label' => ucfirst($role->value),
+                    'label' => $role->label(),
                 ])
                 ->values()
                 ->all(),
