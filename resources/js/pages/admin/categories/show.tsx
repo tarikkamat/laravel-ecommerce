@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { Calendar, ChevronRight, FolderTree, Globe, Info, Pencil, Trash2 } from 'lucide-react';
+import { Calendar, ChevronRight, FolderTree, Globe, ImageIcon, Info, Pencil, Trash2 } from 'lucide-react';
 
 import {
     AlertDialog,
@@ -184,6 +184,28 @@ export default function CategoriesShow({ item }: Props) {
 
                     {/* Sidebar */}
                     <div className="space-y-6">
+                        {/* Category Image */}
+                        {item.image && (
+                            <div className="space-y-3">
+                                <div className="flex items-center gap-2">
+                                    <ImageIcon className="h-4 w-4 text-primary" />
+                                    <Label className="font-semibold">Kategori Görseli</Label>
+                                </div>
+                                <div className="relative">
+                                    <img
+                                        src={`/storage/${item.image.path}`}
+                                        alt={item.image.title || item.title}
+                                        className="w-full h-32 object-contain rounded-lg border bg-muted/30"
+                                    />
+                                    {item.image.title && (
+                                        <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-xs p-1.5 rounded-b-lg truncate">
+                                            {item.image.title}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
                         {/* Parent Category */}
                         <div className="space-y-3">
                             <div className="flex items-center gap-2">

@@ -19,12 +19,12 @@ class ApiHomeController extends Controller
     public function categories(): JsonResponse
     {
         $categories = $this->categoryService
-            ->getRootCategories(['id', 'title', 'slug'])
+            ->getRootCategories(['id', 'title', 'slug', 'image_id'], ['image'])
             ->map(fn ($category) => [
                 'id' => $category->id,
                 'name' => $category->title,
                 'slug' => $category->slug,
-                'image' => null,
+                'image' => $category->image?->path ? '/storage/' . $category->image->path : null,
             ]);
 
         return response()->json($categories);
@@ -33,17 +33,22 @@ class ApiHomeController extends Controller
     public function featuredProducts(): JsonResponse
     {
         $paginator = $this->productService
-            ->paginate(3, ['id', 'title', 'slug', 'price', 'sale_price', 'description'], ['images']);
+            ->paginate(10, ['id', 'title', 'slug', 'price', 'sale_price', 'stock', 'brand_id'], ['images', 'brand']);
         $products = collect($paginator->items())
             ->map(fn ($product) => [
                 'id' => $product->id,
-                'name' => $product->title,
+                'title' => $product->title,
                 'slug' => $product->slug,
-                'price' => $product->sale_price ?? $product->price,
-                'description' => $product->description,
-                'image' => $product->images->first()?->path
-                    ? '/storage/' . $product->images->first()->path
-                    : null,
+                'price' => $product->price,
+                'sale_price' => $product->sale_price,
+                'stock' => $product->stock,
+                'brand' => $product->brand ? [
+                    'id' => $product->brand->id,
+                    'title' => $product->brand->title,
+                ] : null,
+                'images' => $product->images->map(fn ($image) => [
+                    'path' => $image->path,
+                ])->values()->toArray(),
             ])
             ->values();
 
@@ -63,5 +68,29 @@ class ApiHomeController extends Controller
             ->values();
 
         return response()->json($brands);
+    }
+
+    public function brandProducts(int $brandId): JsonResponse
+    {
+        $products = $this->productService
+            ->getByBrandId($brandId, 10, ['id', 'title', 'slug', 'price', 'sale_price', 'stock', 'brand_id'], ['images', 'brand']);
+
+        $mapped = $products->map(fn ($product) => [
+            'id' => $product->id,
+            'title' => $product->title,
+            'slug' => $product->slug,
+            'price' => $product->price,
+            'sale_price' => $product->sale_price,
+            'stock' => $product->stock,
+            'brand' => $product->brand ? [
+                'id' => $product->brand->id,
+                'title' => $product->brand->title,
+            ] : null,
+            'images' => $product->images->map(fn ($image) => [
+                'path' => $image->path,
+            ])->values()->toArray(),
+        ])->values();
+
+        return response()->json($mapped);
     }
 }

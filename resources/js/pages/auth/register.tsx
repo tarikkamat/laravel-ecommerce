@@ -1,5 +1,4 @@
 import InputError from '@/components/input-error';
-import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -7,26 +6,28 @@ import { Spinner } from '@/components/ui/spinner';
 import AuthLayout from '@/layouts/auth-layout';
 import { login } from '@/routes';
 import { store } from '@/routes/register';
-import { Form, Head } from '@inertiajs/react';
+import { Form, Head, Link } from '@inertiajs/react';
 
 export default function Register() {
     return (
         <AuthLayout
-            title="Create an account"
-            description="Enter your details below to create your account"
+            title="Kayıt Ol"
+            description="Aramıza katılmak için bilgilerinizi girin"
         >
-            <Head title="Register" />
+            <Head title="Kayıt Ol" />
             <Form
                 {...store.form()}
                 resetOnSuccess={['password', 'password_confirmation']}
                 disableWhileProcessing
-                className="flex flex-col gap-6"
+                className="flex flex-col gap-5"
             >
                 {({ processing, errors }) => (
                     <>
-                        <div className="grid gap-6">
-                            <div className="grid gap-2">
-                                <Label htmlFor="name">Name</Label>
+                        <div className="space-y-4">
+                            <div className="space-y-1.5">
+                                <Label htmlFor="name" className="text-xs font-bold uppercase tracking-wider text-gray-400">
+                                    Ad Soyad
+                                </Label>
                                 <Input
                                     id="name"
                                     type="text"
@@ -35,16 +36,18 @@ export default function Register() {
                                     tabIndex={1}
                                     autoComplete="name"
                                     name="name"
-                                    placeholder="Full name"
+                                    placeholder="Adınız Soyadınız"
+                                    className="h-11 rounded-xl border-gray-100 bg-white px-4 text-sm transition-all focus:border-[#ec135b] focus:ring-[#ec135b]/10 dark:border-gray-800 dark:bg-gray-950"
                                 />
                                 <InputError
                                     message={errors.name}
-                                    className="mt-2"
                                 />
                             </div>
 
-                            <div className="grid gap-2">
-                                <Label htmlFor="email">Email address</Label>
+                            <div className="space-y-1.5">
+                                <Label htmlFor="email" className="text-xs font-bold uppercase tracking-wider text-gray-400">
+                                    E-posta Adresi
+                                </Label>
                                 <Input
                                     id="email"
                                     type="email"
@@ -52,13 +55,16 @@ export default function Register() {
                                     tabIndex={2}
                                     autoComplete="email"
                                     name="email"
-                                    placeholder="email@example.com"
+                                    placeholder="ornek@eposta.com"
+                                    className="h-11 rounded-xl border-gray-100 bg-white px-4 text-sm transition-all focus:border-[#ec135b] focus:ring-[#ec135b]/10 dark:border-gray-800 dark:bg-gray-950"
                                 />
                                 <InputError message={errors.email} />
                             </div>
 
-                            <div className="grid gap-2">
-                                <Label htmlFor="password">Password</Label>
+                            <div className="space-y-1.5">
+                                <Label htmlFor="password" className="text-xs font-bold uppercase tracking-wider text-gray-400">
+                                    Şifre
+                                </Label>
                                 <Input
                                     id="password"
                                     type="password"
@@ -66,14 +72,15 @@ export default function Register() {
                                     tabIndex={3}
                                     autoComplete="new-password"
                                     name="password"
-                                    placeholder="Password"
+                                    placeholder="••••••••"
+                                    className="h-11 rounded-xl border-gray-100 bg-white px-4 text-sm transition-all focus:border-[#ec135b] focus:ring-[#ec135b]/10 dark:border-gray-800 dark:bg-gray-950"
                                 />
                                 <InputError message={errors.password} />
                             </div>
 
-                            <div className="grid gap-2">
-                                <Label htmlFor="password_confirmation">
-                                    Confirm password
+                            <div className="space-y-1.5">
+                                <Label htmlFor="password_confirmation" className="text-xs font-bold uppercase tracking-wider text-gray-400">
+                                    Şifre Tekrarı
                                 </Label>
                                 <Input
                                     id="password_confirmation"
@@ -82,7 +89,8 @@ export default function Register() {
                                     tabIndex={4}
                                     autoComplete="new-password"
                                     name="password_confirmation"
-                                    placeholder="Confirm password"
+                                    placeholder="••••••••"
+                                    className="h-11 rounded-xl border-gray-100 bg-white px-4 text-sm transition-all focus:border-[#ec135b] focus:ring-[#ec135b]/10 dark:border-gray-800 dark:bg-gray-950"
                                 />
                                 <InputError
                                     message={errors.password_confirmation}
@@ -91,20 +99,24 @@ export default function Register() {
 
                             <Button
                                 type="submit"
-                                className="mt-2 w-full"
+                                className="h-11 w-full rounded-xl bg-gray-900 text-xs font-bold uppercase tracking-widest text-white transition-all hover:bg-gray-800 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100"
                                 tabIndex={5}
-                                data-test="register-user-button"
+                                disabled={processing}
                             >
-                                {processing && <Spinner />}
-                                Create account
+                                {processing ? <Spinner className="mr-2" /> : null}
+                                Kayıt Ol
                             </Button>
                         </div>
 
-                        <div className="text-center text-sm text-muted-foreground">
-                            Already have an account?{' '}
-                            <TextLink href={login()} tabIndex={6}>
-                                Log in
-                            </TextLink>
+                        <div className="text-center text-xs text-gray-500">
+                            Zaten bir hesabınız var mı?{' '}
+                            <Link 
+                                href={login()} 
+                                className="font-bold text-[#ec135b] hover:underline" 
+                                tabIndex={6}
+                            >
+                                Giriş Yapın
+                            </Link>
                         </div>
                     </>
                 )}

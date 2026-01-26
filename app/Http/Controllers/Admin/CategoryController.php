@@ -18,7 +18,7 @@ class CategoryController extends Controller
         $perPage = (int) $request->integer('per_page', 15);
 
         return Inertia::render('admin/categories/index', [
-            'items' => $this->service->paginate($perPage, ['*'], ['parent']),
+            'items' => $this->service->paginate($perPage, ['*'], ['parent', 'image']),
         ]);
     }
 
@@ -39,14 +39,14 @@ class CategoryController extends Controller
     public function show(int $id)
     {
         return Inertia::render('admin/categories/show', [
-            'item' => $this->service->findOrFail($id, ['*'], ['parent', 'children']),
+            'item' => $this->service->findOrFail($id, ['*'], ['parent', 'children', 'image']),
         ]);
     }
 
     public function edit(int $id)
     {
         return Inertia::render('admin/categories/edit', [
-            'item' => $this->service->findOrFail($id, ['*'], ['children']),
+            'item' => $this->service->findOrFail($id, ['*'], ['children', 'image']),
             'categories' => $this->service->all(['*'], ['children']),
         ]);
     }

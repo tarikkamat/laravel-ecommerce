@@ -23,6 +23,12 @@ class CategoryUpdateRequest extends FormRequest
             'description' => ['nullable', 'string'],
             'seo_title' => ['nullable', 'string'],
             'seo_description' => ['nullable', 'string'],
+            'image_file' => ['nullable', 'image', 'max:5120'],
+            'image_title' => ['nullable', 'string'],
+            'image_slug' => ['nullable', 'string'],
+            'image_description' => ['nullable', 'string'],
+            'image_seo_title' => ['nullable', 'string'],
+            'image_seo_description' => ['nullable', 'string'],
         ];
     }
 }

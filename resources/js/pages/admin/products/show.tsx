@@ -67,6 +67,26 @@ export default function ProductsShow({ item }: Props) {
         }).format(price);
     };
 
+    const getImageSrc = (path: string) => {
+        if (!path) {
+            return '';
+        }
+
+        if (path.startsWith('http://') || path.startsWith('https://')) {
+            return path;
+        }
+
+        if (path.startsWith('/storage/')) {
+            return path;
+        }
+
+        if (path.startsWith('storage/')) {
+            return `/${path}`;
+        }
+
+        return `/storage/${path}`;
+    };
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={item.title} />
@@ -129,7 +149,7 @@ export default function ProductsShow({ item }: Props) {
                 <Separator />
 
                 {/* Content */}
-                <div className="space-y-6 max-w-4xl">
+                <div className="w-full space-y-6">
                     {/* Temel Bilgi */}
                     <Card>
                         <CardHeader>
@@ -226,7 +246,7 @@ export default function ProductsShow({ item }: Props) {
                                             className="relative aspect-square rounded-lg border overflow-hidden group"
                                         >
                                             <img
-                                                src={`/storage/${image.path}`}
+                                                src={getImageSrc(image.path)}
                                                 alt={image.title || item.title}
                                                 className="w-full h-full object-cover"
                                             />

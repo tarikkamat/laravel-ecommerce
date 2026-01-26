@@ -5,16 +5,48 @@ namespace App\Services;
 use App\Repositories\Contracts\IBrandRepository;
 use App\Services\Contracts\IBrandService;
 use App\Services\Contracts\IImageService;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
 
 class BrandService extends BaseService implements IBrandService
 {
     public function __construct(
-        IBrandRepository $repository,
+        private readonly IBrandRepository $brandRepository,
         private readonly IImageService $imageService
     ) {
-        parent::__construct($repository);
+        parent::__construct($brandRepository);
+    }
+
+    /**
+     * Get products by brand slug or id with pagination.
+     */
+    public function getProductsByBrandSlug(
+        string|int $identifier,
+        int $perPage = 15,
+        ?string $sort = null,
+        array|string|null $category = null,
+        ?float $priceMin = null,
+        ?float $priceMax = null
+    ): LengthAwarePaginator
+    {
+        return $this->brandRepository->getProductsByBrandSlug(
+            $identifier,
+            $perPage,
+            $sort,
+            $category,
+            $priceMin,
+            $priceMax
+        );
+    }
+
+    /**
+     * Get all brands with images for mega menu.
+     */
+    public function getBrandsForMegaMenu(): Collection
+    {
+        return $this->brandRepository->all(['id', 'title', 'slug', 'image_id'], ['image:id,path']);
     }
 
     public function create(array $data): Model

@@ -24,6 +24,7 @@ class HomeController extends Controller
                 'categories' => route('api.home.categories'),
                 'products' => route('api.home.products'),
                 'brands' => route('api.home.brands'),
+                'brandProducts' => url('/api/home/brands/:brandId/products'),
             ],
         ]);
     }

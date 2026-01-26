@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Repositories\Contracts\IProductRepository;
 use App\Services\Contracts\IImageService;
 use App\Services\Contracts\IProductService;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
 
@@ -16,6 +17,20 @@ class ProductService extends BaseService implements IProductService
         private readonly IImageService $imageService
     ) {
         parent::__construct($repository);
+    }
+
+    /**
+     * Get products by brand ID with limit.
+     *
+     * @param  array<string>  $columns
+     * @param  array<string>  $relations
+     */
+    public function getByBrandId(int $brandId, int $limit = 10, array $columns = ['*'], array $relations = []): Collection
+    {
+        /** @var IProductRepository $repository */
+        $repository = $this->repository;
+
+        return $repository->getByBrandId($brandId, $limit, $columns, $relations);
     }
 
     public function create(array $data): Model

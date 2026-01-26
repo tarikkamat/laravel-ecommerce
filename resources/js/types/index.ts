@@ -12,10 +12,33 @@ export type * from './user';
 
 import type { Auth } from './auth';
 
+export type NavSubCategory = {
+    id: number;
+    title: string;
+    slug: string;
+};
+
+export type NavCategory = {
+    id: number;
+    title: string;
+    slug: string;
+    image: string | null;
+    children: (NavSubCategory & { children: NavSubCategory[] })[];
+};
+
+export type NavBrand = {
+    id: number;
+    title: string;
+    slug: string;
+    image: string | null;
+};
+
 export type SharedData = {
     name: string;
     auth: Auth;
     sidebarOpen: boolean;
+    navCategories: NavCategory[];
+    navBrands: NavBrand[];
     [key: string]: unknown;
 };
 

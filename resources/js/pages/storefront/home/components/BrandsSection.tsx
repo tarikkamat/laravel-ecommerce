@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { BrandLogo } from './BrandLogo';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useIntersectionOnce } from '@/hooks/use-intersection-once';
+import brands from '@/routes/storefront/brands';
 
 type Brand = {
     id: number;
@@ -17,7 +18,7 @@ type BrandsSectionProps = {
 };
 
 export function BrandsSection({ endpoint }: BrandsSectionProps) {
-    const [brands, setBrands] = useState<Brand[]>([]);
+    const [brandsList, setBrandsList] = useState<Brand[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [hasFetched, setHasFetched] = useState(false);
     const hasRequestedRef = useRef(false);
@@ -36,7 +37,7 @@ export function BrandsSection({ endpoint }: BrandsSectionProps) {
             .then((response) => response.json())
             .then((data) => {
                 if (Array.isArray(data)) {
-                    setBrands(data);
+                    setBrandsList(data);
                 }
                 setHasFetched(true);
             })
@@ -54,27 +55,36 @@ export function BrandsSection({ endpoint }: BrandsSectionProps) {
     }, [isVisible, endpoint]);
 
     // Hide section only after fetch completed and no data
-    if (hasFetched && !isLoading && brands.length === 0) {
+    if (hasFetched && !isLoading && brandsList.length === 0) {
         return null;
     }
 
     return (
-        <section ref={ref} className="w-full py-12">
+        <section ref={ref} className="w-full py-16 bg-gray-50/30 dark:bg-black/10">
             <div className="mx-auto max-w-[1440px] px-6 lg:px-12">
+                <div className="mb-10 text-center">
+                    <span className="mb-2 block text-[10px] font-black uppercase tracking-[0.3em] text-[#ec135b]">
+                        Kozmetik Devleri
+                    </span>
+                    <h2 className="font-display text-2xl font-black tracking-tight text-[#181113] dark:text-[#f4f0f2] md:text-4xl">
+                        Popüler Markalar
+                    </h2>
+                </div>
+
                 {/* Brands Grid */}
-                <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6">
+                <div className="flex flex-wrap items-center justify-center gap-4 md:gap-8">
                     {isLoading
-                        ? Array.from({ length: 8 }).map((_, index) => (
+                        ? Array.from({ length: 10 }).map((_, index) => (
                               <Skeleton
                                   key={`brand-skeleton-${index}`}
-                                  className="h-14 w-28 rounded-lg md:h-16 md:w-32"
+                                  className="h-16 w-32 rounded-xl md:h-20 md:w-40"
                               />
                           ))
-                        : brands.map((brand) => (
+                        : brandsList.map((brand) => (
                               <BrandLogo
                                   key={brand.id}
                                   name={brand.title}
-                                  href="#"
+                                  href={brands.products.url(brand.slug)}
                                   imagePath={brand.image?.path}
                               />
                           ))}

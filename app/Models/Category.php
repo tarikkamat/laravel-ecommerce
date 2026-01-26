@@ -14,6 +14,7 @@ class Category extends Model
 
     protected $fillable = [
         'parent_id',
+        'image_id',
         'slug',
         'title',
         'description',
@@ -29,6 +30,11 @@ class Category extends Model
     public function children(): HasMany
     {
         return $this->hasMany(Category::class, 'parent_id');
+    }
+
+    public function image(): BelongsTo
+    {
+        return $this->belongsTo(Image::class);
     }
 
     public function products(): BelongsToMany
