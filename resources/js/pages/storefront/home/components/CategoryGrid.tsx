@@ -2,6 +2,7 @@ import { CategoryCard } from './CategoryCard';
 import { useEffect, useRef, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useIntersectionOnce } from '@/hooks/use-intersection-once';
+import storefront from '@/routes/storefront';
 
 type Category = {
     id: number;
@@ -77,7 +78,7 @@ export function CategoryGrid({ endpoint }: CategoryGridProps) {
                             name={category.name}
                             slug={category.slug}
                             image={category.image}
-                            href="#"
+                            href={storefront.categories.products.url(category.slug)}
                         />
                     ))}
             </div>

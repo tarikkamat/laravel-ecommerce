@@ -16,8 +16,10 @@ type StorefrontProductGridProps = {
     products: PaginatedData<Product>;
     sort?: string;
     categories?: CategoryNode[];
+    brands?: BrandNode[];
     filters?: {
         categories?: string[];
+        brands?: string[];
         price_min?: string | null;
         price_max?: string | null;
     };
@@ -38,6 +40,12 @@ type CategoryNode = {
     children: CategoryNode[];
 };
 
+type BrandNode = {
+    id: number;
+    title: string;
+    slug: string;
+};
+
 type CategoryTreeProps = {
     categories: CategoryNode[];
     selected: string[];
@@ -50,6 +58,7 @@ export function StorefrontProductGrid({
     products,
     sort = 'default',
     categories = [],
+    brands = [],
     filters,
     priceRange,
     emptyTitle = 'Henüz ürün bulunmuyor',
@@ -64,18 +73,23 @@ export function StorefrontProductGrid({
     const [selectedCategories, setSelectedCategories] = useState<string[]>(
         filters?.categories?.length ? filters.categories : []
     );
+    const [selectedBrands, setSelectedBrands] = useState<string[]>(
+        filters?.brands?.length ? filters.brands : []
+    );
     const [priceValues, setPriceValues] = useState<[number, number]>([
         initialMin,
         initialMax,
     ]);
     const [categorySearch, setCategorySearch] = useState('');
+    const [brandSearch, setBrandSearch] = useState('');
 
     useEffect(() => {
         setSelectedCategories(filters?.categories?.length ? filters.categories : []);
+        setSelectedBrands(filters?.brands?.length ? filters.brands : []);
         const nextMin = filters?.price_min ? Number(filters.price_min) : priceRange?.min ?? 0;
         const nextMax = filters?.price_max ? Number(filters.price_max) : priceRange?.max ?? 0;
         setPriceValues([nextMin, nextMax]);
-    }, [filters?.categories, filters?.price_min, filters?.price_max, priceRange?.min, priceRange?.max]);
+    }, [filters?.categories, filters?.brands, filters?.price_min, filters?.price_max, priceRange?.min, priceRange?.max]);
 
     const handlePageChange = (url: string | null) => {
         if (!url) return;
@@ -91,6 +105,10 @@ export function StorefrontProductGrid({
 
         if (selectedCategories.length > 0) {
             query.categories = selectedCategories.join(',');
+        }
+
+        if (selectedBrands.length > 0) {
+            query.brands = selectedBrands.join(',');
         }
 
         const [minValue, maxValue] = priceValues;
@@ -170,29 +188,67 @@ export function StorefrontProductGrid({
                 {/* Filters Column */}
                 <aside className="lg:col-span-3">
                     <div className="space-y-4">
-                        <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-950">
-                            <div className="mb-3 flex items-center justify-between">
-                                <span className="text-xs font-bold uppercase tracking-widest text-gray-400">
-                                    Kategoriler
-                                </span>
-                                <span className="text-xs text-gray-400">
-                                    {selectedCategories.length} seçildi
-                                </span>
+                        {/* Categories Filter */}
+                        {categories.length > 0 && (
+                            <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-950">
+                                <div className="mb-3 flex items-center justify-between">
+                                    <span className="text-xs font-bold uppercase tracking-widest text-gray-400">
+                                        Kategoriler
+                                    </span>
+                                    <span className="text-xs text-gray-400">
+                                        {selectedCategories.length} seçildi
+                                    </span>
+                                </div>
+                                <input
+                                    type="text"
+                                    value={categorySearch}
+                                    onChange={(event) => setCategorySearch(event.target.value)}
+                                    placeholder="Kategori ara"
+                                    className="mb-3 h-9 w-full rounded-md border border-gray-200 bg-white px-3 text-sm text-gray-700 shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ec135b]/30 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-200"
+                                />
+                                <CategoryTree
+                                    categories={categories}
+                                    selected={selectedCategories}
+                                    onToggle={handleToggleCategory}
+                                    query={categorySearch}
+                                />
                             </div>
-                            <input
-                                type="text"
-                                value={categorySearch}
-                                onChange={(event) => setCategorySearch(event.target.value)}
-                                placeholder="Kategori ara"
-                                className="mb-3 h-9 w-full rounded-md border border-gray-200 bg-white px-3 text-sm text-gray-700 shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ec135b]/30 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-200"
-                            />
-                            <CategoryTree
-                                categories={categories}
-                                selected={selectedCategories}
-                                onToggle={handleToggleCategory}
-                                query={categorySearch}
-                            />
-                        </div>
+                        )}
+
+                        {/* Brands Filter */}
+                        {brands.length > 0 && (
+                            <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-950">
+                                <div className="mb-3 flex items-center justify-between">
+                                    <span className="text-xs font-bold uppercase tracking-widest text-gray-400">
+                                        Markalar
+                                    </span>
+                                    <span className="text-xs text-gray-400">
+                                        {selectedBrands.length} seçildi
+                                    </span>
+                                </div>
+                                <input
+                                    type="text"
+                                    value={brandSearch}
+                                    onChange={(event) => setBrandSearch(event.target.value)}
+                                    placeholder="Marka ara"
+                                    className="mb-3 h-9 w-full rounded-md border border-gray-200 bg-white px-3 text-sm text-gray-700 shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ec135b]/30 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-200"
+                                />
+                                <BrandList
+                                    brands={brands}
+                                    selected={selectedBrands}
+                                    onToggle={(brand, checked) => {
+                                        if (checked) {
+                                            setSelectedBrands((prev) => [...prev, brand.slug]);
+                                        } else {
+                                            setSelectedBrands((prev) =>
+                                                prev.filter((slug) => slug !== brand.slug)
+                                            );
+                                        }
+                                    }}
+                                    query={brandSearch}
+                                />
+                            </div>
+                        )}
 
                         <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-950">
                             <div className="mb-4 flex items-center justify-between">
@@ -391,6 +447,45 @@ function CategoryTree({ categories, selected, onToggle, query = '', level = 0 }:
                             />
                         )}
                     </div>
+                );
+            })}
+        </div>
+    );
+}
+
+type BrandListProps = {
+    brands: BrandNode[];
+    selected: string[];
+    onToggle: (brand: BrandNode, checked: boolean) => void;
+    query?: string;
+};
+
+function BrandList({ brands, selected, onToggle, query = '' }: BrandListProps) {
+    const normalizedQuery = query.trim().toLowerCase();
+
+    const filteredBrands = brands.filter((brand) => {
+        if (!normalizedQuery) return true;
+        return brand.title.toLowerCase().includes(normalizedQuery);
+    });
+
+    return (
+        <div className="max-h-[300px] space-y-1.5 overflow-y-auto">
+            {filteredBrands.map((brand) => {
+                const checked = selected.includes(brand.slug);
+
+                return (
+                    <label
+                        key={brand.id}
+                        className="flex items-center gap-2 rounded-xl border border-gray-100 px-3 py-2 text-sm text-gray-700 transition-colors hover:border-[#ec135b]/40 dark:border-gray-800 dark:text-gray-200"
+                    >
+                        <input
+                            type="checkbox"
+                            checked={checked}
+                            onChange={(event) => onToggle(brand, event.target.checked)}
+                            className="size-4 rounded border-gray-300 text-[#ec135b] focus:ring-[#ec135b]/30"
+                        />
+                        {brand.title}
+                    </label>
                 );
             })}
         </div>

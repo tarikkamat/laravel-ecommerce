@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Repositories\Contracts\ICategoryRepository;
 use App\Services\Contracts\ICategoryService;
 use App\Services\Contracts\IImageService;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
@@ -29,6 +30,37 @@ class CategoryService extends BaseService implements ICategoryService
     public function getCategoriesForMegaMenu(): Collection
     {
         return $this->categoryRepository->getCategoriesForMegaMenu();
+    }
+
+    /**
+     * Get products by category slug or id with pagination.
+     */
+    public function getProductsByCategorySlug(
+        string|int $identifier,
+        int $perPage = 15,
+        ?string $sort = null,
+        array|string|null $brand = null,
+        ?float $priceMin = null,
+        ?float $priceMax = null
+    ): LengthAwarePaginator {
+        return $this->categoryRepository->getProductsByCategorySlug(
+            $identifier,
+            $perPage,
+            $sort,
+            $brand,
+            $priceMin,
+            $priceMax
+        );
+    }
+
+    /**
+     * Get price range (min/max) for products in a category.
+     *
+     * @return array{min: float, max: float}
+     */
+    public function getPriceRangeByCategory(string|int $identifier): array
+    {
+        return $this->categoryRepository->getPriceRangeByCategory($identifier);
     }
 
     public function create(array $data): Model
