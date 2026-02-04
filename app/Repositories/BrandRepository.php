@@ -21,6 +21,7 @@ class BrandRepository extends BaseRepository implements IBrandRepository
         int $perPage = 15,
         ?string $sort = null,
         array|string|null $category = null,
+        ?string $search = null,
         ?float $priceMin = null,
         ?float $priceMax = null
     ): LengthAwarePaginator
@@ -76,6 +77,18 @@ class BrandRepository extends BaseRepository implements IBrandRepository
 
         if ($priceMax !== null) {
             $query->where('price', '<=', $priceMax);
+        }
+
+        if ($search !== null && trim($search) !== '') {
+            $searchValue = trim($search);
+            $query->where(function ($builder) use ($searchValue) {
+                $builder
+                    ->where('title', 'like', "%{$searchValue}%")
+                    ->orWhere('description', 'like', "%{$searchValue}%")
+                    ->orWhereHas('brand', function ($inner) use ($searchValue) {
+                        $inner->where('title', 'like', "%{$searchValue}%");
+                    });
+            });
         }
 
         switch ($sort) {

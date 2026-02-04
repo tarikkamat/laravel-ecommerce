@@ -48,6 +48,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the orders for the user.
+     */
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>

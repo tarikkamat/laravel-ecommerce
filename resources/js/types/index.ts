@@ -9,6 +9,8 @@ export type * from './ingredient';
 export type * from './product';
 export type * from './tag';
 export type * from './user';
+export type * from './page';
+export type * from './order';
 
 import type { Auth } from './auth';
 
@@ -39,6 +41,43 @@ export type SharedData = {
     sidebarOpen: boolean;
     navCategories: NavCategory[];
     navBrands: NavBrand[];
+    storefrontSettings?: {
+        site: {
+            title: string;
+            meta_description: string;
+            meta_keywords: string;
+            header_logo_path: string;
+            header_logo_text: string;
+            header_logo_tagline: string;
+            footer_logo_path: string;
+            footer_logo_text: string;
+            footer_description: string;
+            footer_copyright: string;
+            seller_name: string;
+            seller_address: string;
+            seller_phone: string;
+            seller_email: string;
+            footer_bottom_links: { label: string; url: string }[];
+            footer_socials: { label: string; url: string }[];
+            footer_menus: { title: string; items: { label: string; url: string }[] }[];
+        };
+        navigation: {
+            header_menu: { label: string; url: string }[];
+            show_home_link: boolean;
+            show_brands_menu: boolean;
+            show_categories_menu: boolean;
+        };
+        home: {
+            hero_autoplay_ms: number;
+            hero_slides: {
+                image_path: string;
+                eyebrow?: string;
+                title?: string;
+                subtitle?: string;
+                buttons?: { label: string; url: string; variant?: 'primary' | 'secondary' }[];
+            }[];
+        };
+    };
     [key: string]: unknown;
 };
 

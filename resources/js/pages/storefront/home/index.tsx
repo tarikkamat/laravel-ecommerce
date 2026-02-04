@@ -49,8 +49,8 @@ export default function HomePage({ apiEndpoints }: HomePageProps) {
                 {/* Brands Section */}
                 <BrandsSection endpoint={apiEndpoints.brands} />
 
-                {/* Categories Section */}
-                <CategoryGrid endpoint={apiEndpoints.categories} />
+                {/* Categories Section
+                <CategoryGrid endpoint={apiEndpoints.categories} /> */}
 
                 {/* Brand Product Grids */}
                 {brands.map((brand) => (

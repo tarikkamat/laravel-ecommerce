@@ -25,12 +25,19 @@ class ProductService extends BaseService implements IProductService
      * @param  array<string>  $columns
      * @param  array<string>  $relations
      */
-    public function getByBrandId(int $brandId, int $limit = 10, array $columns = ['*'], array $relations = []): Collection
+    public function getByBrandId(
+        int $brandId,
+        int $limit = 10,
+        array $columns = ['*'],
+        array $relations = [],
+        ?string $orderBy = null,
+        string $direction = 'desc'
+    ): Collection
     {
         /** @var IProductRepository $repository */
         $repository = $this->repository;
 
-        return $repository->getByBrandId($brandId, $limit, $columns, $relations);
+        return $repository->getByBrandId($brandId, $limit, $columns, $relations, $orderBy, $direction);
     }
 
     public function create(array $data): Model

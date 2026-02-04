@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Storefront;
 use App\Http\Controllers\Controller;
 use App\Services\Contracts\IBrandService;
 use App\Services\Contracts\ICategoryService;
+use App\Settings\CatalogSettings;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -13,12 +14,13 @@ class CategoryController extends Controller
 {
     public function __construct(
         private readonly ICategoryService $service,
-        private readonly IBrandService $brandService
+        private readonly IBrandService $brandService,
+        private readonly CatalogSettings $catalogSettings
     ) {}
 
     public function index(Request $request): Response
     {
-        $perPage = (int) $request->integer('per_page', 15);
+        $perPage = (int) $request->integer('per_page', $this->catalogSettings->categories_per_page);
 
         return Inertia::render('storefront/categories/index', [
             'categories' => $this->service->paginate($perPage),
@@ -34,12 +36,13 @@ class CategoryController extends Controller
 
     public function getProductsByCategorySlug(Request $request, string $identifier): Response
     {
-        $perPage = (int) $request->integer('per_page', 12);
+        $perPage = (int) $request->integer('per_page', $this->catalogSettings->products_per_page);
         $sort = $request->string('sort')->toString();
         $brand = $request->string('brand')->toString();
         $brandsParam = $request->input('brands');
         $priceMin = $request->input('price_min');
         $priceMax = $request->input('price_max');
+        $search = $request->string('search')->toString();
         $category = $this->service->findBySlugOrIdOrFail($identifier);
 
         $brands = [];
@@ -61,6 +64,7 @@ class CategoryController extends Controller
                 $perPage,
                 $sort,
                 $brands,
+                $search !== '' ? $search : null,
                 is_numeric($priceMin) ? (float) $priceMin : null,
                 is_numeric($priceMax) ? (float) $priceMax : null
             ),
@@ -69,6 +73,7 @@ class CategoryController extends Controller
                 'brands' => $brands,
                 'price_min' => is_numeric($priceMin) ? (string) $priceMin : null,
                 'price_max' => is_numeric($priceMax) ? (string) $priceMax : null,
+                'search' => $search !== '' ? $search : null,
             ],
             'priceRange' => [
                 'min' => $priceStats['min'] ?? 0,

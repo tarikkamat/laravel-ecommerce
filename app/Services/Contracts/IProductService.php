@@ -12,5 +12,12 @@ interface IProductService extends IBaseService
      * @param  array<string>  $columns
      * @param  array<string>  $relations
      */
-    public function getByBrandId(int $brandId, int $limit = 10, array $columns = ['*'], array $relations = []): Collection;
+    public function getByBrandId(
+        int $brandId,
+        int $limit = 10,
+        array $columns = ['*'],
+        array $relations = [],
+        ?string $orderBy = null,
+        string $direction = 'desc'
+    ): Collection;
 }

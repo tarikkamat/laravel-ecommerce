@@ -19,14 +19,24 @@ class ProductRepository extends BaseRepository implements IProductRepository
      * @param  array<string>  $columns
      * @param  array<string>  $relations
      */
-    public function getByBrandId(int $brandId, int $limit = 10, array $columns = ['*'], array $relations = []): Collection
+    public function getByBrandId(
+        int $brandId,
+        int $limit = 10,
+        array $columns = ['*'],
+        array $relations = [],
+        ?string $orderBy = null,
+        string $direction = 'desc'
+    ): Collection
     {
+        $orderColumn = $orderBy ?: 'created_at';
+        $orderDirection = strtolower($direction) === 'asc' ? 'asc' : 'desc';
+
         return $this->model
             ->select($columns)
             ->with($relations)
             ->where('brand_id', $brandId)
             ->where('active', true)
-            ->orderBy('created_at', 'desc')
+            ->orderBy($orderColumn, $orderDirection)
             ->limit($limit)
             ->get();
     }

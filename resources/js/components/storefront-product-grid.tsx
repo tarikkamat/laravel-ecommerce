@@ -9,8 +9,9 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
+import { useStorefrontSearch } from '@/hooks/use-storefront-search';
 
 type StorefrontProductGridProps = {
     products: PaginatedData<Product>;
@@ -22,6 +23,7 @@ type StorefrontProductGridProps = {
         brands?: string[];
         price_min?: string | null;
         price_max?: string | null;
+        search?: string | null;
     };
     priceRange?: {
         min: number;
@@ -82,6 +84,8 @@ export function StorefrontProductGrid({
     ]);
     const [categorySearch, setCategorySearch] = useState('');
     const [brandSearch, setBrandSearch] = useState('');
+    const { search, setSearch, normalizedSearch, withSearch } = useStorefrontSearch(filters?.search ?? '');
+    const debounceRef = useRef<number | null>(null);
 
     useEffect(() => {
         setSelectedCategories(filters?.categories?.length ? filters.categories : []);
@@ -90,6 +94,31 @@ export function StorefrontProductGrid({
         const nextMax = filters?.price_max ? Number(filters.price_max) : priceRange?.max ?? 0;
         setPriceValues([nextMin, nextMax]);
     }, [filters?.categories, filters?.brands, filters?.price_min, filters?.price_max, priceRange?.min, priceRange?.max]);
+
+    useEffect(() => {
+        setSearch(filters?.search ?? '');
+    }, [filters?.search, setSearch]);
+
+    useEffect(() => {
+        const current = (filters?.search ?? '').trim();
+        if (normalizedSearch === current) {
+            return;
+        }
+
+        if (debounceRef.current) {
+            window.clearTimeout(debounceRef.current);
+        }
+
+        debounceRef.current = window.setTimeout(() => {
+            router.get(pathname, buildQuery(sort), { preserveScroll: true });
+        }, 400);
+
+        return () => {
+            if (debounceRef.current) {
+                window.clearTimeout(debounceRef.current);
+            }
+        };
+    }, [normalizedSearch, filters?.search, pathname, sort]);
 
     const handlePageChange = (url: string | null) => {
         if (!url) return;
@@ -121,7 +150,7 @@ export function StorefrontProductGrid({
             query.price_max = String(maxValue);
         }
 
-        return query;
+        return withSearch(query);
     };
 
     const handleSortChange = (value: string) => {
@@ -188,6 +217,32 @@ export function StorefrontProductGrid({
                 {/* Filters Column */}
                 <aside className="lg:col-span-3">
                     <div className="space-y-4">
+                        <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-950">
+                            <div className="mb-3 flex items-center justify-between">
+                                <span className="text-xs font-bold uppercase tracking-widest text-gray-400">
+                                    Arama
+                                </span>
+                                {normalizedSearch && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setSearch('')}
+                                        className="text-xs text-gray-400 hover:text-[#ec135b]"
+                                    >
+                                        Temizle
+                                    </button>
+                                )}
+                            </div>
+                            <input
+                                type="text"
+                                value={search}
+                                onChange={(event) => setSearch(event.target.value)}
+                                placeholder="Ürün veya marka ara"
+                                className="h-9 w-full rounded-md border border-gray-200 bg-white px-3 text-sm text-gray-700 shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ec135b]/30 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-200"
+                            />
+                            <p className="mt-2 text-xs text-gray-400">
+                                Marka adı, ürün adı veya açıklamada arama yapar.
+                            </p>
+                        </div>
                         {/* Categories Filter */}
                         {categories.length > 0 && (
                             <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-950">

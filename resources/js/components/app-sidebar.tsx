@@ -23,6 +23,9 @@ import {
     Plus,
     Folder,
     BookOpen,
+    FileText,
+    Settings,
+    ShoppingCart,
 } from 'lucide-react';
 import AppLogo from './app-logo';
 import { useCurrentUrl } from '@/hooks/use-current-url';
@@ -35,6 +38,18 @@ const adminNavItems: NavItem[] = [
         title: 'Gösterge Paneli',
         href: admin.dashboard.index(),
         icon: LayoutGrid,
+    },
+    {
+        title: 'Siparişler',
+        href: admin.orders.index(),
+        icon: ShoppingCart,
+        children: [
+            {
+                title: 'Listele',
+                href: admin.orders.index(),
+                icon: List,
+            },
+        ],
     },
     {
         title: 'Ürün',
@@ -95,6 +110,23 @@ const adminNavItems: NavItem[] = [
 ];
 
 const definitionsNavItems: NavItem[] = [
+    {
+        title: 'Sayfalar',
+        href: admin.pages.index(),
+        icon: FileText,
+        children: [
+            {
+                title: 'Listele',
+                href: admin.pages.index(),
+                icon: List,
+            },
+            {
+                title: 'Ekle',
+                href: admin.pages.create(),
+                icon: Plus,
+            },
+        ],
+    },
     {
         title: 'Kategori',
         href: admin.categories.index(),
@@ -165,6 +197,14 @@ const definitionsNavItems: NavItem[] = [
     },
 ];
 
+const settingsNavItems: NavItem[] = [
+    {
+        title: 'Ayarlar',
+        href: admin.settings.edit(),
+        icon: Settings,
+    },
+];
+
 const footerNavItems: NavItem[] = [
     {
         title: 'Repository',
@@ -183,6 +223,7 @@ export function AppSidebar() {
     const isAdminArea = currentUrl.startsWith('/suug');
     const mainNavItems = isAdminArea ? adminNavItems : [];
     const definitionItems = isAdminArea ? definitionsNavItems : [];
+    const settingsItems = isAdminArea ? settingsNavItems : [];
 
     const logoHref = isAdminArea ? admin.dashboard.index() : '';
 
@@ -203,6 +244,7 @@ export function AppSidebar() {
             <SidebarContent>
                 <NavMain items={mainNavItems} />
                 <NavMain items={definitionItems} label="Tanımlamalar" />
+                <NavMain items={settingsItems} label="Ayarlar" />
             </SidebarContent>
 
             <SidebarFooter>

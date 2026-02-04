@@ -20,7 +20,7 @@ class BrandStoreRequest extends FormRequest
             'description' => ['nullable', 'string'],
             'seo_title' => ['nullable', 'string'],
             'seo_description' => ['nullable', 'string'],
-            'logo_file' => ['required', 'image', 'mimes:png,jpg,jpeg,svg,webp', 'max:5120'],
+            'logo_file' => ['required', 'mimes:png,jpg,jpeg,svg,webp', 'max:5120'],
             'image_title' => ['nullable', 'string'],
             'image_slug' => ['nullable', 'string'],
             'image_description' => ['nullable', 'string'],

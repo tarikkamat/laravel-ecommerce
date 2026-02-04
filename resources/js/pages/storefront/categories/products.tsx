@@ -11,6 +11,7 @@ type CategoryProductsPageProps = {
         brands?: string[];
         price_min?: string | null;
         price_max?: string | null;
+        search?: string | null;
     };
     brands?: BrandNode[];
     priceRange?: { min: number; max: number };

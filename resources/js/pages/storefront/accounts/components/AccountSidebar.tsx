@@ -1,4 +1,4 @@
-import { Package, Heart, CreditCard, Settings, ChevronRight, LogOut, User } from 'lucide-react';
+import { Package, Heart, CreditCard, Settings, ChevronRight, LogOut } from 'lucide-react';
 import type { User as UserType } from '@/types';
 import { Link } from '@inertiajs/react';
 
@@ -8,7 +8,7 @@ type AccountSidebarProps = {
 
 export function AccountSidebar({ user }: AccountSidebarProps) {
     const menuItems = [
-        { icon: Package, label: 'Siparişlerim', href: '#', count: 0 },
+        { icon: Package, label: 'Siparişlerim', href: '/hesabim/siparislerim', count: 0 },
         { icon: Heart, label: 'Favorilerim', href: '#', count: 0 },
         { icon: CreditCard, label: 'Ödemelerim', href: '#' },
         { icon: Settings, label: 'Ayarlar', href: '#' },
@@ -30,7 +30,7 @@ export function AccountSidebar({ user }: AccountSidebarProps) {
             {/* Menu - More Minimal */}
             <div className="space-y-1">
                 {menuItems.map((item) => (
-                    <a
+                    <Link
                         key={item.label}
                         href={item.href}
                         className="group flex items-center justify-between rounded-xl px-3 py-2.5 transition-all hover:bg-gray-50 dark:hover:bg-gray-900"
@@ -42,7 +42,7 @@ export function AccountSidebar({ user }: AccountSidebarProps) {
                             </span>
                         </div>
                         <ChevronRight className="h-3.5 w-3.5 text-gray-300 group-hover:text-gray-400" />
-                    </a>
+                    </Link>
                 ))}
                 
                 <div className="my-2 h-px bg-gray-100 dark:bg-gray-800 mx-3" />

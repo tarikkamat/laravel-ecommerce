@@ -46,6 +46,7 @@ class CategoryRepository extends BaseRepository implements ICategoryRepository
         int $perPage = 15,
         ?string $sort = null,
         array|string|null $brand = null,
+        ?string $search = null,
         ?float $priceMin = null,
         ?float $priceMax = null
     ): LengthAwarePaginator {
@@ -96,6 +97,18 @@ class CategoryRepository extends BaseRepository implements ICategoryRepository
 
         if ($priceMax !== null) {
             $query->where('price', '<=', $priceMax);
+        }
+
+        if ($search !== null && trim($search) !== '') {
+            $searchValue = trim($search);
+            $query->where(function ($builder) use ($searchValue) {
+                $builder
+                    ->where('title', 'like', "%{$searchValue}%")
+                    ->orWhere('description', 'like', "%{$searchValue}%")
+                    ->orWhereHas('brand', function ($inner) use ($searchValue) {
+                        $inner->where('title', 'like', "%{$searchValue}%");
+                    });
+            });
         }
 
         switch ($sort) {

@@ -21,10 +21,21 @@ return Application::configure(basePath: dirname(__DIR__))
             'role.admin' => \App\Http\Middleware\EnsureAdmin::class,
         ]);
 
+        $middleware->validateCsrfTokens(except: [
+            'odeme/iyzico/callback',
+        ]);
+
         $middleware->web(append: [
             HandleAppearance::class,
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
+        ]);
+
+        // Guest cart/checkout requires sessions on API routes as well.
+        $middleware->api(prepend: [
+            \Illuminate\Cookie\Middleware\EncryptCookies::class,
+            \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+            \Illuminate\Session\Middleware\StartSession::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

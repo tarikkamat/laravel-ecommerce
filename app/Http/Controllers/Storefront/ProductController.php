@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Product;
 use App\Services\Contracts\IProductService;
+use App\Settings\CatalogSettings;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -13,17 +14,19 @@ use Inertia\Response;
 class ProductController extends Controller
 {
     public function __construct(
-        private readonly IProductService $service
+        private readonly IProductService $service,
+        private readonly CatalogSettings $catalogSettings
     ) {}
 
     public function index(Request $request): Response
     {
-        $perPage = (int) $request->integer('per_page', 15);
+        $perPage = (int) $request->integer('per_page', $this->catalogSettings->products_per_page);
         $sort = $request->string('sort')->toString();
         $category = $request->string('category')->toString();
         $categoriesParam = $request->input('categories');
         $priceMin = $request->input('price_min');
         $priceMax = $request->input('price_max');
+        $search = $request->string('search')->toString();
 
         $query = Product::query()->with(['brand', 'images']);
 
@@ -74,6 +77,17 @@ class ProductController extends Controller
             $query->where('price', '<=', (float) $priceMax);
         }
 
+        if ($search !== '') {
+            $query->where(function ($builder) use ($search) {
+                $builder
+                    ->where('title', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%")
+                    ->orWhereHas('brand', function ($inner) use ($search) {
+                        $inner->where('title', 'like', "%{$search}%");
+                    });
+            });
+        }
+
         switch ($sort) {
             case 'price_asc':
                 $query->orderBy('price', 'asc');
@@ -100,6 +114,7 @@ class ProductController extends Controller
                 'categories' => $categories,
                 'price_min' => is_numeric($priceMin) ? (string) $priceMin : null,
                 'price_max' => is_numeric($priceMax) ? (string) $priceMax : null,
+                'search' => $search !== '' ? $search : null,
             ],
             'priceRange' => [
                 'min' => $priceStats?->min_price !== null ? (float) $priceStats->min_price : 0,

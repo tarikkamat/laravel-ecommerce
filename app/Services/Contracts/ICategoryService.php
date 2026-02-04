@@ -22,6 +22,7 @@ interface ICategoryService extends IBaseService
         int $perPage = 15,
         ?string $sort = null,
         array|string|null $brand = null,
+        ?string $search = null,
         ?float $priceMin = null,
         ?float $priceMax = null
     ): LengthAwarePaginator;

@@ -29,7 +29,30 @@ class ImageController extends Controller
 
     public function store(ImageStoreRequest $request)
     {
-        $this->service->create($request->validated());
+        $data = $request->validated();
+        $file = $request->file('image_file');
+        $files = $request->file('image_files', []);
+
+        unset($data['image_file'], $data['image_files']);
+
+        if (!empty($files)) {
+            $baseMetadata = $data;
+            $totalFiles = count($files);
+
+            foreach ($files as $uploadedFile) {
+                $originalName = pathinfo($uploadedFile->getClientOriginalName(), PATHINFO_FILENAME);
+                $metadata = $baseMetadata;
+                $metadata['title'] = $totalFiles === 1 && !empty($data['title']) ? $data['title'] : $originalName;
+                $metadata['slug'] = $totalFiles === 1 && !empty($data['slug']) ? $data['slug'] : $originalName;
+
+                $this->service->upload($uploadedFile, $metadata);
+            }
+        } elseif ($file) {
+            unset($data['path']);
+            $this->service->upload($file, $data);
+        } else {
+            $this->service->create($data);
+        }
 
         return redirect()->route('admin.images.index');
     }
@@ -41,16 +64,33 @@ class ImageController extends Controller
         ]);
     }
 
+    public function edit(int $id)
+    {
+        return Inertia::render('admin/images/edit', [
+            'item' => $this->service->findOrFail($id)
+        ]);
+    }
+
     public function update(ImageUpdateRequest $request, int $id)
     {
-        $this->service->update($id, $request->validated());
+        $data = $request->validated();
+        $file = $request->file('image_file');
+
+        unset($data['image_file']);
+
+        if ($file) {
+            unset($data['path']);
+            $this->service->updateWithFile($id, $file, $data);
+        } else {
+            $this->service->update($id, $data);
+        }
 
         return redirect()->route('admin.images.index');
     }
 
     public function destroy(int $id)
     {
-        $this->service->delete($id);
+        $this->service->deleteWithFile($id);
 
         return redirect()->route('admin.images.index');
     }

@@ -27,6 +27,7 @@ class BrandService extends BaseService implements IBrandService
         int $perPage = 15,
         ?string $sort = null,
         array|string|null $category = null,
+        ?string $search = null,
         ?float $priceMin = null,
         ?float $priceMax = null
     ): LengthAwarePaginator
@@ -36,6 +37,7 @@ class BrandService extends BaseService implements IBrandService
             $perPage,
             $sort,
             $category,
+            $search,
             $priceMin,
             $priceMax
         );

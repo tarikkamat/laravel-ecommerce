@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Storefront;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Services\Contracts\IBrandService;
+use App\Settings\CatalogSettings;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -12,12 +13,13 @@ use Inertia\Response;
 class BrandController extends Controller
 {
     public function __construct(
-        private readonly IBrandService $service
+        private readonly IBrandService $service,
+        private readonly CatalogSettings $catalogSettings
     ) {}
 
     public function index(Request $request): Response
     {
-        $perPage = (int) $request->integer('per_page', 15);
+        $perPage = (int) $request->integer('per_page', $this->catalogSettings->brands_per_page);
 
         return Inertia::render('storefront/brands/index', [
             'brands' => $this->service->paginate($perPage),
@@ -33,12 +35,13 @@ class BrandController extends Controller
 
     public function getProductsByBrandSlug(Request $request, string $identifier): Response
     {
-        $perPage = (int) $request->integer('per_page', 12);
+        $perPage = (int) $request->integer('per_page', $this->catalogSettings->products_per_page);
         $sort = $request->string('sort')->toString();
         $category = $request->string('category')->toString();
         $categoriesParam = $request->input('categories');
         $priceMin = $request->input('price_min');
         $priceMax = $request->input('price_max');
+        $search = $request->string('search')->toString();
         $brand = $this->service->findBySlugOrIdOrFail($identifier);
 
         $categories = [];
@@ -62,6 +65,7 @@ class BrandController extends Controller
                 $perPage,
                 $sort,
                 $categories,
+                $search !== '' ? $search : null,
                 is_numeric($priceMin) ? (float) $priceMin : null,
                 is_numeric($priceMax) ? (float) $priceMax : null
             ),
@@ -70,6 +74,7 @@ class BrandController extends Controller
                 'categories' => $categories,
                 'price_min' => is_numeric($priceMin) ? (string) $priceMin : null,
                 'price_max' => is_numeric($priceMax) ? (string) $priceMax : null,
+                'search' => $search !== '' ? $search : null,
             ],
             'priceRange' => [
                 'min' => $priceStats?->min_price !== null ? (float) $priceStats->min_price : 0,

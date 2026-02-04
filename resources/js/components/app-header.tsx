@@ -32,7 +32,7 @@ import { cn, toUrl } from '@/lib/utils';
 import admin from '@/routes/admin';
 import type { BreadcrumbItem, NavItem, SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, Folder, Image as ImageIcon, LayoutGrid, Layers, Leaf, MapPin, Menu, Package, Percent, Search, Tag, User } from 'lucide-react';
+import { BookOpen, Folder, Image as ImageIcon, LayoutGrid, Layers, Leaf, MapPin, Menu, Package, Percent, Search, ShoppingCart, Tag, User } from 'lucide-react';
 import AppLogo from './app-logo';
 import AppLogoIcon from './app-logo-icon';
 
@@ -50,6 +50,11 @@ const adminNavItems: NavItem[] = [
         title: 'Ürün',
         href: admin.products.index(),
         icon: Package,
+    },
+    {
+        title: 'Sipariş',
+        href: admin.orders.index(),
+        icon: ShoppingCart,
     },
     {
         title: 'Kategori',

@@ -14,6 +14,7 @@ interface IBrandRepository extends IBaseRepository
         int $perPage = 15,
         ?string $sort = null,
         array|string|null $category = null,
+        ?string $search = null,
         ?float $priceMin = null,
         ?float $priceMax = null
     ): LengthAwarePaginator;
