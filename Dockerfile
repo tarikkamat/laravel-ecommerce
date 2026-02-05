@@ -36,6 +36,7 @@ RUN npm ci
 COPY resources resources
 COPY public public
 COPY vite.config.ts tsconfig.json ./
+COPY composer.json composer.lock ./
 COPY artisan artisan
 COPY routes routes
 COPY app app
