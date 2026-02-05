@@ -43,7 +43,7 @@ COPY app app
 COPY config config
 COPY bootstrap bootstrap
 COPY database database
-COPY vendor vendor
+COPY --from=composer_deps /app/vendor /app/vendor
 RUN npm run build
 
 FROM base AS app
