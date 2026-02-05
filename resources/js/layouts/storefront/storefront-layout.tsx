@@ -26,6 +26,7 @@ export default function StorefrontLayout({ children, title }: Props) {
     const announcementTextColor = storefrontSettings?.site?.announcement_text_color ?? '#ffffff';
     const announcementItems =
         announcementTexts.length > 0 ? announcementTexts : announcementText ? [announcementText] : [];
+    const tickerItems = announcementItems.length > 1 ? announcementItems : [...announcementItems, ...announcementItems];
     const whatsappUrl = whatsappEnabled && whatsappPhone
         ? `https://api.whatsapp.com/send?phone=${encodeURIComponent(whatsappPhone)}&text=${encodeURIComponent(whatsappMessage)}`
         : '';
@@ -46,12 +47,12 @@ export default function StorefrontLayout({ children, title }: Props) {
                         <div className="mx-auto flex max-w-[1440px] items-center px-6 py-2 lg:px-12">
                             <div className="relative flex w-full overflow-hidden">
                                 <div
-                                    className="flex min-w-full items-center gap-6 whitespace-nowrap text-sm font-semibold uppercase tracking-[0.2em]"
+                                    className="flex shrink-0 items-center gap-6 whitespace-nowrap text-sm font-semibold uppercase tracking-[0.2em] pr-12 will-change-transform"
                                     style={{
                                         animation: `ticker ${announcementSpeedSeconds}s linear infinite`,
                                     }}
                                 >
-                                    {[...announcementItems, ...announcementItems, ...announcementItems].map((text, index) => (
+                                    {tickerItems.map((text, index) => (
                                         <span key={`a-${index}`} className="flex items-center gap-3">
                                             {text}
                                             <span className="text-[#ec135b]">•</span>
@@ -59,12 +60,14 @@ export default function StorefrontLayout({ children, title }: Props) {
                                     ))}
                                 </div>
                                 <div
-                                    className="flex min-w-full items-center gap-6 whitespace-nowrap text-sm font-semibold uppercase tracking-[0.2em]"
+                                    className="flex shrink-0 items-center gap-6 whitespace-nowrap text-sm font-semibold uppercase tracking-[0.2em] pr-12 will-change-transform"
                                     style={{
                                         animation: `ticker ${announcementSpeedSeconds}s linear infinite`,
+                                        animationDelay: `-${announcementSpeedSeconds / 2}s`,
                                     }}
+                                    aria-hidden="true"
                                 >
-                                    {[...announcementItems, ...announcementItems, ...announcementItems].map((text, index) => (
+                                    {tickerItems.map((text, index) => (
                                         <span key={`b-${index}`} className="flex items-center gap-3">
                                             {text}
                                             <span className="text-[#ec135b]">•</span>
