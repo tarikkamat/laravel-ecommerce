@@ -33,6 +33,8 @@ class SettingsUpdateRequest extends FormRequest
             'whatsapp_message' => ['nullable', 'string', 'max:500'],
             'announcement_enabled' => ['boolean'],
             'announcement_text' => ['nullable', 'string', 'max:255'],
+            'announcement_texts' => ['nullable', 'array'],
+            'announcement_texts.*' => ['string', 'max:255'],
             'announcement_speed_seconds' => ['nullable', 'integer', 'min:6', 'max:60'],
             'announcement_background' => ['nullable', 'string', 'max:20'],
             'announcement_text_color' => ['nullable', 'string', 'max:20'],
@@ -60,6 +62,7 @@ class SettingsUpdateRequest extends FormRequest
 
             'tax_default_rate' => ['nullable', 'numeric', 'min:0'],
             'tax_label' => ['nullable', 'string', 'max:50'],
+            'tax_prices_include_tax' => ['boolean'],
             'tax_category_rates' => ['nullable', 'array'],
             'tax_category_rates.*.category_id' => ['required_with:tax_category_rates', 'integer', 'exists:categories,id'],
             'tax_category_rates.*.rate' => ['required_with:tax_category_rates', 'numeric', 'min:0'],

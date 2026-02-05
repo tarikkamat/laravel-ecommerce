@@ -175,6 +175,7 @@ class HandleInertiaRequests extends Middleware
                 'whatsapp_message' => $siteSettings->whatsapp_message,
                 'announcement_enabled' => $siteSettings->announcement_enabled,
                 'announcement_text' => $siteSettings->announcement_text,
+                'announcement_texts' => $siteSettings->announcement_texts,
                 'announcement_speed_seconds' => $siteSettings->announcement_speed_seconds,
                 'announcement_background' => $siteSettings->announcement_background,
                 'announcement_text_color' => $siteSettings->announcement_text_color,

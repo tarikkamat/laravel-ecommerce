@@ -3,6 +3,7 @@
 namespace App\Integrations\Iyzico;
 
 use App\Settings\PaymentSettings;
+use App\Settings\TaxSettings;
 use App\Models\Order;
 use App\Models\OrderAddress;
 use Iyzipay\Model\Address;
@@ -22,7 +23,8 @@ class IyzicoPaymentProvider
 {
     public function __construct(
         private readonly IyzicoClient $client,
-        private readonly PaymentSettings $settings
+        private readonly PaymentSettings $settings,
+        private readonly TaxSettings $taxSettings
     ) {}
 
     /**
@@ -266,7 +268,7 @@ class IyzicoPaymentProvider
         }
 
         $taxTotal = (float) $order->tax_total;
-        if ($taxTotal > 0) {
+        if (! $this->taxSettings->prices_include_tax && $taxTotal > 0) {
             $taxItem = new BasketItem();
             $taxItem->setId('tax');
             $taxItem->setName('KDV');

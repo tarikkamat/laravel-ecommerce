@@ -62,6 +62,7 @@ export type SharedData = {
             whatsapp_message: string;
             announcement_enabled: boolean;
             announcement_text: string;
+            announcement_texts: string[];
             announcement_speed_seconds: number;
             announcement_background: string;
             announcement_text_color: string;

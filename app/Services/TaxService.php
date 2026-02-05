@@ -17,6 +17,11 @@ class TaxService
         return (float) $this->settings->default_rate;
     }
 
+    public function pricesIncludeTax(): bool
+    {
+        return (bool) $this->settings->prices_include_tax;
+    }
+
     /**
      * @param  Collection<int, array{cart_item_id:int, base:float}>  $bases
      * @return array{rate:float,total:float,lines:array<int,array<string,mixed>>}
@@ -26,19 +31,28 @@ class TaxService
         $cart->loadMissing('items.product.categories');
         $defaultRate = $this->rate();
         $categoryRates = $this->categoryRateMap();
+        $includeTax = $this->pricesIncludeTax();
 
-        $lines = $bases->map(function (array $row) use ($defaultRate, $categoryRates, $cart): array {
+        $lines = $bases->map(function (array $row) use ($defaultRate, $categoryRates, $cart, $includeTax): array {
             $cartItem = $cart->items->firstWhere('id', (int) $row['cart_item_id']);
             $rate = $this->resolveItemRate($cartItem, $defaultRate, $categoryRates);
-            $base = round((float) $row['base'], 2);
-            $taxAmount = round($base * $rate, 2);
+            $gross = round((float) $row['base'], 2);
+
+            if ($includeTax && $rate > 0) {
+                $net = round($gross / (1 + $rate), 2);
+                $taxAmount = round($gross - $net, 2);
+                $baseAmount = $net;
+            } else {
+                $baseAmount = $gross;
+                $taxAmount = round($baseAmount * $rate, 2);
+            }
 
             return [
                 'cart_item_id' => $row['cart_item_id'],
                 'scope' => 'item',
                 'name' => $this->settings->label ?: 'KDV',
                 'rate' => $rate,
-                'base_amount' => $base,
+                'base_amount' => $baseAmount,
                 'tax_amount' => $taxAmount,
                 'currency' => $cart->currency,
             ];

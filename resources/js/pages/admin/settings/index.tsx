@@ -51,6 +51,7 @@ type SettingsPayload = {
         whatsapp_message: string;
         announcement_enabled: boolean;
         announcement_text: string;
+        announcement_texts: string[];
         announcement_speed_seconds: number;
         announcement_background: string;
         announcement_text_color: string;
@@ -67,6 +68,7 @@ type SettingsPayload = {
     tax: {
         default_rate: number;
         label: string;
+        prices_include_tax: boolean;
         category_rates: { category_id: number; rate: number }[];
     };
     payments: {
@@ -137,6 +139,7 @@ type SettingsFormData = {
     whatsapp_message: string;
     announcement_enabled: boolean;
     announcement_text: string;
+    announcement_texts: string[];
     announcement_speed_seconds: number;
     announcement_background: string;
     announcement_text_color: string;
@@ -149,6 +152,7 @@ type SettingsFormData = {
     show_categories_menu: boolean;
     tax_default_rate: number;
     tax_label: string;
+    tax_prices_include_tax: boolean;
     tax_category_rates: { category_id: number; rate: number }[];
     iyzico_enabled: boolean;
     iyzico_api_key: string;
@@ -234,6 +238,12 @@ export default function SettingsIndex({ settings, categories }: Props) {
         whatsapp_message: settings.site.whatsapp_message ?? '',
         announcement_enabled: settings.site.announcement_enabled ?? false,
         announcement_text: settings.site.announcement_text ?? '',
+        announcement_texts:
+            settings.site.announcement_texts && settings.site.announcement_texts.length > 0
+                ? settings.site.announcement_texts
+                : settings.site.announcement_text
+                  ? [settings.site.announcement_text]
+                  : [],
         announcement_speed_seconds: settings.site.announcement_speed_seconds ?? 18,
         announcement_background: settings.site.announcement_background ?? '#181113',
         announcement_text_color: settings.site.announcement_text_color ?? '#ffffff',
@@ -246,6 +256,7 @@ export default function SettingsIndex({ settings, categories }: Props) {
         show_categories_menu: settings.navigation.show_categories_menu ?? true,
         tax_default_rate: settings.tax.default_rate ?? 0,
         tax_label: settings.tax.label ?? 'KDV',
+        tax_prices_include_tax: settings.tax.prices_include_tax ?? false,
         tax_category_rates: settings.tax.category_rates ?? [],
         iyzico_enabled: settings.payments.iyzico_enabled ?? true,
         iyzico_api_key: settings.payments.iyzico_api_key ?? '',
@@ -976,6 +987,21 @@ export default function SettingsIndex({ settings, categories }: Props) {
                             </Field>
                         </div>
 
+                        <Field>
+                            <label className="flex items-center gap-2 text-sm">
+                                <input
+                                    type="checkbox"
+                                    checked={data.tax_prices_include_tax}
+                                    onChange={(event) => setData('tax_prices_include_tax', event.target.checked)}
+                                />
+                                Ürün fiyatları vergi dahil
+                            </label>
+                            <FieldDescription>
+                                Aktifse sepet toplamı hesaplanırken KDV eklenmez, fiyatlar vergi dahil kabul edilir.
+                            </FieldDescription>
+                            <FieldError>{errors.tax_prices_include_tax}</FieldError>
+                        </Field>
+
                         <Separator />
 
                         <div className="space-y-4">
@@ -1254,14 +1280,25 @@ export default function SettingsIndex({ settings, categories }: Props) {
                                     </div>
                                 </Field>
                                 <Field>
-                                    <FieldLabel htmlFor="announcement_text">Duyuru Metni</FieldLabel>
-                                    <Input
-                                        id="announcement_text"
-                                        value={data.announcement_text}
-                                        onChange={(event) => setData('announcement_text', event.target.value)}
-                                        placeholder="Yeni sezon ürünlerinde %20 indirim!"
+                                    <FieldLabel htmlFor="announcement_texts">Duyuru Metinleri</FieldLabel>
+                                    <textarea
+                                        id="announcement_texts"
+                                        className="border-input focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:bg-input/30 min-h-[120px] w-full resize-y rounded-md border bg-transparent px-3 py-2 text-sm shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px]"
+                                        value={data.announcement_texts.join('\n')}
+                                        onChange={(event) =>
+                                            (() => {
+                                                const next = event.target.value
+                                                    .split('\n')
+                                                    .map((line) => line.trim())
+                                                    .filter(Boolean);
+                                                setData('announcement_texts', next);
+                                                setData('announcement_text', next[0] ?? '');
+                                            })()
+                                        }
+                                        placeholder="Her satıra bir duyuru yazın."
                                     />
-                                    <FieldError>{errors.announcement_text}</FieldError>
+                                    <FieldError>{errors.announcement_texts}</FieldError>
+                                    <FieldDescription>Kaydırmada sırayla gösterilir.</FieldDescription>
                                 </Field>
                                 <div className="grid gap-4 md:grid-cols-3">
                                     <Field>

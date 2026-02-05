@@ -141,6 +141,7 @@ class CheckoutService
 
             $subtotal = 0.0;
             $taxTotal = 0.0;
+            $includeTax = (bool) $this->taxSettings->prices_include_tax;
 
             foreach ($cart->items as $cartItem) {
                 $product = Product::query()->findOrFail($cartItem->product_id);
@@ -162,8 +163,16 @@ class CheckoutService
                 $unitEffective = $unitSalePrice !== null && $unitSalePrice > 0 ? $unitSalePrice : $unitPrice;
                 $lineSubtotal = round($unitEffective * $cartItem->qty, 2);
                 $lineRate = $this->taxService->rateForProduct($product);
-                $lineTaxTotal = round($lineSubtotal * $lineRate, 2);
-                $lineTotal = round($lineSubtotal + $lineTaxTotal, 2);
+
+                if ($includeTax && $lineRate > 0) {
+                    $taxBase = round($lineSubtotal / (1 + $lineRate), 2);
+                    $lineTaxTotal = round($lineSubtotal - $taxBase, 2);
+                    $lineTotal = $lineSubtotal;
+                } else {
+                    $taxBase = $lineSubtotal;
+                    $lineTaxTotal = round($lineSubtotal * $lineRate, 2);
+                    $lineTotal = round($lineSubtotal + $lineTaxTotal, 2);
+                }
 
                 $orderItem = $order->items()->create([
                     'product_id' => $product->id,
@@ -182,7 +191,7 @@ class CheckoutService
                     'scope' => 'item',
                     'name' => $taxLabel,
                     'rate' => $lineRate,
-                    'base_amount' => $lineSubtotal,
+                    'base_amount' => $taxBase,
                     'tax_amount' => $lineTaxTotal,
                 ]);
 
@@ -190,7 +199,9 @@ class CheckoutService
                 $taxTotal = round($taxTotal + $lineTaxTotal, 2);
             }
 
-            $grandTotal = round($subtotal + $taxTotal + $shippingTotal, 2);
+            $grandTotal = $includeTax
+                ? round($subtotal + $shippingTotal, 2)
+                : round($subtotal + $taxTotal + $shippingTotal, 2);
 
             $order->shipments()->create([
                 'provider' => (string) ($selectedShipping['provider'] ?? 'geliver'),

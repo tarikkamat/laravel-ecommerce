@@ -20,9 +20,12 @@ export default function StorefrontLayout({ children, title }: Props) {
     const whatsappMessage = storefrontSettings?.site?.whatsapp_message ?? '';
     const announcementEnabled = storefrontSettings?.site?.announcement_enabled ?? false;
     const announcementText = storefrontSettings?.site?.announcement_text ?? '';
+    const announcementTexts = storefrontSettings?.site?.announcement_texts ?? [];
     const announcementSpeedSeconds = storefrontSettings?.site?.announcement_speed_seconds ?? 18;
     const announcementBackground = storefrontSettings?.site?.announcement_background ?? '#181113';
     const announcementTextColor = storefrontSettings?.site?.announcement_text_color ?? '#ffffff';
+    const announcementItems =
+        announcementTexts.length > 0 ? announcementTexts : announcementText ? [announcementText] : [];
     const whatsappUrl = whatsappEnabled && whatsappPhone
         ? `https://api.whatsapp.com/send?phone=${encodeURIComponent(whatsappPhone)}&text=${encodeURIComponent(whatsappMessage)}`
         : '';
@@ -35,7 +38,7 @@ export default function StorefrontLayout({ children, title }: Props) {
             </Head>
             <div className="relative flex min-h-screen w-full flex-col">
                 <StorefrontNav />
-                {announcementEnabled && announcementText && (
+                {announcementEnabled && announcementItems.length > 0 && (
                     <div
                         className="relative z-40 w-full overflow-hidden"
                         style={{ backgroundColor: announcementBackground, color: announcementTextColor }}
@@ -48,11 +51,12 @@ export default function StorefrontLayout({ children, title }: Props) {
                                         animation: `ticker ${announcementSpeedSeconds}s linear infinite`,
                                     }}
                                 >
-                                    <span>{announcementText}</span>
-                                    <span className="text-[#ec135b]">•</span>
-                                    <span>{announcementText}</span>
-                                    <span className="text-[#ec135b]">•</span>
-                                    <span>{announcementText}</span>
+                                    {[...announcementItems, ...announcementItems, ...announcementItems].map((text, index) => (
+                                        <span key={`a-${index}`} className="flex items-center gap-3">
+                                            {text}
+                                            <span className="text-[#ec135b]">•</span>
+                                        </span>
+                                    ))}
                                 </div>
                                 <div
                                     className="flex min-w-full items-center gap-6 whitespace-nowrap text-sm font-semibold uppercase tracking-[0.2em]"
@@ -60,11 +64,12 @@ export default function StorefrontLayout({ children, title }: Props) {
                                         animation: `ticker ${announcementSpeedSeconds}s linear infinite`,
                                     }}
                                 >
-                                    <span>{announcementText}</span>
-                                    <span className="text-[#ec135b]">•</span>
-                                    <span>{announcementText}</span>
-                                    <span className="text-[#ec135b]">•</span>
-                                    <span>{announcementText}</span>
+                                    {[...announcementItems, ...announcementItems, ...announcementItems].map((text, index) => (
+                                        <span key={`b-${index}`} className="flex items-center gap-3">
+                                            {text}
+                                            <span className="text-[#ec135b]">•</span>
+                                        </span>
+                                    ))}
                                 </div>
                             </div>
                         </div>

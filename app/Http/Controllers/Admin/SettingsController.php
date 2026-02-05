@@ -52,6 +52,7 @@ class SettingsController extends Controller
                     'whatsapp_message' => $siteSettings->whatsapp_message,
                     'announcement_enabled' => $siteSettings->announcement_enabled,
                     'announcement_text' => $siteSettings->announcement_text,
+                    'announcement_texts' => $siteSettings->announcement_texts,
                     'announcement_speed_seconds' => $siteSettings->announcement_speed_seconds,
                     'announcement_background' => $siteSettings->announcement_background,
                     'announcement_text_color' => $siteSettings->announcement_text_color,
@@ -68,6 +69,7 @@ class SettingsController extends Controller
                 'tax' => [
                     'default_rate' => $taxSettings->default_rate,
                     'label' => $taxSettings->label,
+                    'prices_include_tax' => $taxSettings->prices_include_tax,
                     'category_rates' => $taxSettings->category_rates,
                 ],
                 'payments' => [
@@ -154,7 +156,12 @@ class SettingsController extends Controller
         $siteSettings->whatsapp_phone = $request->string('whatsapp_phone', '')->toString();
         $siteSettings->whatsapp_message = $request->string('whatsapp_message', '')->toString();
         $siteSettings->announcement_enabled = $request->boolean('announcement_enabled');
-        $siteSettings->announcement_text = $request->string('announcement_text', '')->toString();
+        $announcementTexts = array_values(array_filter(
+            $request->input('announcement_texts', []),
+            fn ($text) => is_string($text) && trim($text) !== ''
+        ));
+        $siteSettings->announcement_texts = $announcementTexts;
+        $siteSettings->announcement_text = $announcementTexts[0] ?? $request->string('announcement_text', '')->toString();
         $siteSettings->announcement_speed_seconds = (int) $request->input('announcement_speed_seconds', $siteSettings->announcement_speed_seconds);
         $siteSettings->announcement_background = $request->string('announcement_background', $siteSettings->announcement_background)->toString();
         $siteSettings->announcement_text_color = $request->string('announcement_text_color', $siteSettings->announcement_text_color)->toString();
@@ -171,6 +178,7 @@ class SettingsController extends Controller
 
         $taxSettings->default_rate = (float) $request->input('tax_default_rate', $taxSettings->default_rate);
         $taxSettings->label = $request->string('tax_label', $taxSettings->label)->toString();
+        $taxSettings->prices_include_tax = $request->boolean('tax_prices_include_tax');
         $taxSettings->category_rates = $request->input('tax_category_rates', []);
         $taxSettings->save();
 

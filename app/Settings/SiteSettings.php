@@ -30,6 +30,7 @@ class SiteSettings extends Settings
 
     public bool $announcement_enabled = false;
     public string $announcement_text = '';
+    public array $announcement_texts = [];
     public int $announcement_speed_seconds = 18;
     public string $announcement_background = '#181113';
     public string $announcement_text_color = '#ffffff';

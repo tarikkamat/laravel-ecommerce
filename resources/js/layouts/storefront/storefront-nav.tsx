@@ -29,6 +29,7 @@ export function StorefrontNav() {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
+
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             const target = event.target as Node | null;

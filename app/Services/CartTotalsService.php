@@ -50,7 +50,10 @@ class CartTotalsService
             ? round($shippingTotal, 2)
             : 0.0;
 
-        $grandTotal = round($subtotal + $taxResult['total'] + $resolvedShipping, 2);
+        $includeTax = $this->taxService->pricesIncludeTax();
+        $grandTotal = $includeTax
+            ? round($subtotal + $resolvedShipping, 2)
+            : round($subtotal + $taxResult['total'] + $resolvedShipping, 2);
 
         return [
             'currency' => $cart->currency,
