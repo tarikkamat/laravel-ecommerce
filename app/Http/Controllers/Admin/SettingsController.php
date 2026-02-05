@@ -117,6 +117,7 @@ class SettingsController extends Controller
 
     public function update(
         SettingsUpdateRequest $request,
+        \App\Support\SettingsDefaults $settingsDefaults,
         SiteSettings $siteSettings,
         NavigationSettings $navigationSettings,
         TaxSettings $taxSettings,
@@ -125,6 +126,16 @@ class SettingsController extends Controller
         HomeSettings $homeSettings,
         CatalogSettings $catalogSettings,
     ) {
+        $settingsDefaults->sync([
+            SiteSettings::class,
+            NavigationSettings::class,
+            TaxSettings::class,
+            PaymentSettings::class,
+            ShippingSettings::class,
+            HomeSettings::class,
+            CatalogSettings::class,
+        ]);
+
         $siteSettings->site_title = $request->string('site_title')->toString();
         $siteSettings->meta_description = $request->string('meta_description', '')->toString();
         $siteSettings->meta_keywords = $request->string('meta_keywords', '')->toString();
