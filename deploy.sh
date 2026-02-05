@@ -96,4 +96,18 @@ if [[ "$nginx_changed" == true ]]; then
   docker compose exec -T web nginx -s reload
 fi
 
+if [[ -n "${LETSENCRYPT_EMAIL:-}" ]]; then
+  LETSENCRYPT_DOMAINS="${LETSENCRYPT_DOMAINS:-suug.istanbul www.suug.istanbul}"
+  docker compose run --rm certbot certonly --webroot \
+    -w /var/www/public \
+    $(printf -- '-d %s ' $LETSENCRYPT_DOMAINS) \
+    --email "$LETSENCRYPT_EMAIL" \
+    --agree-tos --no-eff-email
+
+  if [[ -f docker/nginx/conf.d/default-ssl.conf.disabled ]]; then
+    mv docker/nginx/conf.d/default-ssl.conf.disabled docker/nginx/conf.d/default-ssl.conf
+  fi
+  docker compose exec -T web nginx -s reload
+fi
+
 echo "Deploy tamamlandı."
