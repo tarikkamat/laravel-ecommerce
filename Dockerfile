@@ -28,13 +28,22 @@ WORKDIR /app
 COPY composer.json composer.lock ./
 RUN composer install --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader --ignore-platform-reqs --no-scripts
 
-FROM node:18-alpine AS node_build
+FROM node:22-alpine AS node_build
 WORKDIR /app
+RUN apk add --no-cache php82-cli php82-phar php82-mbstring php82-json \
+    && ln -sf /usr/bin/php82 /usr/bin/php
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY resources resources
 COPY public public
 COPY vite.config.ts tsconfig.json ./
+COPY artisan artisan
+COPY routes routes
+COPY app app
+COPY config config
+COPY bootstrap bootstrap
+COPY database database
+COPY vendor vendor
 RUN npm run build
 
 FROM base AS app
