@@ -27,9 +27,17 @@ return new class extends Migration
             $table->softDeletes();
         });
 
-        DB::statement('CREATE UNIQUE INDEX products_slug_unique ON products (slug) WHERE deleted_at IS NULL');
-        DB::statement('CREATE UNIQUE INDEX products_sku_unique ON products (sku) WHERE deleted_at IS NULL');
-        DB::statement('CREATE UNIQUE INDEX products_barcode_unique ON products (barcode) WHERE deleted_at IS NULL AND barcode IS NOT NULL');
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement('CREATE UNIQUE INDEX products_slug_unique ON products (slug) WHERE deleted_at IS NULL');
+            DB::statement('CREATE UNIQUE INDEX products_sku_unique ON products (sku) WHERE deleted_at IS NULL');
+            DB::statement('CREATE UNIQUE INDEX products_barcode_unique ON products (barcode) WHERE deleted_at IS NULL AND barcode IS NOT NULL');
+        } else {
+            Schema::table('products', function (Blueprint $table) {
+                $table->unique('slug');
+                $table->unique('sku');
+                $table->unique('barcode');
+            });
+        }
     }
 
     public function down(): void

@@ -20,7 +20,13 @@ return new class extends Migration
             $table->softDeletes();
         });
 
-        DB::statement('CREATE UNIQUE INDEX ingredients_slug_unique ON ingredients (slug) WHERE deleted_at IS NULL');
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement('CREATE UNIQUE INDEX ingredients_slug_unique ON ingredients (slug) WHERE deleted_at IS NULL');
+        } else {
+            Schema::table('ingredients', function (Blueprint $table) {
+                $table->unique('slug');
+            });
+        }
     }
 
     public function down(): void
