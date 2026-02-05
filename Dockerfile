@@ -58,6 +58,7 @@ COPY config config
 COPY bootstrap bootstrap
 COPY database database
 COPY --from=composer_deps /app/vendor /app/vendor
+RUN ln -s /app/resources /resources
 RUN mkdir -p storage/framework/cache storage/framework/views storage/framework/sessions bootstrap/cache
 RUN APP_ENV=production APP_KEY=base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA= SESSION_DRIVER=array php artisan wayfinder:generate --with-form
 RUN npm run build
@@ -79,3 +80,11 @@ USER www
 EXPOSE 9000
 
 CMD ["php-fpm"]
+
+FROM nginx:alpine AS web
+WORKDIR /var/www
+
+RUN mkdir -p /var/www/public/.well-known/acme-challenge
+
+COPY docker/nginx/conf.d /etc/nginx/conf.d
+COPY --from=app /var/www/public /var/www/public

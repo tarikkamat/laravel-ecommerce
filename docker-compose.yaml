@@ -1,15 +1,15 @@
-version: "3.9"
-
 services:
   app:
     build:
       context: .
       dockerfile: Dockerfile
+      target: app
     container_name: suug_app
     env_file:
       - .env
     volumes:
-      - .:/var/www
+      - ./storage:/var/www/storage
+      - ./bootstrap/cache:/var/www/bootstrap/cache
     depends_on:
       - db
       - redis
@@ -29,14 +29,15 @@ services:
       - app
 
   web:
-    image: nginx:alpine
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: web
     container_name: suug_web
     ports:
       - "80:80"
       - "443:443"
     volumes:
-      - .:/var/www
-      - ./docker/nginx/conf.d:/etc/nginx/conf.d
       - ./docker/certbot/www:/var/www/public/.well-known/acme-challenge
       - ./docker/certbot/conf:/etc/letsencrypt
     depends_on:
@@ -50,16 +51,12 @@ services:
       MYSQL_USER: ${DB_USERNAME:-suug}
       MYSQL_PASSWORD: ${DB_PASSWORD:-suug}
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
-    ports:
-      - "3306:3306"
     volumes:
       - db_data:/var/lib/mysql
 
   redis:
     image: redis:7-alpine
     container_name: suug_redis
-    ports:
-      - "6379:6379"
 
   certbot:
     image: certbot/certbot

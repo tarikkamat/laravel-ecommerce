@@ -73,11 +73,12 @@ fi
 docker compose up -d --remove-orphans
 
 if [[ "$composer_changed" == true ]]; then
-  docker compose exec -T app composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
+  docker run --rm -v "$ROOT_DIR":/app -w /app composer:2 \
+    install --no-dev --prefer-dist --no-interaction --optimize-autoloader
 fi
 
 if [[ "$npm_changed" == true ]]; then
-  docker run --rm -v "$ROOT_DIR":/app -w /app node:22-alpine sh -c "npm ci && npm run build"
+  rebuild_images=true
 fi
 
 if [[ "$wayfinder_changed" == true ]]; then
