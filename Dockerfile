@@ -42,8 +42,6 @@ RUN apk add --no-cache \
     php-curl \
     php-dom \
     php-fileinfo \
-    php-filter \
-    php-hash \
     php-openssl \
     php-tokenizer \
     php-xml
