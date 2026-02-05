@@ -26,8 +26,15 @@ export default function StorefrontLayout({ children, title }: Props) {
     const announcementTextColor = storefrontSettings?.site?.announcement_text_color ?? '#ffffff';
     const announcementItems =
         announcementTexts.length > 0 ? announcementTexts : announcementText ? [announcementText] : [];
-    const tickerItems =
-        announcementItems.length > 1 ? announcementItems : [...announcementItems, ...announcementItems];
+    const baseTickerItems = (() => {
+        if (announcementItems.length === 0) return [];
+        const items = [...announcementItems];
+        while (items.length < 8) {
+            items.push(...announcementItems);
+        }
+        return items;
+    })();
+    const tickerItems = [...baseTickerItems, ...baseTickerItems];
     const whatsappUrl = whatsappEnabled && whatsappPhone
         ? `https://api.whatsapp.com/send?phone=${encodeURIComponent(whatsappPhone)}&text=${encodeURIComponent(whatsappMessage)}`
         : '';
@@ -53,7 +60,7 @@ export default function StorefrontLayout({ children, title }: Props) {
                                         animation: `ticker ${announcementSpeedSeconds}s linear infinite`,
                                     }}
                                 >
-                                    {[...tickerItems, ...tickerItems].map((text, index) => (
+                                    {tickerItems.map((text, index) => (
                                         <span key={`t-${index}`} className="flex items-center gap-3 pr-6">
                                             {text}
                                             <span className="text-[#ec135b]">•</span>

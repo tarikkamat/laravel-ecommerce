@@ -14,6 +14,10 @@ export function StorefrontNav() {
     const [activeCategory, setActiveCategory] = useState<NavCategory | null>(null);
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [mobileBrandsOpen, setMobileBrandsOpen] = useState(false);
+    const [mobileCategoriesOpen, setMobileCategoriesOpen] = useState(false);
+    const [mobileCategoryId, setMobileCategoryId] = useState<number | null>(null);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
     const navRef = useRef<HTMLElement>(null);
     const cartRef = useRef<HTMLDivElement>(null);
@@ -80,6 +84,12 @@ export function StorefrontNav() {
     const showCategoriesMenu = navSettings?.show_categories_menu ?? true;
     const headerLogoPath = siteSettings?.header_logo_path ? `/storage/${siteSettings.header_logo_path}` : '';
     const headerLogoText = siteSettings?.header_logo_text || 'SUUG';
+    const closeMobileMenu = () => {
+        setIsMobileMenuOpen(false);
+        setMobileBrandsOpen(false);
+        setMobileCategoriesOpen(false);
+        setMobileCategoryId(null);
+    };
 
     return (
         <header
@@ -415,11 +425,159 @@ export function StorefrontNav() {
                     </div>
 
                     {/* Mobile Menu Toggle */}
-                    <button className="flex size-10 items-center justify-center rounded-full text-[#181113] dark:text-[#f4f0f2] lg:hidden">
+                    <button
+                        type="button"
+                        onClick={() => setIsMobileMenuOpen(true)}
+                        className="flex size-10 items-center justify-center rounded-full text-[#181113] dark:text-[#f4f0f2] lg:hidden"
+                        aria-label="Menüyü aç"
+                    >
                         <span className="material-symbols-outlined">menu</span>
                     </button>
                 </div>
             </div>
+
+            {/* Mobile Menu */}
+            {isMobileMenuOpen && (
+                <div className="fixed inset-0 z-[70] lg:hidden">
+                    <button
+                        type="button"
+                        className="absolute inset-0 bg-black/50"
+                        onClick={closeMobileMenu}
+                        aria-label="Menüyü kapat"
+                    />
+                    <div className="absolute right-0 top-0 flex h-full w-[88%] max-w-sm flex-col bg-white shadow-2xl dark:bg-[#0f0a0c]">
+                        <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4 dark:border-gray-800">
+                            <Link
+                                href={storefront.home.index.url()}
+                                className="text-lg font-black tracking-wide text-[#181113] dark:text-white"
+                                onClick={closeMobileMenu}
+                            >
+                                {headerLogoText}
+                            </Link>
+                            <button
+                                type="button"
+                                onClick={closeMobileMenu}
+                                className="flex size-9 items-center justify-center rounded-full text-[#181113] dark:text-white"
+                                aria-label="Menüyü kapat"
+                            >
+                                <span className="material-symbols-outlined">close</span>
+                            </button>
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto px-5 py-4">
+                            <div className="space-y-4">
+                                {showHomeLink && (
+                                    <Link
+                                        href={storefront.home.index.url()}
+                                        onClick={closeMobileMenu}
+                                        className="block text-sm font-bold uppercase tracking-widest text-[#181113] dark:text-white"
+                                    >
+                                        Anasayfa
+                                    </Link>
+                                )}
+
+                                {headerMenu.map((item) => (
+                                    <Link
+                                        key={item.url}
+                                        href={item.url}
+                                        onClick={closeMobileMenu}
+                                        className="block text-sm font-bold uppercase tracking-widest text-[#181113] dark:text-white"
+                                    >
+                                        {item.label}
+                                    </Link>
+                                ))}
+
+                                {showBrandsMenu && (
+                                    <div className="space-y-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => setMobileBrandsOpen((prev) => !prev)}
+                                            className="flex w-full items-center justify-between text-sm font-bold uppercase tracking-widest text-[#181113] dark:text-white"
+                                        >
+                                            Markalar
+                                            <span className="material-symbols-outlined text-[18px]">
+                                                {mobileBrandsOpen ? 'expand_less' : 'expand_more'}
+                                            </span>
+                                        </button>
+                                        {mobileBrandsOpen && (
+                                            <div className="grid grid-cols-2 gap-2">
+                                                {navBrands?.map((brand) => (
+                                                    <Link
+                                                        key={brand.id}
+                                                        href={`/markalar/${brand.slug}/urunler`}
+                                                        onClick={closeMobileMenu}
+                                                        className="rounded-lg border border-gray-100 px-3 py-2 text-xs font-semibold text-[#181113] dark:border-gray-800 dark:text-white"
+                                                    >
+                                                        {brand.title}
+                                                    </Link>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {showCategoriesMenu && (
+                                    <div className="space-y-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => setMobileCategoriesOpen((prev) => !prev)}
+                                            className="flex w-full items-center justify-between text-sm font-bold uppercase tracking-widest text-[#181113] dark:text-white"
+                                        >
+                                            Kategoriler
+                                            <span className="material-symbols-outlined text-[18px]">
+                                                {mobileCategoriesOpen ? 'expand_less' : 'expand_more'}
+                                            </span>
+                                        </button>
+                                        {mobileCategoriesOpen && (
+                                            <div className="space-y-2">
+                                                {navCategories?.map((category) => (
+                                                    <div key={category.id} className="rounded-lg border border-gray-100 dark:border-gray-800">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() =>
+                                                                setMobileCategoryId((prev) =>
+                                                                    prev === category.id ? null : category.id
+                                                                )
+                                                            }
+                                                            className="flex w-full items-center justify-between px-3 py-2 text-xs font-semibold text-[#181113] dark:text-white"
+                                                        >
+                                                            {category.title}
+                                                            <span className="material-symbols-outlined text-[18px]">
+                                                                {mobileCategoryId === category.id ? 'expand_less' : 'expand_more'}
+                                                            </span>
+                                                        </button>
+                                                        {mobileCategoryId === category.id && (
+                                                            <div className="space-y-1 px-3 pb-3">
+                                                                <Link
+                                                                    href={`/kategori/${category.slug}`}
+                                                                    onClick={closeMobileMenu}
+                                                                    className="block text-xs font-semibold text-[#ec135b]"
+                                                                >
+                                                                    Tümünü Gör
+                                                                </Link>
+                                                                {category.children.map((sub) => (
+                                                                    <Link
+                                                                        key={sub.id}
+                                                                        href={`/kategori/${sub.slug}`}
+                                                                        onClick={closeMobileMenu}
+                                                                        className="block text-xs text-gray-600 dark:text-gray-300"
+                                                                    >
+                                                                        {sub.title}
+                                                                    </Link>
+                                                                ))}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Mega Menu - Brands */}
             {showBrandsMenu && (
