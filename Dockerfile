@@ -26,7 +26,7 @@ RUN apk add --no-cache \
 FROM composer:2 AS composer_deps
 WORKDIR /app
 COPY composer.json composer.lock ./
-RUN composer install --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader --ignore-platform-reqs
+RUN composer install --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader --ignore-platform-reqs --no-scripts
 
 FROM node:18-alpine AS node_build
 WORKDIR /app
