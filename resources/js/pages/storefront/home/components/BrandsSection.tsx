@@ -71,15 +71,6 @@ export function BrandsSection({ endpoint }: BrandsSectionProps) {
     return (
         <section ref={ref} className="w-full py-16 bg-gray-50/30 dark:bg-black/10">
             <div className="mx-auto max-w-[1440px] px-6 lg:px-12">
-                <div className="mb-10 text-center">
-                    <span className="mb-2 block text-[10px] font-black uppercase tracking-[0.3em] text-[#ec135b]">
-                        Kozmetik Devleri
-                    </span>
-                    <h2 className="font-display text-2xl font-black tracking-tight text-[#181113] dark:text-[#f4f0f2] md:text-4xl">
-                        Popüler Markalar
-                    </h2>
-                </div>
-
                 {/* Brands Slider */}
                 <div className="relative">
                     <button

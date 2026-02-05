@@ -43,11 +43,11 @@ export default function HomePage({ apiEndpoints }: HomePageProps) {
     return (
         <StorefrontLayout title="Home">
             <div className="w-full">
-                {/* Hero Section */}
-                <HeroSection />
-
                 {/* Brands Section */}
                 <BrandsSection endpoint={apiEndpoints.brands} />
+
+                {/* Hero Section */}
+                <HeroSection />
 
                 {/* Categories Section
                 <CategoryGrid endpoint={apiEndpoints.categories} /> */}
