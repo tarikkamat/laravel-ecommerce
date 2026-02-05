@@ -30,7 +30,23 @@ RUN composer install --no-dev --prefer-dist --no-interaction --no-progress --opt
 
 FROM node:22-alpine AS node_build
 WORKDIR /app
-RUN apk add --no-cache php-cli php-phar php-mbstring php-json php-pdo php-sqlite3 php-session
+RUN apk add --no-cache \
+    php-cli \
+    php-phar \
+    php-mbstring \
+    php-json \
+    php-pdo \
+    php-sqlite3 \
+    php-session \
+    php-ctype \
+    php-curl \
+    php-dom \
+    php-fileinfo \
+    php-filter \
+    php-hash \
+    php-openssl \
+    php-tokenizer \
+    php-xml
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY resources resources
