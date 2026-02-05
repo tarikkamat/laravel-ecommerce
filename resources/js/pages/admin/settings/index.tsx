@@ -1287,12 +1287,10 @@ export default function SettingsIndex({ settings, categories }: Props) {
                                         value={data.announcement_texts.join('\n')}
                                         onChange={(event) =>
                                             (() => {
-                                                const next = event.target.value
-                                                    .split('\n')
-                                                    .map((line) => line.trim())
-                                                    .filter(Boolean);
+                                                const next = event.target.value.split('\n');
+                                                const firstNonEmpty = next.find((line) => line.trim() !== '') ?? '';
                                                 setData('announcement_texts', next);
-                                                setData('announcement_text', next[0] ?? '');
+                                                setData('announcement_text', firstNonEmpty.trim());
                                             })()
                                         }
                                         placeholder="Her satıra bir duyuru yazın."
