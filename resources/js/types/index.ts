@@ -57,6 +57,14 @@ export type SharedData = {
             seller_address: string;
             seller_phone: string;
             seller_email: string;
+            whatsapp_enabled: boolean;
+            whatsapp_phone: string;
+            whatsapp_message: string;
+            announcement_enabled: boolean;
+            announcement_text: string;
+            announcement_speed_seconds: number;
+            announcement_background: string;
+            announcement_text_color: string;
             footer_bottom_links: { label: string; url: string }[];
             footer_socials: { label: string; url: string }[];
             footer_menus: { title: string; items: { label: string; url: string }[] }[];

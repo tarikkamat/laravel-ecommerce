@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { LoadingButton } from '@/components/ui/loading-button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AppLayout from '@/layouts/app-layout';
 import admin from '@/routes/admin';
 import type { BreadcrumbItem } from '@/types';
@@ -45,6 +46,14 @@ type SettingsPayload = {
         seller_address: string;
         seller_phone: string;
         seller_email: string;
+        whatsapp_enabled: boolean;
+        whatsapp_phone: string;
+        whatsapp_message: string;
+        announcement_enabled: boolean;
+        announcement_text: string;
+        announcement_speed_seconds: number;
+        announcement_background: string;
+        announcement_text_color: string;
         footer_bottom_links: { label: string; url: string }[];
         footer_socials: { label: string; url: string }[];
         footer_menus: { title: string; items: { label: string; url: string }[] }[];
@@ -123,6 +132,14 @@ type SettingsFormData = {
     seller_address: string;
     seller_phone: string;
     seller_email: string;
+    whatsapp_enabled: boolean;
+    whatsapp_phone: string;
+    whatsapp_message: string;
+    announcement_enabled: boolean;
+    announcement_text: string;
+    announcement_speed_seconds: number;
+    announcement_background: string;
+    announcement_text_color: string;
     footer_bottom_links: { label: string; url: string }[];
     footer_socials: { label: string; url: string }[];
     footer_menus: { title: string; items: { label: string; url: string }[] }[];
@@ -212,6 +229,14 @@ export default function SettingsIndex({ settings, categories }: Props) {
         seller_address: settings.site.seller_address ?? '',
         seller_phone: settings.site.seller_phone ?? '',
         seller_email: settings.site.seller_email ?? '',
+        whatsapp_enabled: settings.site.whatsapp_enabled ?? false,
+        whatsapp_phone: settings.site.whatsapp_phone ?? '',
+        whatsapp_message: settings.site.whatsapp_message ?? '',
+        announcement_enabled: settings.site.announcement_enabled ?? false,
+        announcement_text: settings.site.announcement_text ?? '',
+        announcement_speed_seconds: settings.site.announcement_speed_seconds ?? 18,
+        announcement_background: settings.site.announcement_background ?? '#181113',
+        announcement_text_color: settings.site.announcement_text_color ?? '#ffffff',
         footer_bottom_links: settings.site.footer_bottom_links ?? [],
         footer_socials: settings.site.footer_socials ?? [],
         footer_menus: settings.site.footer_menus ?? [],
@@ -487,6 +512,83 @@ export default function SettingsIndex({ settings, categories }: Props) {
                     </div>
                 </div>
 
+                <Tabs defaultValue="general" className="flex-1">
+                    <TabsList className="flex flex-wrap justify-start">
+                        <TabsTrigger value="general">Genel</TabsTrigger>
+                        <TabsTrigger value="navigation">Navigasyon</TabsTrigger>
+                        <TabsTrigger value="home">Anasayfa</TabsTrigger>
+                        <TabsTrigger value="catalog">Katalog</TabsTrigger>
+                        <TabsTrigger value="payments">Ödeme</TabsTrigger>
+                        <TabsTrigger value="shipping">Kargo</TabsTrigger>
+                        <TabsTrigger value="contact">İletişim</TabsTrigger>
+                        <TabsTrigger value="tax">Vergi</TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value="navigation" className="mt-6 space-y-6">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Header Menü</CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-6">
+                                <div className="flex flex-wrap gap-4 text-sm">
+                                    <label className="flex items-center gap-2">
+                                        <input
+                                            type="checkbox"
+                                            checked={data.show_home_link}
+                                            onChange={(event) => setData('show_home_link', event.target.checked)}
+                                        />
+                                        Anasayfa bağlantısı
+                                    </label>
+                                    <label className="flex items-center gap-2">
+                                        <input
+                                            type="checkbox"
+                                            checked={data.show_brands_menu}
+                                            onChange={(event) => setData('show_brands_menu', event.target.checked)}
+                                        />
+                                        Markalar menüsü
+                                    </label>
+                                    <label className="flex items-center gap-2">
+                                        <input
+                                            type="checkbox"
+                                            checked={data.show_categories_menu}
+                                            onChange={(event) => setData('show_categories_menu', event.target.checked)}
+                                        />
+                                        Kategori menüleri
+                                    </label>
+                                </div>
+
+                                {data.header_menu.length === 0 && (
+                                    <p className="text-sm text-muted-foreground">Ek menü öğesi eklenmedi.</p>
+                                )}
+
+                                <div className="space-y-3">
+                                    {data.header_menu.map((item, index) => (
+                                        <div key={`header-menu-${index}`} className="grid gap-3 md:grid-cols-[1fr_1fr_auto]">
+                                            <Input
+                                                value={item.label}
+                                                onChange={(event) => updateHeaderMenuItem(index, 'label', event.target.value)}
+                                                placeholder="Menü etiketi"
+                                            />
+                                            <Input
+                                                value={item.url}
+                                                onChange={(event) => updateHeaderMenuItem(index, 'url', event.target.value)}
+                                                placeholder="/hakkimizda"
+                                            />
+                                            <Button type="button" variant="outline" onClick={() => removeHeaderMenuItem(index)}>
+                                                Kaldır
+                                            </Button>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <Button type="button" variant="secondary" onClick={addHeaderMenuItem}>
+                                    Menü Ekle
+                                </Button>
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
+
+                    <TabsContent value="general" className="mt-6 space-y-6">
                 <Card>
                     <CardHeader>
                         <CardTitle>Site Genel</CardTitle>
@@ -585,65 +687,6 @@ export default function SettingsIndex({ settings, categories }: Props) {
                             </Field>
                         </div>
 
-                        <Separator />
-
-                        <div className="space-y-4">
-                            <h3 className="text-sm font-semibold">Header Menü</h3>
-                            <div className="flex flex-wrap gap-4 text-sm">
-                                <label className="flex items-center gap-2">
-                                    <input
-                                        type="checkbox"
-                                        checked={data.show_home_link}
-                                        onChange={(event) => setData('show_home_link', event.target.checked)}
-                                    />
-                                    Anasayfa bağlantısı
-                                </label>
-                                <label className="flex items-center gap-2">
-                                    <input
-                                        type="checkbox"
-                                        checked={data.show_brands_menu}
-                                        onChange={(event) => setData('show_brands_menu', event.target.checked)}
-                                    />
-                                    Markalar menüsü
-                                </label>
-                                <label className="flex items-center gap-2">
-                                    <input
-                                        type="checkbox"
-                                        checked={data.show_categories_menu}
-                                        onChange={(event) => setData('show_categories_menu', event.target.checked)}
-                                    />
-                                    Kategori menüleri
-                                </label>
-                            </div>
-
-                            {data.header_menu.length === 0 && (
-                                <p className="text-sm text-muted-foreground">Ek menü öğesi eklenmedi.</p>
-                            )}
-
-                            <div className="space-y-3">
-                                {data.header_menu.map((item, index) => (
-                                    <div key={`header-menu-${index}`} className="grid gap-3 md:grid-cols-[1fr_1fr_auto]">
-                                        <Input
-                                            value={item.label}
-                                            onChange={(event) => updateHeaderMenuItem(index, 'label', event.target.value)}
-                                            placeholder="Menü etiketi"
-                                        />
-                                        <Input
-                                            value={item.url}
-                                            onChange={(event) => updateHeaderMenuItem(index, 'url', event.target.value)}
-                                            placeholder="/hakkimizda"
-                                        />
-                                        <Button type="button" variant="outline" onClick={() => removeHeaderMenuItem(index)}>
-                                            Kaldır
-                                        </Button>
-                                    </div>
-                                ))}
-                            </div>
-
-                            <Button type="button" variant="secondary" onClick={addHeaderMenuItem}>
-                                Menü Ekle
-                            </Button>
-                        </div>
                     </CardContent>
                 </Card>
 
@@ -716,10 +759,10 @@ export default function SettingsIndex({ settings, categories }: Props) {
 
                         <Separator />
 
-                        <div className="space-y-4">
-                            <h3 className="text-sm font-semibold">Satici Bilgileri</h3>
-                            <div className="grid gap-4 md:grid-cols-2">
-                                <Field>
+                                <div className="space-y-4">
+                                    <h3 className="text-sm font-semibold">Satici Bilgileri</h3>
+                                    <div className="grid gap-4 md:grid-cols-2">
+                                        <Field>
                                     <FieldLabel htmlFor="seller_name">Unvan / Ad Soyad</FieldLabel>
                                     <Input
                                         id="seller_name"
@@ -744,8 +787,8 @@ export default function SettingsIndex({ settings, categories }: Props) {
                                         value={data.seller_email}
                                         onChange={(event) => setData('seller_email', event.target.value)}
                                     />
-                                    <FieldError>{errors.seller_email}</FieldError>
-                                </Field>
+                                        <FieldError>{errors.seller_email}</FieldError>
+                                    </Field>
                             <Field className="md:col-span-2">
                                 <FieldLabel htmlFor="seller_address">Adres</FieldLabel>
                                 <textarea
@@ -900,6 +943,9 @@ export default function SettingsIndex({ settings, categories }: Props) {
                         </div>
                     </CardContent>
                 </Card>
+                    </TabsContent>
+
+                    <TabsContent value="tax" className="mt-6 space-y-6">
 
                 <Card>
                     <CardHeader>
@@ -958,6 +1004,9 @@ export default function SettingsIndex({ settings, categories }: Props) {
                         </div>
                     </CardContent>
                 </Card>
+                    </TabsContent>
+
+                    <TabsContent value="payments" className="mt-6 space-y-6">
 
                 <Card>
                     <CardHeader>
@@ -1023,12 +1072,15 @@ export default function SettingsIndex({ settings, categories }: Props) {
                         </div>
                     </CardContent>
                 </Card>
+                    </TabsContent>
 
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Kargo ve Geliver Ayarları</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
+                    <TabsContent value="shipping" className="mt-6 space-y-6">
+
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Kargo ve Geliver Ayarları</CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-6">
                         <div className="space-y-3">
                             <label className="flex items-center gap-2 text-sm">
                                 <input
@@ -1178,8 +1230,128 @@ export default function SettingsIndex({ settings, categories }: Props) {
                                 />
                             </Field>
                         </div>
-                    </CardContent>
-                </Card>
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
+
+                    <TabsContent value="contact" className="mt-6 space-y-6">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Kaydırmalı Duyuru</CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <Field>
+                                    <div className="flex items-center justify-between">
+                                        <FieldLabel>Duyuru Aktif</FieldLabel>
+                                        <label className="flex items-center gap-2 text-sm text-muted-foreground">
+                                            <input
+                                                type="checkbox"
+                                                checked={data.announcement_enabled}
+                                                onChange={(event) => setData('announcement_enabled', event.target.checked)}
+                                            />
+                                            Aktif
+                                        </label>
+                                    </div>
+                                </Field>
+                                <Field>
+                                    <FieldLabel htmlFor="announcement_text">Duyuru Metni</FieldLabel>
+                                    <Input
+                                        id="announcement_text"
+                                        value={data.announcement_text}
+                                        onChange={(event) => setData('announcement_text', event.target.value)}
+                                        placeholder="Yeni sezon ürünlerinde %20 indirim!"
+                                    />
+                                    <FieldError>{errors.announcement_text}</FieldError>
+                                </Field>
+                                <div className="grid gap-4 md:grid-cols-3">
+                                    <Field>
+                                        <FieldLabel htmlFor="announcement_speed_seconds">Hız (sn)</FieldLabel>
+                                        <Input
+                                            id="announcement_speed_seconds"
+                                            type="number"
+                                            min={6}
+                                            max={60}
+                                            value={data.announcement_speed_seconds}
+                                            onChange={(event) =>
+                                                setData('announcement_speed_seconds', Number(event.target.value))
+                                            }
+                                        />
+                                        <FieldError>{errors.announcement_speed_seconds}</FieldError>
+                                    </Field>
+                                    <Field>
+                                        <FieldLabel htmlFor="announcement_background">Arka Plan</FieldLabel>
+                                        <Input
+                                            id="announcement_background"
+                                            value={data.announcement_background}
+                                            onChange={(event) =>
+                                                setData('announcement_background', event.target.value)
+                                            }
+                                            placeholder="#181113"
+                                        />
+                                        <FieldError>{errors.announcement_background}</FieldError>
+                                    </Field>
+                                    <Field>
+                                        <FieldLabel htmlFor="announcement_text_color">Yazı Rengi</FieldLabel>
+                                        <Input
+                                            id="announcement_text_color"
+                                            value={data.announcement_text_color}
+                                            onChange={(event) =>
+                                                setData('announcement_text_color', event.target.value)
+                                            }
+                                            placeholder="#ffffff"
+                                        />
+                                        <FieldError>{errors.announcement_text_color}</FieldError>
+                                    </Field>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>WhatsApp Destek</CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <Field>
+                                    <div className="flex items-center justify-between">
+                                        <FieldLabel>WhatsApp Aktif</FieldLabel>
+                                        <label className="flex items-center gap-2 text-sm text-muted-foreground">
+                                            <input
+                                                type="checkbox"
+                                                checked={data.whatsapp_enabled}
+                                                onChange={(event) => setData('whatsapp_enabled', event.target.checked)}
+                                            />
+                                            Aktif
+                                        </label>
+                                    </div>
+                                </Field>
+                                <Field>
+                                    <FieldLabel htmlFor="whatsapp_phone">WhatsApp Telefon</FieldLabel>
+                                    <Input
+                                        id="whatsapp_phone"
+                                        value={data.whatsapp_phone}
+                                        onChange={(event) => setData('whatsapp_phone', event.target.value)}
+                                        placeholder="905559621600"
+                                    />
+                                    <FieldDescription>Ülke kodu ile, boşluk olmadan.</FieldDescription>
+                                    <FieldError>{errors.whatsapp_phone}</FieldError>
+                                </Field>
+                                <Field>
+                                    <FieldLabel htmlFor="whatsapp_message">WhatsApp Mesajı</FieldLabel>
+                                    <textarea
+                                        id="whatsapp_message"
+                                        value={data.whatsapp_message}
+                                        onChange={(event) => setData('whatsapp_message', event.target.value)}
+                                        rows={3}
+                                        className="flex min-h-[90px] w-full rounded-md border border-input bg-transparent px-3 py-2 shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                        placeholder="Selamlar bu ürünü almak istiyorum."
+                                    />
+                                    <FieldError>{errors.whatsapp_message}</FieldError>
+                                </Field>
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
+
+                    <TabsContent value="home" className="mt-6 space-y-6">
 
                 <Card>
                     <CardHeader>
@@ -1469,6 +1641,9 @@ export default function SettingsIndex({ settings, categories }: Props) {
                         </div>
                     </CardContent>
                 </Card>
+                    </TabsContent>
+
+                    <TabsContent value="catalog" className="mt-6 space-y-6">
 
                 <Card>
                     <CardHeader>
@@ -1529,6 +1704,8 @@ export default function SettingsIndex({ settings, categories }: Props) {
                         </div>
                     </CardContent>
                 </Card>
+                    </TabsContent>
+                </Tabs>
             </form>
 
             <ImagePickerModal

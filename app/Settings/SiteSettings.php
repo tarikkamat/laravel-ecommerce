@@ -24,6 +24,16 @@ class SiteSettings extends Settings
     public string $seller_phone = '';
     public string $seller_email = '';
 
+    public bool $whatsapp_enabled = false;
+    public string $whatsapp_phone = '';
+    public string $whatsapp_message = 'Selamlar, bu ürünü almak istiyorum.';
+
+    public bool $announcement_enabled = false;
+    public string $announcement_text = '';
+    public int $announcement_speed_seconds = 18;
+    public string $announcement_background = '#181113';
+    public string $announcement_text_color = '#ffffff';
+
     public array $footer_bottom_links = [];
 
     public array $footer_socials = [];
