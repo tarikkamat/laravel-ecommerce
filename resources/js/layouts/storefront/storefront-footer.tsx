@@ -78,43 +78,27 @@ export function StorefrontFooter() {
                         </div>
                     ))}
 
-                    {/* Newsletter */}
-                    <div className="lg:col-span-1">
-                        <h3 className="mb-4 text-sm font-bold uppercase tracking-wider text-[#181113] dark:text-[#f4f0f2]">
-                            Stay in the loop
-                        </h3>
-                        <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
-                            Sign up for 10% off your first order and exclusive
-                            access to new drops.
-                        </p>
-                        <form className="flex flex-col gap-3">
-                            <input
-                                className="h-10 w-full rounded-lg border border-gray-200 bg-transparent px-4 text-sm text-[#181113] outline-none focus:border-[#ec135b] focus:ring-1 focus:ring-[#ec135b] dark:border-white/20 dark:text-[#f4f0f2] placeholder:text-gray-400"
-                                placeholder="Enter your email"
-                                type="email"
-                            />
-                            <button
-                                className="h-10 w-full rounded-lg bg-[#181113] text-sm font-bold text-white transition-colors hover:bg-[#ec135b] dark:bg-white dark:text-[#181113] dark:hover:bg-gray-200"
-                                type="submit"
-                            >
-                                Subscribe
-                            </button>
-                        </form>
-                    </div>
+                    {footerBottomLinks.length > 0 && (
+                        <div className="lg:col-span-1">
+                            <h3 className="mb-4 text-sm font-bold uppercase tracking-wider text-[#181113] dark:text-[#f4f0f2]">
+                                Sayfalar ve Sözleşmeler
+                            </h3>
+                            <ul className="flex flex-col gap-3 text-sm text-gray-500 dark:text-gray-400">
+                                {footerBottomLinks.map((item, index) => (
+                                    <li key={`footer-pages-${index}`}>
+                                        <Link href={item.url} className="transition-colors hover:text-[#ec135b]">
+                                            {item.label}
+                                        </Link>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
                 </div>
 
                 {/* Bottom Bar */}
                 <div className="mt-16 flex flex-col items-center justify-between border-t border-gray-100 pt-8 text-xs text-gray-400 dark:border-white/5 sm:flex-row">
                     <p>{footerCopyright}</p>
-                    {footerBottomLinks.length > 0 && (
-                        <div className="mt-4 flex gap-6 sm:mt-0">
-                            {footerBottomLinks.map((item, index) => (
-                                <Link key={`footer-bottom-${index}`} href={item.url} className="hover:text-[#ec135b]">
-                                    {item.label}
-                                </Link>
-                            ))}
-                        </div>
-                    )}
                 </div>
             </div>
         </footer>
