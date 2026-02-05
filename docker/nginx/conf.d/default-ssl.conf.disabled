@@ -1,0 +1,36 @@
+server {
+    listen 80;
+    server_name suug.istanbul www.suug.istanbul;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name suug.istanbul www.suug.istanbul;
+
+    root /var/www/public;
+    index index.php index.html;
+
+    ssl_certificate /etc/letsencrypt/live/suug.istanbul/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/suug.istanbul/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/public;
+    }
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        try_files $uri =404;
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_param PATH_INFO $fastcgi_path_info;
+        fastcgi_pass app:9000;
+    }
+
+    client_max_body_size 50m;
+}

@@ -1,0 +1,60 @@
+version: "3.9"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: suug_app
+    env_file:
+      - .env
+    volumes:
+      - .:/var/www
+    depends_on:
+      - db
+      - redis
+
+  web:
+    image: nginx:alpine
+    container_name: suug_web
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - .:/var/www
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d
+      - ./docker/certbot/www:/var/www/public/.well-known/acme-challenge
+      - ./docker/certbot/conf:/etc/letsencrypt
+    depends_on:
+      - app
+
+  db:
+    image: mysql:8
+    container_name: suug_db
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-suug}
+      MYSQL_USER: ${DB_USERNAME:-suug}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-suug}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+  redis:
+    image: redis:7-alpine
+    container_name: suug_redis
+    ports:
+      - "6379:6379"
+
+  certbot:
+    image: certbot/certbot
+    container_name: suug_certbot
+    volumes:
+      - ./docker/certbot/conf:/etc/letsencrypt
+      - ./docker/certbot/www:/var/www/public/.well-known/acme-challenge
+    entrypoint: /bin/sh -c
+    command: "trap exit TERM; while :; do sleep 12h & wait $${!}; certbot renew; done"
+
+volumes:
+  db_data:
