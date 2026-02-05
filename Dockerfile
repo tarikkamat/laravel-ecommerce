@@ -45,7 +45,7 @@ COPY bootstrap bootstrap
 COPY database database
 COPY --from=composer_deps /app/vendor /app/vendor
 RUN mkdir -p storage/framework/cache storage/framework/views storage/framework/sessions bootstrap/cache
-RUN APP_ENV=production APP_KEY=base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA= php artisan wayfinder:generate --with-form
+RUN APP_ENV=production APP_KEY=base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA= SESSION_DRIVER=array php artisan wayfinder:generate --with-form
 RUN npm run build
 
 FROM base AS app
