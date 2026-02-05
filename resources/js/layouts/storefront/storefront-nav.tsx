@@ -89,7 +89,7 @@ export function StorefrontNav() {
                     : 'bg-transparent py-8'
             }`}
         >
-            <div className="mx-auto flex max-w-[1440px] items-center justify-between px-6 lg:px-12">
+            <div className="mx-auto flex max-w-[1440px] items-center justify-between px-6 lg:px-12 mt-5">
                 {/* Logo Area */}
                 <Link
                     href={storefront.home.index.url()}

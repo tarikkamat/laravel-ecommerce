@@ -3,7 +3,6 @@ import type { Product } from '@/types/product';
 import { Link, router } from '@inertiajs/react';
 import brands from '@/routes/storefront/brands';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { ShoppingCart, Heart, Share2 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { useState } from 'react';
@@ -109,20 +108,6 @@ export function ProductInfo({ product }: ProductInfoProps) {
                     ) : (
                         <span className="text-2xl font-bold text-foreground md:text-3xl">
                             ₺{formatPrice(price)}
-                        </span>
-                    )}
-                </div>
-
-                <div className="flex items-center gap-2">
-                    <Badge 
-                        variant={product.stock > 0 ? "secondary" : "destructive"}
-                        className="rounded-full px-2"
-                    >
-                        {product.stock > 0 ? 'Stokta' : 'Tükendi'}
-                    </Badge>
-                    {product.stock > 0 && (
-                        <span className="text-xs text-muted-foreground">
-                            {product.stock} adet mevcut
                         </span>
                     )}
                 </div>

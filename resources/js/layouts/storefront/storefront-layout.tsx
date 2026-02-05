@@ -26,7 +26,8 @@ export default function StorefrontLayout({ children, title }: Props) {
     const announcementTextColor = storefrontSettings?.site?.announcement_text_color ?? '#ffffff';
     const announcementItems =
         announcementTexts.length > 0 ? announcementTexts : announcementText ? [announcementText] : [];
-    const tickerItems = announcementItems.length > 1 ? announcementItems : [...announcementItems, ...announcementItems];
+    const tickerItems =
+        announcementItems.length > 1 ? announcementItems : [...announcementItems, ...announcementItems];
     const whatsappUrl = whatsappEnabled && whatsappPhone
         ? `https://api.whatsapp.com/send?phone=${encodeURIComponent(whatsappPhone)}&text=${encodeURIComponent(whatsappMessage)}`
         : '';
@@ -45,30 +46,15 @@ export default function StorefrontLayout({ children, title }: Props) {
                         style={{ backgroundColor: announcementBackground, color: announcementTextColor }}
                     >
                         <div className="mx-auto flex max-w-[1440px] items-center px-6 py-2 lg:px-12">
-                            <div className="relative flex w-full overflow-hidden">
+                            <div className="relative w-full overflow-hidden">
                                 <div
-                                    className="flex shrink-0 items-center gap-6 whitespace-nowrap text-sm font-semibold uppercase tracking-[0.2em] pr-12 will-change-transform"
+                                    className="flex w-max items-center gap-8 whitespace-nowrap text-sm font-semibold uppercase tracking-[0.2em] will-change-transform"
                                     style={{
                                         animation: `ticker ${announcementSpeedSeconds}s linear infinite`,
                                     }}
                                 >
-                                    {tickerItems.map((text, index) => (
-                                        <span key={`a-${index}`} className="flex items-center gap-3">
-                                            {text}
-                                            <span className="text-[#ec135b]">•</span>
-                                        </span>
-                                    ))}
-                                </div>
-                                <div
-                                    className="flex shrink-0 items-center gap-6 whitespace-nowrap text-sm font-semibold uppercase tracking-[0.2em] pr-12 will-change-transform"
-                                    style={{
-                                        animation: `ticker ${announcementSpeedSeconds}s linear infinite`,
-                                        animationDelay: `-${announcementSpeedSeconds / 2}s`,
-                                    }}
-                                    aria-hidden="true"
-                                >
-                                    {tickerItems.map((text, index) => (
-                                        <span key={`b-${index}`} className="flex items-center gap-3">
+                                    {[...tickerItems, ...tickerItems].map((text, index) => (
+                                        <span key={`t-${index}`} className="flex items-center gap-3 pr-6">
                                             {text}
                                             <span className="text-[#ec135b]">•</span>
                                         </span>
@@ -79,7 +65,7 @@ export default function StorefrontLayout({ children, title }: Props) {
                         <style>{`
                             @keyframes ticker {
                                 0% { transform: translateX(0); }
-                                100% { transform: translateX(-100%); }
+                                100% { transform: translateX(-50%); }
                             }
                         `}</style>
                     </div>
