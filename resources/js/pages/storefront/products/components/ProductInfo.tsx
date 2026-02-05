@@ -130,9 +130,10 @@ export function ProductInfo({ product }: ProductInfoProps) {
                 <Separator className="my-6" />
 
                 {product.description && (
-                    <div className="prose prose-sm max-w-none text-muted-foreground line-clamp-4">
-                        {product.description}
-                    </div>
+                    <div
+                        className="prose prose-sm max-w-none text-muted-foreground line-clamp-4"
+                        dangerouslySetInnerHTML={{ __html: product.description }}
+                    />
                 )}
             </div>
 

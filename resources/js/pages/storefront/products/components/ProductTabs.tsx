@@ -37,7 +37,9 @@ export function ProductTabs({ product }: ProductTabsProps) {
             <div className="py-8">
                 <TabsContent value="description" className="mt-0">
                     <div className="prose prose-sm max-w-none text-muted-foreground leading-relaxed">
-                        {product.description || (
+                        {product.description ? (
+                            <div dangerouslySetInnerHTML={{ __html: product.description }} />
+                        ) : (
                             <div className="flex items-center gap-2 text-muted-foreground italic">
                                 <Info className="size-4" />
                                 Bu ürün için henüz detaylı açıklama girilmemiş.

@@ -8,6 +8,7 @@ type WysiwygProps = {
     onChange: (value: string) => void;
     placeholder?: string;
     disabled?: boolean;
+    allowHtmlSource?: boolean;
 };
 
 const commands = [
@@ -21,10 +22,17 @@ const commands = [
     { label: 'P', command: 'formatBlock', value: 'P' },
 ];
 
-export function WysiwygEditor({ value, onChange, placeholder, disabled }: WysiwygProps) {
+export function WysiwygEditor({
+    value,
+    onChange,
+    placeholder,
+    disabled,
+    allowHtmlSource = true,
+}: WysiwygProps) {
     const editorRef = useRef<HTMLDivElement>(null);
     const selectionRef = useRef<Range | null>(null);
     const [isImagePickerOpen, setIsImagePickerOpen] = useState(false);
+    const [mode, setMode] = useState<'visual' | 'html'>('visual');
 
     useEffect(() => {
         if (!editorRef.current) return;
@@ -76,70 +84,141 @@ export function WysiwygEditor({ value, onChange, placeholder, disabled }: Wysiwy
         exec('createLink', url);
     };
 
+    const insertTable = () => {
+        if (disabled) return;
+        const rowsRaw = window.prompt('Satır sayısı', '3');
+        const colsRaw = window.prompt('Sütun sayısı', '3');
+        const rows = Number(rowsRaw);
+        const cols = Number(colsRaw);
+        if (!Number.isInteger(rows) || !Number.isInteger(cols) || rows < 1 || cols < 1) return;
+
+        const table = [
+            '<table style="width:100%; border-collapse: collapse;" border="1">',
+            '<tbody>',
+        ];
+        for (let r = 0; r < rows; r += 1) {
+            table.push('<tr>');
+            for (let c = 0; c < cols; c += 1) {
+                table.push('<td>&nbsp;</td>');
+            }
+            table.push('</tr>');
+        }
+        table.push('</tbody></table>');
+
+        exec('insertHTML', table.join(''));
+    };
+
     const handleInput = () => {
         onChange(editorRef.current?.innerHTML ?? '');
     };
 
     return (
         <div className="space-y-2">
-            <div className="flex flex-wrap gap-2 rounded-md border border-input bg-muted/30 p-2">
-                {commands.map((item) => (
-                    <button
-                        key={item.label}
-                        type="button"
-                        onMouseDown={(event) => {
-                            event.preventDefault();
-                            exec(item.command, item.value);
-                        }}
-                        className="rounded border border-transparent px-2 py-1 text-xs font-medium hover:border-input hover:bg-background"
-                        disabled={disabled}
-                    >
-                        {item.label}
-                    </button>
-                ))}
-                <button
-                    type="button"
-                    onMouseDown={(event) => {
-                        event.preventDefault();
-                        insertLink();
-                    }}
-                    className="rounded border border-transparent px-2 py-1 text-xs font-medium hover:border-input hover:bg-background"
-                    disabled={disabled}
-                >
-                    Link
-                </button>
-                <button
-                    type="button"
-                    onMouseDown={(event) => {
-                        event.preventDefault();
-                        handleOpenImagePicker();
-                    }}
-                    className="rounded border border-transparent px-2 py-1 text-xs font-medium hover:border-input hover:bg-background"
-                    disabled={disabled}
-                >
-                    Görsel
-                </button>
-                <button
-                    type="button"
-                    onMouseDown={(event) => {
-                        event.preventDefault();
-                        exec('removeFormat');
-                    }}
-                    className="rounded border border-transparent px-2 py-1 text-xs font-medium hover:border-input hover:bg-background"
-                    disabled={disabled}
-                >
-                    Temizle
-                </button>
+            <div className="flex flex-wrap items-center gap-2 rounded-md border border-input bg-muted/30 p-2">
+                {allowHtmlSource && (
+                    <div className="flex items-center gap-1 rounded-md border border-input bg-background p-0.5 text-xs">
+                        <button
+                            type="button"
+                            onClick={() => setMode('visual')}
+                            className={`rounded px-2 py-1 ${mode === 'visual' ? 'bg-muted font-semibold' : ''}`}
+                            disabled={disabled}
+                        >
+                            Görsel
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setMode('html')}
+                            className={`rounded px-2 py-1 ${mode === 'html' ? 'bg-muted font-semibold' : ''}`}
+                            disabled={disabled}
+                        >
+                            HTML
+                        </button>
+                    </div>
+                )}
+
+                {mode === 'visual' && (
+                    <>
+                        {commands.map((item) => (
+                            <button
+                                key={item.label}
+                                type="button"
+                                onMouseDown={(event) => {
+                                    event.preventDefault();
+                                    exec(item.command, item.value);
+                                }}
+                                className="rounded border border-transparent px-2 py-1 text-xs font-medium hover:border-input hover:bg-background"
+                                disabled={disabled}
+                            >
+                                {item.label}
+                            </button>
+                        ))}
+                        <button
+                            type="button"
+                            onMouseDown={(event) => {
+                                event.preventDefault();
+                                insertLink();
+                            }}
+                            className="rounded border border-transparent px-2 py-1 text-xs font-medium hover:border-input hover:bg-background"
+                            disabled={disabled}
+                        >
+                            Link
+                        </button>
+                        <button
+                            type="button"
+                            onMouseDown={(event) => {
+                                event.preventDefault();
+                                handleOpenImagePicker();
+                            }}
+                            className="rounded border border-transparent px-2 py-1 text-xs font-medium hover:border-input hover:bg-background"
+                            disabled={disabled}
+                        >
+                            Görsel
+                        </button>
+                        <button
+                            type="button"
+                            onMouseDown={(event) => {
+                                event.preventDefault();
+                                insertTable();
+                            }}
+                            className="rounded border border-transparent px-2 py-1 text-xs font-medium hover:border-input hover:bg-background"
+                            disabled={disabled}
+                        >
+                            Tablo
+                        </button>
+                        <button
+                            type="button"
+                            onMouseDown={(event) => {
+                                event.preventDefault();
+                                exec('removeFormat');
+                            }}
+                            className="rounded border border-transparent px-2 py-1 text-xs font-medium hover:border-input hover:bg-background"
+                            disabled={disabled}
+                        >
+                            Temizle
+                        </button>
+                    </>
+                )}
             </div>
 
-            <div
-                ref={editorRef}
-                contentEditable={!disabled}
-                onInput={handleInput}
-                className="min-h-[200px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
-                data-placeholder={placeholder}
-                suppressContentEditableWarning
-            />
+            {mode === 'visual' ? (
+                <div
+                    ref={editorRef}
+                    contentEditable={!disabled}
+                    onInput={handleInput}
+                    className="min-h-[200px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                    data-placeholder={placeholder}
+                    suppressContentEditableWarning
+                />
+            ) : (
+                <textarea
+                    value={value}
+                    onChange={(event) => onChange(event.target.value)}
+                    rows={10}
+                    className="min-h-[200px] w-full rounded-md border border-input bg-transparent px-3 py-2 font-mono text-xs shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                    placeholder={placeholder}
+                    disabled={disabled}
+                />
+            )}
 
             <ImagePickerModal
                 open={isImagePickerOpen}

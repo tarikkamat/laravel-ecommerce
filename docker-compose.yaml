@@ -40,6 +40,7 @@ services:
     volumes:
       - ./docker/certbot/www:/var/www/public/.well-known/acme-challenge
       - ./docker/certbot/conf:/etc/letsencrypt
+      - ./storage/app/public:/var/www/public/storage
     depends_on:
       - app
 

@@ -19,6 +19,7 @@ type ProductShowProps = {
 };
 
 export default function ProductShow({ product }: ProductShowProps) {
+    console.log(product);
     return (
         <StorefrontLayout title={product.title}>
             <main className="mx-auto w-full max-w-7xl px-4 py-6 md:px-6 lg:py-10">
@@ -76,14 +77,14 @@ export default function ProductShow({ product }: ProductShowProps) {
                                 Sizin için seçtiğimiz benzer ürünlere göz atın.
                             </p>
                         </div>
-                        <Link 
-                            href="/urunler" 
+                        <Link
+                            href="/urunler"
                             className="text-sm font-medium text-primary hover:underline underline-offset-4"
                         >
                             Tümünü Gör
                         </Link>
                     </div>
-                    
+
                     <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6">
                         <div className="col-span-full flex h-40 flex-col items-center justify-center rounded-2xl border border-dashed bg-muted/30 px-4 text-center">
                             <p className="text-sm text-muted-foreground">
