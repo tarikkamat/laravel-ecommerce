@@ -30,6 +30,7 @@ RUN composer install --no-dev --prefer-dist --no-interaction --no-progress --opt
 
 FROM node:22-alpine AS node_build
 WORKDIR /app
+ENV WAYFINDER_DISABLE=true
 RUN apk add --no-cache php-cli php-phar php-mbstring php-json
 COPY package.json package-lock.json ./
 RUN npm ci

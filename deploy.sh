@@ -36,6 +36,7 @@ npm_changed=false
 nginx_changed=false
 env_changed=false
 migrations_changed=false
+wayfinder_changed=false
 
 if echo "$CHANGED_FILES" | grep -Eq '(^Dockerfile$|^docker-compose\.ya?ml$|^docker/)' ; then
   rebuild_images=true
@@ -47,6 +48,10 @@ fi
 
 if echo "$CHANGED_FILES" | grep -Eq '(^package\.json$|^package-lock\.json$|^vite\.config\.ts$|^tsconfig\.json$|^resources/)' ; then
   npm_changed=true
+fi
+
+if echo "$CHANGED_FILES" | grep -Eq '(^routes/|^resources/js/|^app/Http/)' ; then
+  wayfinder_changed=true
 fi
 
 if echo "$CHANGED_FILES" | grep -Eq '(^docker/nginx/)' ; then
@@ -72,7 +77,11 @@ if [[ "$composer_changed" == true ]]; then
 fi
 
 if [[ "$npm_changed" == true ]]; then
-  docker run --rm -v "$ROOT_DIR":/app -w /app node:18-alpine sh -c "npm ci && npm run build"
+  docker run --rm -v "$ROOT_DIR":/app -w /app node:22-alpine sh -c "npm ci && npm run build"
+fi
+
+if [[ "$wayfinder_changed" == true ]]; then
+  docker compose --profile tools run --rm wayfinder
 fi
 
 if [[ "$migrations_changed" == true ]]; then

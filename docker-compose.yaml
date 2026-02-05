@@ -14,6 +14,20 @@ services:
       - db
       - redis
 
+  wayfinder:
+    profiles: ["tools"]
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: suug_wayfinder
+    env_file:
+      - .env
+    volumes:
+      - .:/var/www
+    entrypoint: ["php", "/var/www/artisan", "wayfinder:generate", "--with-form"]
+    depends_on:
+      - app
+
   web:
     image: nginx:alpine
     container_name: suug_web
