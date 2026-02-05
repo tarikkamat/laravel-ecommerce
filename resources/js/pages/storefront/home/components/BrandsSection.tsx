@@ -59,6 +59,15 @@ export function BrandsSection({ endpoint }: BrandsSectionProps) {
         return null;
     }
 
+    const sliderRef = useRef<HTMLDivElement>(null);
+
+    const scrollByAmount = (direction: 'left' | 'right') => {
+        const slider = sliderRef.current;
+        if (!slider) return;
+        const amount = Math.round(slider.clientWidth * 0.8);
+        slider.scrollBy({ left: direction === 'left' ? -amount : amount, behavior: 'smooth' });
+    };
+
     return (
         <section ref={ref} className="w-full py-16 bg-gray-50/30 dark:bg-black/10">
             <div className="mx-auto max-w-[1440px] px-6 lg:px-12">
@@ -71,23 +80,44 @@ export function BrandsSection({ endpoint }: BrandsSectionProps) {
                     </h2>
                 </div>
 
-                {/* Brands Grid */}
-                <div className="flex flex-wrap items-center justify-center gap-4 md:gap-8">
-                    {isLoading
-                        ? Array.from({ length: 10 }).map((_, index) => (
-                              <Skeleton
-                                  key={`brand-skeleton-${index}`}
-                                  className="h-16 w-32 rounded-xl md:h-20 md:w-40"
-                              />
-                          ))
-                        : brandsList.map((brand) => (
-                              <BrandLogo
-                                  key={brand.id}
-                                  name={brand.title}
-                                  href={brands.products.url(brand.slug)}
-                                  imagePath={brand.image?.path}
-                              />
-                          ))}
+                {/* Brands Slider */}
+                <div className="relative">
+                    <button
+                        type="button"
+                        onClick={() => scrollByAmount('left')}
+                        className="absolute left-0 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-gray-200 bg-white/90 p-2 text-sm font-semibold text-[#181113] shadow-sm transition hover:border-[#ec135b] hover:text-[#ec135b] dark:border-white/10 dark:bg-[#1a0c10]/90 dark:text-[#f4f0f2] md:flex"
+                        aria-label="Sola kaydır"
+                    >
+                        ‹
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => scrollByAmount('right')}
+                        className="absolute right-0 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-gray-200 bg-white/90 p-2 text-sm font-semibold text-[#181113] shadow-sm transition hover:border-[#ec135b] hover:text-[#ec135b] dark:border-white/10 dark:bg-[#1a0c10]/90 dark:text-[#f4f0f2] md:flex"
+                        aria-label="Sağa kaydır"
+                    >
+                        ›
+                    </button>
+                    <div
+                        ref={sliderRef}
+                        className="no-scrollbar flex snap-x snap-mandatory flex-nowrap items-center gap-4 overflow-x-auto pb-2 md:gap-8"
+                    >
+                        {isLoading
+                            ? Array.from({ length: 10 }).map((_, index) => (
+                                  <div key={`brand-skeleton-${index}`} className="snap-start">
+                                      <Skeleton className="h-16 w-32 rounded-xl md:h-20 md:w-40" />
+                                  </div>
+                              ))
+                            : brandsList.map((brand) => (
+                                  <div key={brand.id} className="snap-start">
+                                      <BrandLogo
+                                          name={brand.title}
+                                          href={brands.products.url(brand.slug)}
+                                          imagePath={brand.image?.path}
+                                      />
+                                  </div>
+                              ))}
+                    </div>
                 </div>
             </div>
         </section>
