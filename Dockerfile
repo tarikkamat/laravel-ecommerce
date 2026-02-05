@@ -30,7 +30,6 @@ RUN composer install --no-dev --prefer-dist --no-interaction --no-progress --opt
 
 FROM node:22-alpine AS node_build
 WORKDIR /app
-ENV WAYFINDER_DISABLE=true
 RUN apk add --no-cache php-cli php-phar php-mbstring php-json
 COPY package.json package-lock.json ./
 RUN npm ci
@@ -44,6 +43,8 @@ COPY config config
 COPY bootstrap bootstrap
 COPY database database
 COPY --from=composer_deps /app/vendor /app/vendor
+RUN mkdir -p storage/framework/cache storage/framework/views storage/framework/sessions bootstrap/cache
+RUN APP_ENV=production APP_KEY=base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA= php artisan wayfinder:generate --with-form
 RUN npm run build
 
 FROM base AS app
