@@ -23,7 +23,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
         const normalized = value.slice(0, 10);
         const parts = normalized.split('-').map((part) => Number(part));
         if (parts.length === 3 && parts.every((part) => Number.isFinite(part))) {
-            const [year, month, day] = parts;
+            const [day, month, year] = parts;
             const date = new Date(year, month - 1, day);
             return date.toLocaleDateString('tr-TR', {
                 year: 'numeric',
