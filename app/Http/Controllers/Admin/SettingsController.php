@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\SettingsUpdateRequest;
 use App\Models\Category;
+use App\Models\Page;
 use App\Settings\CatalogSettings;
 use App\Settings\HomeSettings;
 use App\Settings\NavigationSettings;
@@ -27,6 +28,12 @@ class SettingsController extends Controller
     ) {
         $categories = Category::query()
             ->select(['id', 'title'])
+            ->orderBy('title')
+            ->get();
+
+        $pages = Page::query()
+            ->select(['id', 'title', 'slug'])
+            ->where('active', true)
             ->orderBy('title')
             ->get();
 
@@ -114,6 +121,7 @@ class SettingsController extends Controller
                 ],
             ],
             'categories' => $categories,
+            'pages' => $pages,
         ]);
     }
 

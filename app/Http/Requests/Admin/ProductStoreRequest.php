@@ -26,7 +26,7 @@ class ProductStoreRequest extends FormRequest
             'sale_price' => ['nullable', 'numeric', 'min:0'],
             'stock' => ['required', 'integer', 'min:0'],
             'barcode' => ['nullable', 'string', Rule::unique('products', 'barcode')->whereNull('deleted_at')],
-            'skt' => ['nullable', 'date'],
+            'skt' => ['nullable', 'string', 'max:255', 'regex:/^\d{2}-\d{2}-\d{4}$/'],
             'active' => ['boolean'],
             'category_ids' => ['nullable', 'array'],
             'category_ids.*' => ['integer', 'exists:categories,id'],

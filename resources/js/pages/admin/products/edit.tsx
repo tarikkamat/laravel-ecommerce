@@ -776,9 +776,10 @@ export default function ProductsEdit({ item, brands, categories, tags, ingredien
                                 <FieldLabel htmlFor="skt">SKT (Son Kullanım Tarihi)</FieldLabel>
                                 <Input
                                     id="skt"
-                                    type="date"
+                                    type="text"
                                     value={data.skt}
                                     onChange={(e) => setData('skt', e.target.value)}
+                                    placeholder="DD-MM-YYYY"
                                     aria-invalid={!!errors.skt}
                                 />
                                 <FieldDescription>Boş bırakabilirsiniz.</FieldDescription>

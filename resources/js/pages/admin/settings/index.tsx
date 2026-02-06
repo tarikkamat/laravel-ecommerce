@@ -30,6 +30,12 @@ type CategoryOption = {
     title: string;
 };
 
+type PageOption = {
+    id: number;
+    title: string;
+    slug: string;
+};
+
 type SettingsPayload = {
     site: {
         site_title: string;
@@ -197,6 +203,7 @@ type SettingsFormData = {
 type Props = {
     settings: SettingsPayload;
     categories: CategoryOption[];
+    pages: PageOption[];
 };
 
 const toStoragePath = (value: string) => {
@@ -211,7 +218,7 @@ const toStorageUrl = (value: string) => {
     return value.startsWith('/storage/') ? value : `/storage/${value}`;
 };
 
-export default function SettingsIndex({ settings, categories }: Props) {
+export default function SettingsIndex({ settings, categories, pages }: Props) {
     const [imagePickerTarget, setImagePickerTarget] = useState<
         | { type: 'header' | 'footer' }
         | { type: 'hero'; slideIndex: number }
@@ -471,6 +478,25 @@ export default function SettingsIndex({ settings, categories }: Props) {
         const next = [...data.footer_menus];
         const menu = next[menuIndex];
         menu.items = menu.items.filter((_, idx) => idx !== itemIndex);
+        next[menuIndex] = { ...menu };
+        setData('footer_menus', next);
+    };
+
+    const applyFooterMenuItemPage = (menuIndex: number, itemIndex: number, slug: string) => {
+        const page = pages.find((item) => item.slug === slug);
+        if (!page) return;
+
+        const next = [...data.footer_menus];
+        const menu = next[menuIndex];
+        const items = [...menu.items];
+        const current = items[itemIndex];
+        const nextLabel = current.label.trim() !== '' ? current.label : page.title;
+        items[itemIndex] = {
+            ...current,
+            label: nextLabel,
+            url: `/sayfa/${page.slug}`,
+        };
+        menu.items = items;
         next[menuIndex] = { ...menu };
         setData('footer_menus', next);
     };
@@ -888,7 +914,7 @@ export default function SettingsIndex({ settings, categories }: Props) {
                                                 <p className="text-sm text-muted-foreground">Menü öğesi eklenmedi.</p>
                                             )}
                                             {menu.items.map((item, itemIndex) => (
-                                                <div key={`footer-menu-${menuIndex}-item-${itemIndex}`} className="grid gap-3 md:grid-cols-[1fr_1fr_auto]">
+                                                <div key={`footer-menu-${menuIndex}-item-${itemIndex}`} className="grid gap-3 md:grid-cols-[1fr_1fr_1fr_auto]">
                                                     <Input
                                                         value={item.label}
                                                         onChange={(event) =>
@@ -896,6 +922,21 @@ export default function SettingsIndex({ settings, categories }: Props) {
                                                         }
                                                         placeholder="Hakkımızda"
                                                     />
+                                                    <Select
+                                                        value={pages.find((page) => `/sayfa/${page.slug}` === item.url)?.slug}
+                                                        onValueChange={(value) => applyFooterMenuItemPage(menuIndex, itemIndex, value)}
+                                                    >
+                                                        <SelectTrigger>
+                                                            <SelectValue placeholder="Sayfa seç" />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {pages.map((page) => (
+                                                                <SelectItem key={page.id} value={page.slug}>
+                                                                    {page.title}
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
                                                     <Input
                                                         value={item.url}
                                                         onChange={(event) =>

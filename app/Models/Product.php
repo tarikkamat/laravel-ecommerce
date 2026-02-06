@@ -34,7 +34,6 @@ class Product extends Model
             'sale_price' => 'decimal:2',
             'stock' => 'integer',
             'active' => 'boolean',
-            'skt' => 'date',
         ];
     }
 
