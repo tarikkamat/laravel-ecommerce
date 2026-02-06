@@ -71,11 +71,6 @@ export function StorefrontProductCard({ product }: StorefrontProductCardProps) {
                                 -%{discountPercent}
                             </span>
                         )}
-                        {product.stock <= 5 && product.stock > 0 && (
-                            <span className="flex h-6 items-center rounded-full bg-[#181113] px-2.5 text-[10px] font-black uppercase tracking-wider text-white dark:bg-[#f4f0f2] dark:text-[#181113]">
-                                Son {product.stock} Ürün
-                            </span>
-                        )}
                     </div>
 
                     {/* Product Image */}
