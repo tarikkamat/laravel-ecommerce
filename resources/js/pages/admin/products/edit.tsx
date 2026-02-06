@@ -481,7 +481,7 @@ export default function ProductsEdit({ item, brands, categories, tags, ingredien
 
                             <div className="grid gap-4 sm:grid-cols-2">
                                 <Field>
-                                    <FieldLabel htmlFor="price">Satış Fiyatı (₺)</FieldLabel>
+                                    <FieldLabel htmlFor="price">Satış Fiyatı (TL)</FieldLabel>
                                     <Input
                                         id="price"
                                         type="number"
@@ -495,7 +495,7 @@ export default function ProductsEdit({ item, brands, categories, tags, ingredien
                                 </Field>
 
                                 <Field>
-                                    <FieldLabel htmlFor="sale_price">İndirimli Fiyat (₺)</FieldLabel>
+                                    <FieldLabel htmlFor="sale_price">İndirimli Fiyat (TL)</FieldLabel>
                                     <Input
                                         id="sale_price"
                                         type="number"

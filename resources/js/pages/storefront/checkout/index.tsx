@@ -455,14 +455,6 @@ export default function CheckoutPage({ address: initialAddress, selectedShipping
                                 >
                                     Adresi Kaydet ve Kargo Hesapla
                                 </button>
-                                <button
-                                    type="button"
-                                    onClick={fetchRates}
-                                    disabled={loading}
-                                    className="rounded border px-4 py-2 text-sm disabled:opacity-50"
-                                >
-                                    Kargo Oranlarini Yenile
-                                </button>
                             </div>
                         </form>
 

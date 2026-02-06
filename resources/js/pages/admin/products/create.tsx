@@ -432,7 +432,7 @@ export default function ProductsCreate({ brands, categories, tags, ingredients }
 
                             <div className="grid gap-4 sm:grid-cols-2">
                                 <Field>
-                                    <FieldLabel htmlFor="price">Satış Fiyatı (₺)</FieldLabel>
+                                    <FieldLabel htmlFor="price">Satış Fiyatı (TL)</FieldLabel>
                                     <Input
                                         id="price"
                                         type="number"
@@ -446,7 +446,7 @@ export default function ProductsCreate({ brands, categories, tags, ingredients }
                                 </Field>
 
                                 <Field>
-                                    <FieldLabel htmlFor="sale_price">İndirimli Fiyat (₺)</FieldLabel>
+                                    <FieldLabel htmlFor="sale_price">İndirimli Fiyat (TL)</FieldLabel>
                                     <Input
                                         id="sale_price"
                                         type="number"

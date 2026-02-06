@@ -392,7 +392,7 @@ export function StorefrontNav() {
                                                 </div>
                                             </div>
                                             <div className="shrink-0 font-bold text-[#ec135b]">
-                                                ₺{Number(item.line_subtotal ?? 0).toFixed(2)}
+                                                {Number(item.line_subtotal ?? 0).toFixed(2)} TL
                                             </div>
                                         </div>
                                     ))
@@ -402,15 +402,15 @@ export function StorefrontNav() {
                             <div className="space-y-2 border-t border-gray-100 px-4 py-3 text-xs dark:border-gray-800">
                                 <div className="flex items-center justify-between text-gray-600 dark:text-gray-300">
                                     <span>Ara Toplam</span>
-                                    <span className="font-semibold">₺{Number(cartTotals?.subtotal ?? 0).toFixed(2)}</span>
+                                    <span className="font-semibold">{Number(cartTotals?.subtotal ?? 0).toFixed(2)} TL</span>
                                 </div>
                                 <div className="flex items-center justify-between text-gray-600 dark:text-gray-300">
                                     <span>Vergi</span>
-                                    <span className="font-semibold">₺{Number(cartTotals?.tax_total ?? 0).toFixed(2)}</span>
+                                    <span className="font-semibold">{Number(cartTotals?.tax_total ?? 0).toFixed(2)} TL</span>
                                 </div>
                                 <div className="flex items-center justify-between text-base font-black text-[#181113] dark:text-white">
                                     <span>Toplam</span>
-                                    <span>₺{Number(cartTotals?.grand_total ?? 0).toFixed(2)}</span>
+                                    <span>{Number(cartTotals?.grand_total ?? 0).toFixed(2)} TL</span>
                                 </div>
 
                                 <Link

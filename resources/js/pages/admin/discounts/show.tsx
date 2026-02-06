@@ -63,7 +63,7 @@ export default function DiscountsShow({ item }: Props) {
         if (item.type === 'percentage') {
             return `%${item.value}`;
         }
-        return `₺${item.value.toFixed(2)}`;
+        return `TL${item.value.toFixed(2)}`;
     };
 
     const isActive = () => {

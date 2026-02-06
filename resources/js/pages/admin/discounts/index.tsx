@@ -59,7 +59,7 @@ export default function DiscountsIndex({ items }: Props) {
         if (discount.type === 'percentage') {
             return `%${discount.value}`;
         }
-        return `₺${discount.value.toFixed(2)}`;
+        return `TL${discount.value.toFixed(2)}`;
     };
 
     const formatDate = (dateString: string | null) => {

@@ -125,16 +125,16 @@ export function StorefrontProductCard({ product }: StorefrontProductCardProps) {
                         <>
                             <div className="flex flex-col">
                                 <span className="text-xs text-gray-400 line-through">
-                                    ₺{formatPrice(price)}
+                                    {formatPrice(price)} TL
                                 </span>
                                 <span className="text-base font-black text-[#ec135b]">
-                                    ₺{formatPrice(salePrice)}
+                                    {formatPrice(salePrice)} TL
                                 </span>
                             </div>
                         </>
                     ) : (
                         <span className="text-base font-black text-[#181113] dark:text-[#f4f0f2]">
-                            ₺{formatPrice(price)}
+                            {formatPrice(price)} TL
                         </span>
                     )}
                 </div>

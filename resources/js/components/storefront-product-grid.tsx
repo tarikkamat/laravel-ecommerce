@@ -311,7 +311,7 @@ export function StorefrontProductGrid({
                                     Fiyat Aralığı
                                 </span>
                                 <span className="text-xs text-gray-400">
-                                    ₺{priceValues[0]} - ₺{priceValues[1]}
+                                    {priceValues[0]} TL - {priceValues[1]} TL
                                 </span>
                             </div>
                             <Slider
@@ -324,8 +324,8 @@ export function StorefrontProductGrid({
                                 }
                             />
                             <div className="mt-3 flex items-center justify-between text-xs text-gray-400">
-                                <span>₺{priceRange?.min ?? 0}</span>
-                                <span>₺{priceRange?.max ?? 0}</span>
+                                <span>{priceRange?.min ?? 0} TL</span>
+                                <span>{priceRange?.max ?? 0} TL</span>
                             </div>
                         </div>
 

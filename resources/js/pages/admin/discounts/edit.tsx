@@ -151,7 +151,7 @@ export default function DiscountsEdit({ item, discountTypes }: Props) {
 
                                 <Field>
                                     <FieldLabel htmlFor="value">
-                                        {data.type === 'percentage' ? 'Yüzde Değeri' : 'Tutar (₺)'}
+                                        {data.type === 'percentage' ? 'Yüzde Değeri' : 'Tutar (TL)'}
                                     </FieldLabel>
                                     <Input
                                         id="value"
