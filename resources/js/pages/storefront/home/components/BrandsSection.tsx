@@ -59,54 +59,26 @@ export function BrandsSection({ endpoint }: BrandsSectionProps) {
         return null;
     }
 
-    const sliderRef = useRef<HTMLDivElement>(null);
-
-    const scrollByAmount = (direction: 'left' | 'right') => {
-        const slider = sliderRef.current;
-        if (!slider) return;
-        const amount = Math.round(slider.clientWidth * 0.8);
-        slider.scrollBy({ left: direction === 'left' ? -amount : amount, behavior: 'smooth' });
-    };
-
     return (
         <section ref={ref} className="w-full overflow-x-hidden py-8 bg-gray-50/30 dark:bg-black/10">
             <div className="mx-auto max-w-[1440px] px-6 lg:px-12">
-                {/* Brands Slider */}
-                <div className="relative">
-                    <button
-                        type="button"
-                        onClick={() => scrollByAmount('left')}
-                        className="absolute left-0 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-gray-200 bg-white/90 p-2 text-sm font-semibold text-[#181113] shadow-sm transition hover:border-[#ec135b] hover:text-[#ec135b] dark:border-white/10 dark:bg-[#1a0c10]/90 dark:text-[#f4f0f2] md:flex"
-                        aria-label="Sola kaydır"
-                    >
-                        ‹
-                    </button>
-                    <button
-                        type="button"
-                        onClick={() => scrollByAmount('right')}
-                        className="absolute right-0 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-gray-200 bg-white/90 p-2 text-sm font-semibold text-[#181113] shadow-sm transition hover:border-[#ec135b] hover:text-[#ec135b] dark:border-white/10 dark:bg-[#1a0c10]/90 dark:text-[#f4f0f2] md:flex"
-                        aria-label="Sağa kaydır"
-                    >
-                        ›
-                    </button>
-                    <div
-                        ref={sliderRef}
-                        className="no-scrollbar flex snap-x snap-mandatory flex-nowrap items-center gap-4 overflow-x-auto px-2 pb-2 scroll-px-2 md:gap-6 md:px-6 md:scroll-px-6"
-                    >
+                {/* Brands Grid */}
+                <div className="flex justify-center">
+                    <div className="grid max-w-[1200px] grid-cols-2 items-center justify-items-center gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
                         {isLoading
-                            ? Array.from({ length: 10 }).map((_, index) => (
-                                  <div key={`brand-skeleton-${index}`} className="snap-start">
-                                      <Skeleton className="h-14 w-28 rounded-xl md:h-16 md:w-32" />
-                                  </div>
+                            ? Array.from({ length: 16 }).map((_, index) => (
+                                  <Skeleton
+                                      key={`brand-skeleton-${index}`}
+                                      className="h-14 w-28 rounded-xl md:h-16 md:w-32"
+                                  />
                               ))
                             : brandsList.map((brand) => (
-                                  <div key={brand.id} className="snap-start">
-                                      <BrandLogo
-                                          name={brand.title}
-                                          href={brands.products.url(brand.slug)}
-                                          imagePath={brand.image?.path}
-                                      />
-                                  </div>
+                                  <BrandLogo
+                                      key={brand.id}
+                                      name={brand.title}
+                                      href={brands.products.url(brand.slug)}
+                                      imagePath={brand.image?.path}
+                                  />
                               ))}
                     </div>
                 </div>
