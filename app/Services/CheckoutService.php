@@ -30,6 +30,7 @@ class CheckoutService
 
         return [
             'address' => $this->shippingService->getStoredAddress($request),
+            'billing_address' => $this->shippingService->getStoredBillingAddress($request),
             'selected_shipping' => $this->shippingService->getSelectedRate($request),
             'totals' => $totals,
             'items_count' => (int) $cart->items->sum('qty'),
@@ -40,10 +41,15 @@ class CheckoutService
      * @param  array<string, mixed>  $address
      * @return array<string, mixed>
      */
-    public function storeAddress(Request $request, array $address): array
+    public function storeAddress(Request $request, array $address, ?array $billingAddress = null): array
     {
         $this->assertAddress($address);
         $this->shippingService->storeAddress($request, $address);
+
+        if ($billingAddress !== null) {
+            $this->assertAddress($billingAddress);
+            $this->shippingService->storeBillingAddress($request, $billingAddress);
+        }
 
         return $this->summary($request);
     }
@@ -58,6 +64,10 @@ class CheckoutService
 
         $address = $this->shippingService->getStoredAddress($request);
         $this->assertAddress($address);
+        $billingAddress = $this->shippingService->getStoredBillingAddress($request);
+        if (! empty($billingAddress)) {
+            $this->assertAddress($billingAddress);
+        }
 
         $rates = $this->shippingService->getRates($request, $cart, $address);
 
@@ -129,14 +139,14 @@ class CheckoutService
 
             $order->addresses()->create([
                 'type' => 'billing',
-                'full_name' => (string) $address['full_name'],
-                'phone' => $address['phone'] ?? null,
-                'country' => (string) $address['country'],
-                'city' => (string) $address['city'],
-                'district' => $address['district'] ?? null,
-                'line1' => (string) $address['line1'],
-                'line2' => $address['line2'] ?? null,
-                'postal_code' => $address['postal_code'] ?? null,
+                'full_name' => (string) ($billingAddress['full_name'] ?? $address['full_name']),
+                'phone' => $billingAddress['phone'] ?? $address['phone'] ?? null,
+                'country' => (string) ($billingAddress['country'] ?? $address['country']),
+                'city' => (string) ($billingAddress['city'] ?? $address['city']),
+                'district' => $billingAddress['district'] ?? $address['district'] ?? null,
+                'line1' => (string) ($billingAddress['line1'] ?? $address['line1']),
+                'line2' => $billingAddress['line2'] ?? $address['line2'] ?? null,
+                'postal_code' => $billingAddress['postal_code'] ?? $address['postal_code'] ?? null,
             ]);
 
             $subtotal = 0.0;

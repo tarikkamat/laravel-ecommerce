@@ -27,6 +27,7 @@ class CheckoutPageController extends Controller
         return Inertia::render('storefront/checkout/index', [
             'itemsCount' => $summary['items_count'],
             'address' => $summary['address'],
+            'billingAddress' => $summary['billing_address'],
             'selectedShipping' => $summary['selected_shipping'],
             'totals' => $summary['totals'],
             'contractPage' => $contractPage ? [

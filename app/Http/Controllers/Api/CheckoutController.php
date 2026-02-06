@@ -22,6 +22,33 @@ class CheckoutController extends Controller
 
     public function storeAddress(Request $request): JsonResponse
     {
+        if ($request->has('shipping')) {
+            $data = $request->validate([
+                'shipping.full_name' => ['required', 'string', 'max:255'],
+                'shipping.phone' => ['nullable', 'string', 'max:50'],
+                'shipping.email' => ['nullable', 'email', 'max:255'],
+                'shipping.country' => ['required', 'string', 'max:2'],
+                'shipping.city' => ['required', 'string', 'max:100'],
+                'shipping.district' => ['nullable', 'string', 'max:100'],
+                'shipping.line1' => ['required', 'string', 'max:255'],
+                'shipping.line2' => ['nullable', 'string', 'max:255'],
+                'shipping.postal_code' => ['nullable', 'string', 'max:20'],
+                'billing.full_name' => ['required', 'string', 'max:255'],
+                'billing.phone' => ['nullable', 'string', 'max:50'],
+                'billing.email' => ['nullable', 'email', 'max:255'],
+                'billing.country' => ['required', 'string', 'max:2'],
+                'billing.city' => ['required', 'string', 'max:100'],
+                'billing.district' => ['nullable', 'string', 'max:100'],
+                'billing.line1' => ['required', 'string', 'max:255'],
+                'billing.line2' => ['nullable', 'string', 'max:255'],
+                'billing.postal_code' => ['nullable', 'string', 'max:20'],
+            ]);
+
+            return response()->json(
+                $this->checkoutService->storeAddress($request, $data['shipping'], $data['billing'])
+            );
+        }
+
         $data = $request->validate([
             'full_name' => ['required', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:50'],
@@ -34,7 +61,7 @@ class CheckoutController extends Controller
             'postal_code' => ['nullable', 'string', 'max:20'],
         ]);
 
-        return response()->json($this->checkoutService->storeAddress($request, $data));
+        return response()->json($this->checkoutService->storeAddress($request, $data, $data));
     }
 
     public function rates(Request $request): JsonResponse

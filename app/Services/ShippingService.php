@@ -12,6 +12,7 @@ use Illuminate\Validation\ValidationException;
 class ShippingService
 {
     private const ADDRESS_SESSION_KEY = 'checkout.address';
+    private const BILLING_ADDRESS_SESSION_KEY = 'checkout.billing_address';
     private const SHIPPING_SELECTION_KEY = 'checkout.shipping_selection';
     private const SHIPPING_RATES_KEY = 'checkout.shipping_rates';
 
@@ -63,7 +64,60 @@ class ShippingService
         /** @var array<string, mixed> $address */
         $address = $request->session()->get(self::ADDRESS_SESSION_KEY, []);
 
-        return $address;
+        if (! empty($address)) {
+            return $address;
+        }
+
+        $fallback = $this->getUserFallbackAddress($request, 'shipping');
+        if (empty($fallback)) {
+            return [];
+        }
+
+        $request->session()->put(self::ADDRESS_SESSION_KEY, $fallback);
+
+        return $fallback;
+    }
+
+    /**
+     * @param  array<string, mixed>  $address
+     */
+    public function storeBillingAddress(Request $request, array $address): void
+    {
+        $normalized = [
+            'full_name' => (string) Arr::get($address, 'full_name', ''),
+            'phone' => Arr::get($address, 'phone'),
+            'email' => Arr::get($address, 'email'),
+            'country' => (string) Arr::get($address, 'country', 'TR'),
+            'city' => (string) Arr::get($address, 'city', ''),
+            'district' => Arr::get($address, 'district'),
+            'line1' => (string) Arr::get($address, 'line1', ''),
+            'line2' => Arr::get($address, 'line2'),
+            'postal_code' => Arr::get($address, 'postal_code'),
+        ];
+
+        $request->session()->put(self::BILLING_ADDRESS_SESSION_KEY, $normalized);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function getStoredBillingAddress(Request $request): array
+    {
+        /** @var array<string, mixed> $address */
+        $address = $request->session()->get(self::BILLING_ADDRESS_SESSION_KEY, []);
+
+        if (! empty($address)) {
+            return $address;
+        }
+
+        $fallback = $this->getUserFallbackAddress($request, 'billing');
+        if (empty($fallback)) {
+            return [];
+        }
+
+        $request->session()->put(self::BILLING_ADDRESS_SESSION_KEY, $fallback);
+
+        return $fallback;
     }
 
     public function selectRate(Request $request, string $serviceCode): array
@@ -128,6 +182,7 @@ class ShippingService
     {
         $request->session()->forget([
             self::ADDRESS_SESSION_KEY,
+            self::BILLING_ADDRESS_SESSION_KEY,
             self::SHIPPING_SELECTION_KEY,
             self::SHIPPING_RATES_KEY,
         ]);
@@ -153,5 +208,37 @@ class ShippingService
 
             return round($unit * $item->qty, 2);
         });
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function getUserFallbackAddress(Request $request, string $type): array
+    {
+        $user = $request->user();
+        if (! $user) {
+            return [];
+        }
+
+        $user->loadMissing('addresses');
+        $preferred = $user->addresses->firstWhere('type', $type)
+            ?? $user->addresses->firstWhere('type', 'shipping')
+            ?? $user->addresses->first();
+
+        if (! $preferred) {
+            return [];
+        }
+
+        return [
+            'full_name' => (string) ($preferred->contact_name ?? $user->name ?? ''),
+            'phone' => null,
+            'email' => $user->email ?? null,
+            'country' => (string) ($preferred->country ?? 'TR'),
+            'city' => (string) ($preferred->city ?? ''),
+            'district' => null,
+            'line1' => (string) ($preferred->address ?? ''),
+            'line2' => null,
+            'postal_code' => $preferred->zip_code ?? null,
+        ];
     }
 }

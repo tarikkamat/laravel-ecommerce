@@ -41,6 +41,7 @@ type ShippingRate = {
 
 type CheckoutSummaryResponse = {
     address: Partial<Address>;
+    billing_address?: Partial<Address>;
     selected_shipping: ShippingRate | null;
     totals: CartTotals;
 };
@@ -64,6 +65,7 @@ type PaymentInitResponse = {
 
 type CheckoutPageProps = {
     address: Partial<Address>;
+    billingAddress?: Partial<Address>;
     selectedShipping: ShippingRate | null;
     totals: CartTotals;
     contractPage?: {
@@ -110,9 +112,36 @@ const emptyAddress: Address = {
     postal_code: '',
 };
 
-export default function CheckoutPage({ address: initialAddress, selectedShipping: initialSelectedShipping, totals: initialTotals, contractPage, apiEndpoints }: CheckoutPageProps) {
+const isAddressEmpty = (value: Partial<Address> | undefined): boolean => {
+    if (!value) return true;
+    return (
+        !value.full_name &&
+        !value.line1 &&
+        !value.city &&
+        !value.country &&
+        !value.email &&
+        !value.phone &&
+        !value.postal_code
+    );
+};
+
+export default function CheckoutPage({
+    address: initialAddress,
+    billingAddress: initialBillingAddress,
+    selectedShipping: initialSelectedShipping,
+    totals: initialTotals,
+    contractPage,
+    apiEndpoints,
+}: CheckoutPageProps) {
     const { flash, storefrontSettings } = usePage<SharedData & { flash?: FlashProps }>().props;
     const [address, setAddress] = useState<Address>({ ...emptyAddress, ...initialAddress });
+    const [billingAddress, setBillingAddress] = useState<Address>({
+        ...emptyAddress,
+        ...initialBillingAddress,
+    });
+    const [useBillingSame, setUseBillingSame] = useState(
+        isAddressEmpty(initialBillingAddress) || JSON.stringify(initialBillingAddress ?? {}) === JSON.stringify(initialAddress ?? {})
+    );
     const [selectedShipping, setSelectedShipping] = useState<ShippingRate | null>(initialSelectedShipping);
     const [rates, setRates] = useState<ShippingRate[]>([]);
     const [totals, setTotals] = useState<CartTotals>(initialTotals);
@@ -137,12 +166,13 @@ export default function CheckoutPage({ address: initialAddress, selectedShipping
             return '';
         }
 
+        const billing = useBillingSame ? address : billingAddress;
         const billingBlock = `
             <p><strong>Fatura Bilgileri</strong></p>
-            <p>Ad/Soyad/Unvan: ${address.full_name || '-'}</p>
-            <p>Adres: ${address.line1 || '-'}</p>
-            <p>Telefon: ${address.phone || '-'}</p>
-            <p>Eposta/kullanıcı adı: ${address.email || '-'}</p>
+            <p>Ad/Soyad/Unvan: ${billing.full_name || '-'}</p>
+            <p>Adres: ${billing.line1 || '-'}</p>
+            <p>Telefon: ${billing.phone || '-'}</p>
+            <p>Eposta/kullanıcı adı: ${billing.email || '-'}</p>
         `;
 
         const totalsTable = `
@@ -178,10 +208,10 @@ export default function CheckoutPage({ address: initialAddress, selectedShipping
         const seller = storefrontSettings?.site;
 
         const replacements: Record<string, string> = {
-            '{{BUYER_NAME}}': address.full_name || '-',
-            '{{BUYER_ADDRESS}}': address.line1 || '-',
-            '{{BUYER_PHONE}}': address.phone || '-',
-            '{{BUYER_EMAIL}}': address.email || '-',
+            '{{BUYER_NAME}}': billing.full_name || '-',
+            '{{BUYER_ADDRESS}}': billing.line1 || '-',
+            '{{BUYER_PHONE}}': billing.phone || '-',
+            '{{BUYER_EMAIL}}': billing.email || '-',
             '{{SELLER_NAME}}': seller?.seller_name || '-',
             '{{SELLER_ADDRESS}}': seller?.seller_address || '-',
             '{{SELLER_PHONE}}': seller?.seller_phone || '-',
@@ -196,7 +226,7 @@ export default function CheckoutPage({ address: initialAddress, selectedShipping
         });
 
         return html;
-    }, [contractPage, totals, formatMoney, address, storefrontSettings]);
+    }, [contractPage, totals, formatMoney, address, billingAddress, useBillingSame, storefrontSettings]);
 
     const loadSummary = useCallback(async () => {
         setLoading(true);
@@ -211,6 +241,12 @@ export default function CheckoutPage({ address: initialAddress, selectedShipping
             }
             if (data?.address) {
                 setAddress((prev) => ({ ...prev, ...data.address }));
+            }
+            if (data?.billing_address) {
+                setBillingAddress((prev) => ({ ...prev, ...data.billing_address }));
+                if (!isAddressEmpty(data.billing_address)) {
+                    setUseBillingSame(false);
+                }
             }
             setSelectedShipping(data?.selected_shipping ?? null);
         } catch (error) {
@@ -236,7 +272,10 @@ export default function CheckoutPage({ address: initialAddress, selectedShipping
                     Accept: 'application/json',
                 },
                 credentials: 'same-origin',
-                body: JSON.stringify(address),
+                body: JSON.stringify({
+                    shipping: address,
+                    billing: useBillingSame ? address : billingAddress,
+                }),
             });
             const data = (await response.json()) as CheckoutSummaryResponse;
             if (data?.totals) {
@@ -446,6 +485,86 @@ export default function CheckoutPage({ address: initialAddress, selectedShipping
                                     />
                                 </div>
                             </div>
+
+                            <label className="flex items-center gap-2 text-xs text-muted-foreground">
+                                <input
+                                    type="checkbox"
+                                    checked={useBillingSame}
+                                    onChange={(event) => setUseBillingSame(event.target.checked)}
+                                />
+                                Fatura adresi teslimat adresi ile aynı
+                            </label>
+
+                            {!useBillingSame && (
+                                <>
+                                    <div className="pt-2 text-sm font-medium">Fatura Adresi</div>
+
+                                    <div className="grid gap-3 sm:grid-cols-2">
+                                        <input
+                                            className="rounded border px-3 py-2 text-sm"
+                                            placeholder="Ad Soyad"
+                                            value={billingAddress.full_name}
+                                            onChange={(e) => setBillingAddress((prev) => ({ ...prev, full_name: e.target.value }))}
+                                        />
+                                        <input
+                                            className="rounded border px-3 py-2 text-sm"
+                                            placeholder="Telefon"
+                                            value={billingAddress.phone ?? ''}
+                                            onChange={(e) => setBillingAddress((prev) => ({ ...prev, phone: e.target.value }))}
+                                        />
+                                        <input
+                                            className="rounded border px-3 py-2 text-sm sm:col-span-2"
+                                            placeholder="E-posta"
+                                            value={billingAddress.email ?? ''}
+                                            onChange={(e) => setBillingAddress((prev) => ({ ...prev, email: e.target.value }))}
+                                        />
+                                    </div>
+
+                                    <div className="grid gap-3 sm:grid-cols-3">
+                                        <input
+                                            className="rounded border px-3 py-2 text-sm"
+                                            placeholder="Ulke"
+                                            value={billingAddress.country}
+                                            onChange={(e) => setBillingAddress((prev) => ({ ...prev, country: e.target.value }))}
+                                        />
+                                        <input
+                                            className="rounded border px-3 py-2 text-sm"
+                                            placeholder="Sehir"
+                                            value={billingAddress.city}
+                                            onChange={(e) => setBillingAddress((prev) => ({ ...prev, city: e.target.value }))}
+                                        />
+                                        <input
+                                            className="rounded border px-3 py-2 text-sm"
+                                            placeholder="Ilce"
+                                            value={billingAddress.district ?? ''}
+                                            onChange={(e) => setBillingAddress((prev) => ({ ...prev, district: e.target.value }))}
+                                        />
+                                    </div>
+
+                                    <div className="grid gap-3">
+                                        <input
+                                            className="rounded border px-3 py-2 text-sm"
+                                            placeholder="Adres satiri"
+                                            value={billingAddress.line1}
+                                            onChange={(e) => setBillingAddress((prev) => ({ ...prev, line1: e.target.value }))}
+                                        />
+                                        <div className="grid gap-3 sm:grid-cols-2">
+                                            <input
+                                                className="rounded border px-3 py-2 text-sm"
+                                                placeholder="Adres satiri 2"
+                                                value={billingAddress.line2 ?? ''}
+                                                onChange={(e) => setBillingAddress((prev) => ({ ...prev, line2: e.target.value }))}
+                                            />
+                                            <input
+                                                className="rounded border px-3 py-2 text-sm"
+                                                placeholder="Posta kodu"
+                                                value={billingAddress.postal_code ?? ''}
+                                                onChange={(e) => setBillingAddress((prev) => ({ ...prev, postal_code: e.target.value }))}
+                                            />
+                                        </div>
+                                    </div>
+                                </>
+                            )}
 
                             <div className="flex gap-2">
                                 <button
