@@ -18,6 +18,7 @@ export interface Product {
     sale_price: number | null;
     stock: number;
     barcode: string | null;
+    skt: string | null;
     active: boolean;
     categories: Category[];
     tags: Tag[];
@@ -56,6 +57,7 @@ export interface ProductFormData {
     sale_price: string;
     stock: string;
     barcode: string;
+    skt: string;
     active: boolean;
     category_ids: string[];
     tag_ids: string[];

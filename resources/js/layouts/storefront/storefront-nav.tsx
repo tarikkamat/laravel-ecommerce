@@ -170,7 +170,7 @@ export function StorefrontNav() {
                                 onMouseLeave={handleMenuLeave}
                             >
                                 <Link
-                                    href={`/kategori/${category.slug}`}
+                                    href={storefront.categories.products.url(category.slug)}
                                     className={`group relative flex items-center gap-1 px-5 py-2 text-[13px] font-black uppercase tracking-widest transition-colors ${
                                         activeMegaMenu === 'category' && activeCategory?.id === category.id
                                             ? 'text-[#ec135b]'
@@ -549,7 +549,7 @@ export function StorefrontNav() {
                                                         {mobileCategoryId === category.id && (
                                                             <div className="space-y-1 px-3 pb-3">
                                                                 <Link
-                                                                    href={`/kategori/${category.slug}`}
+                                                                    href={storefront.categories.products.url(category.slug)}
                                                                     onClick={closeMobileMenu}
                                                                     className="block text-xs font-semibold text-[#ec135b]"
                                                                 >
@@ -558,7 +558,7 @@ export function StorefrontNav() {
                                                                 {category.children.map((sub) => (
                                                                     <Link
                                                                         key={sub.id}
-                                                                        href={`/kategori/${sub.slug}`}
+                                                                        href={storefront.categories.products.url(sub.slug)}
                                                                         onClick={closeMobileMenu}
                                                                         className="block text-xs text-gray-600 dark:text-gray-300"
                                                                     >
@@ -636,7 +636,7 @@ export function StorefrontNav() {
                                             {activeCategory.title}
                                         </h3>
                                         <Link
-                                            href={`/kategori/${activeCategory.slug}`}
+                                            href={storefront.categories.products.url(activeCategory.slug)}
                                             className="flex items-center gap-1 text-sm font-medium text-[#ec135b] transition-colors hover:text-[#ec135b]/80"
                                         >
                                             Tümünü Gör
@@ -649,7 +649,7 @@ export function StorefrontNav() {
                                         {activeCategory.children.map((subCategory) => (
                                             <div key={subCategory.id} className="space-y-3">
                                                 <Link
-                                                    href={`/kategori/${subCategory.slug}`}
+                                                    href={storefront.categories.products.url(subCategory.slug)}
                                                     className="group block text-sm font-bold text-[#181113] transition-colors hover:text-[#ec135b] dark:text-white"
                                                 >
                                                     <span className="border-b-2 border-transparent transition-colors group-hover:border-[#ec135b]">
@@ -661,7 +661,7 @@ export function StorefrontNav() {
                                                         {subCategory.children.map((grandChild) => (
                                                             <li key={grandChild.id}>
                                                                 <Link
-                                                                    href={`/kategori/${grandChild.slug}`}
+                                                                    href={storefront.categories.products.url(grandChild.slug)}
                                                                     className="text-sm text-gray-600 transition-colors hover:text-[#ec135b] dark:text-gray-400"
                                                                 >
                                                                     {grandChild.title}

@@ -19,6 +19,21 @@ export function ProductInfo({ product }: ProductInfoProps) {
     const hasDiscount = salePrice !== null && salePrice > 0 && salePrice < price;
     const discountRate = calculateDiscountPercent(price, salePrice);
 
+    const formatDate = (value: string): string => {
+        const normalized = value.slice(0, 10);
+        const parts = normalized.split('-').map((part) => Number(part));
+        if (parts.length === 3 && parts.every((part) => Number.isFinite(part))) {
+            const [year, month, day] = parts;
+            const date = new Date(year, month - 1, day);
+            return date.toLocaleDateString('tr-TR', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+            });
+        }
+        return normalized || value;
+    };
+
     const getCsrfToken = (): string => {
         const meta = document.querySelector('meta[name="csrf-token"]');
         return meta?.getAttribute('content') ?? '';
@@ -88,6 +103,11 @@ export function ProductInfo({ product }: ProductInfoProps) {
                     {product.sku && (
                         <p className="text-xs text-muted-foreground">
                             SKU: <span className="font-medium">{product.sku}</span>
+                        </p>
+                    )}
+                    {product.skt && (
+                        <p className="text-xs text-muted-foreground">
+                            SKT: <span className="font-medium">{formatDate(product.skt)}</span>
                         </p>
                     )}
                 </div>

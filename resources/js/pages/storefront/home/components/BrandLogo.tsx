@@ -19,7 +19,7 @@ export function BrandLogo({ name, href, imagePath }: BrandLogoProps) {
                 <img
                     src={`/storage/${imagePath}`}
                     alt={name}
-                    className="relative z-10 h-full w-full object-contain opacity-40 grayscale transition-all duration-700 group-hover:scale-110 group-hover:opacity-100 group-hover:grayscale-0 dark:opacity-50"
+                    className="relative z-10 h-full w-full object-contain opacity-100 grayscale-0 transition-all duration-700 group-hover:scale-110"
                 />
             ) : (
                 <span className="relative z-10 text-center text-xs font-black tracking-widest uppercase text-gray-400 transition-all duration-500 group-hover:text-[#ec135b] dark:text-gray-500 md:text-sm">

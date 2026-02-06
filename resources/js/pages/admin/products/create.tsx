@@ -134,6 +134,7 @@ interface FormData {
     sale_price: string;
     stock: string;
     barcode: string;
+    skt: string;
     active: boolean;
     category_ids: string[];
     tag_ids: string[];
@@ -166,6 +167,7 @@ export default function ProductsCreate({ brands, categories, tags, ingredients }
         sale_price: '',
         stock: '0',
         barcode: '',
+        skt: '',
         active: true,
         category_ids: [],
         tag_ids: [],
@@ -711,6 +713,18 @@ export default function ProductsCreate({ brands, categories, tags, ingredients }
                                     <FieldError>{errors.stock}</FieldError>
                                 </Field>
                             </div>
+                            <Field>
+                                <FieldLabel htmlFor="skt">SKT (Son Kullanım Tarihi)</FieldLabel>
+                                <Input
+                                    id="skt"
+                                    type="date"
+                                    value={data.skt}
+                                    onChange={(e) => setData('skt', e.target.value)}
+                                    aria-invalid={!!errors.skt}
+                                />
+                                <FieldDescription>Boş bırakabilirsiniz.</FieldDescription>
+                                <FieldError>{errors.skt}</FieldError>
+                            </Field>
                         </CardContent>
                     </Card>
 

@@ -123,6 +123,7 @@ interface FormData {
     sale_price: string;
     stock: string;
     barcode: string;
+    skt: string;
     active: boolean;
     category_ids: string[];
     tag_ids: string[];
@@ -138,6 +139,11 @@ interface FormData {
 }
 
 export default function ProductsEdit({ item, brands, categories, tags, ingredients }: Props) {
+    const normalizeDateValue = (value?: string | null): string => {
+        if (!value) return '';
+        return value.slice(0, 10);
+    };
+
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Dashboard',
@@ -188,6 +194,7 @@ export default function ProductsEdit({ item, brands, categories, tags, ingredien
         sale_price: item.sale_price ? String(item.sale_price) : '',
         stock: String(item.stock),
         barcode: item.barcode || '',
+        skt: normalizeDateValue(item.skt),
         active: item.active,
         category_ids: (item.category_ids || []).map(String),
         tag_ids: (item.tag_ids || []).map(String),
@@ -765,6 +772,18 @@ export default function ProductsEdit({ item, brands, categories, tags, ingredien
                                     <FieldError>{errors.stock}</FieldError>
                                 </Field>
                             </div>
+                            <Field>
+                                <FieldLabel htmlFor="skt">SKT (Son Kullanım Tarihi)</FieldLabel>
+                                <Input
+                                    id="skt"
+                                    type="date"
+                                    value={data.skt}
+                                    onChange={(e) => setData('skt', e.target.value)}
+                                    aria-invalid={!!errors.skt}
+                                />
+                                <FieldDescription>Boş bırakabilirsiniz.</FieldDescription>
+                                <FieldError>{errors.skt}</FieldError>
+                            </Field>
                         </CardContent>
                     </Card>
 

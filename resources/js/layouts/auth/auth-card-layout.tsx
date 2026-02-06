@@ -1,4 +1,4 @@
-import AppLogoIcon from '@/components/app-logo-icon';
+import type { SharedData } from '@/types';
 import {
     Card,
     CardContent,
@@ -6,7 +6,7 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import { Link } from '@inertiajs/react';
+import { usePage } from '@inertiajs/react';
 import type { PropsWithChildren } from 'react';
 
 export default function AuthCardLayout({
@@ -18,12 +18,25 @@ export default function AuthCardLayout({
     title?: string;
     description?: string;
 }>) {
+    const { storefrontSettings, name } = usePage<SharedData>().props;
+    const siteSettings = storefrontSettings?.site;
+    const headerLogoPath = siteSettings?.header_logo_path ? `/storage/${siteSettings.header_logo_path}` : '';
+    const headerLogoText = siteSettings?.header_logo_text || name;
+
     return (
         <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-muted p-6 md:p-10">
             <div className="flex w-full max-w-md flex-col gap-6">
-                <div className="flex h-9 w-9 items-center justify-center">
-                    <AppLogoIcon className="size-9 fill-current text-black dark:text-white" />
-                </div>
+                {headerLogoPath ? (
+                    <img
+                        src={headerLogoPath}
+                        alt={headerLogoText}
+                        className="h-10 w-auto object-contain"
+                    />
+                ) : (
+                    <div className="self-start rounded-xl bg-[#ec135b] px-4 py-2 text-xs font-black uppercase tracking-widest text-white shadow-lg shadow-[#ec135b]/20">
+                        {headerLogoText}
+                    </div>
+                )}
                 <div className="flex flex-col gap-6">
                     <Card className="rounded-xl">
                         <CardHeader className="px-10 pt-8 pb-0 text-center">
