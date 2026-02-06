@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\Category;
+use App\Models\Product;
 use App\Repositories\Contracts\ICategoryRepository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
@@ -138,9 +139,12 @@ class CategoryRepository extends BaseRepository implements ICategoryRepository
     {
         $category = $this->findBySlugOrIdOrFail($identifier);
 
-        $priceStats = $category->products()
-            ->where('active', true)
-            ->selectRaw('MIN(price) as min_price, MAX(price) as max_price')
+        $priceStats = Product::query()
+            ->selectRaw('MIN(products.price) as min_price, MAX(products.price) as max_price')
+            ->join('category_product', 'products.id', '=', 'category_product.product_id')
+            ->where('category_product.category_id', $category->id)
+            ->where('products.active', true)
+            ->whereNull('products.deleted_at')
             ->first();
 
         return [

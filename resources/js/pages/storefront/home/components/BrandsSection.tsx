@@ -69,7 +69,7 @@ export function BrandsSection({ endpoint }: BrandsSectionProps) {
     };
 
     return (
-        <section ref={ref} className="w-full py-8 bg-gray-50/30 dark:bg-black/10">
+        <section ref={ref} className="w-full overflow-x-hidden py-8 bg-gray-50/30 dark:bg-black/10">
             <div className="mx-auto max-w-[1440px] px-6 lg:px-12">
                 {/* Brands Slider */}
                 <div className="relative">
@@ -91,12 +91,12 @@ export function BrandsSection({ endpoint }: BrandsSectionProps) {
                     </button>
                     <div
                         ref={sliderRef}
-                        className="no-scrollbar flex snap-x snap-mandatory flex-nowrap items-center gap-4 overflow-x-auto px-2 pb-2 scroll-px-2 md:gap-8 md:px-6 md:scroll-px-6"
+                        className="no-scrollbar flex snap-x snap-mandatory flex-nowrap items-center gap-4 overflow-x-auto px-2 pb-2 scroll-px-2 md:gap-6 md:px-6 md:scroll-px-6"
                     >
                         {isLoading
                             ? Array.from({ length: 10 }).map((_, index) => (
                                   <div key={`brand-skeleton-${index}`} className="snap-start">
-                                      <Skeleton className="h-16 w-32 rounded-xl md:h-20 md:w-40" />
+                                      <Skeleton className="h-14 w-28 rounded-xl md:h-16 md:w-32" />
                                   </div>
                               ))
                             : brandsList.map((brand) => (
