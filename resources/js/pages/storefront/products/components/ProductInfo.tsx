@@ -116,10 +116,10 @@ export function ProductInfo({ product }: ProductInfoProps) {
                     {hasDiscount ? (
                         <div className="flex items-baseline gap-2">
                             <span className="text-2xl font-bold text-foreground md:text-3xl">
-                                TL{formatPrice(salePrice)}
+                                {formatPrice(salePrice)} TL
                             </span>
                             <span className="text-base text-muted-foreground line-through">
-                                TL{formatPrice(price)}
+                                {formatPrice(price)} TL
                             </span>
                             <Badge variant="destructive" className="ml-1">
                                 -%{discountRate}
@@ -127,7 +127,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
                         </div>
                     ) : (
                         <span className="text-2xl font-bold text-foreground md:text-3xl">
-                            TL{formatPrice(price)}
+                            {formatPrice(price)} TL
                         </span>
                     )}
                 </div>
