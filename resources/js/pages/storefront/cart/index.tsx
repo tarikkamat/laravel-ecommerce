@@ -217,10 +217,6 @@ export default function CartPage({ totals: initialTotals, apiEndpoints }: CartPa
                                 <span>{formatMoney(totals.subtotal)}</span>
                             </div>
                             <div className="flex items-center justify-between text-sm">
-                                <span>Vergi</span>
-                                <span>{formatMoney(totals.tax_total)}</span>
-                            </div>
-                            <div className="flex items-center justify-between text-sm">
                                 <span>Kargo</span>
                                 <span>{formatMoney(totals.shipping_total)}</span>
                             </div>

@@ -217,10 +217,6 @@ export default function OrdersShowPage({ order, apiEndpoints }: OrdersShowProps)
                                     <span>{formatMoney(order.subtotal)}</span>
                                 </div>
                                 <div className="flex items-center justify-between">
-                                    <span>Vergi</span>
-                                    <span>{formatMoney(order.taxTotal)}</span>
-                                </div>
-                                <div className="flex items-center justify-between">
                                     <span>Kargo</span>
                                     <span>{formatMoney(order.shippingTotal)}</span>
                                 </div>

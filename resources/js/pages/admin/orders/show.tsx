@@ -170,10 +170,6 @@ export default function OrdersShow({ order, statusOptions, shipmentStatusOptions
                                     <span>{formatPrice(order.subtotal)} {order.currency}</span>
                                 </div>
                                 <div className="flex items-center justify-between">
-                                    <span>Vergi</span>
-                                    <span>{formatPrice(order.taxTotal)} {order.currency}</span>
-                                </div>
-                                <div className="flex items-center justify-between">
                                     <span>Kargo</span>
                                     <span>{formatPrice(order.shippingTotal)} {order.currency}</span>
                                 </div>

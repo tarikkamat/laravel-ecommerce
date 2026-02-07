@@ -404,10 +404,6 @@ export function StorefrontNav() {
                                     <span>Ara Toplam</span>
                                     <span className="font-semibold">{Number(cartTotals?.subtotal ?? 0).toFixed(2)} TL</span>
                                 </div>
-                                <div className="flex items-center justify-between text-gray-600 dark:text-gray-300">
-                                    <span>Vergi</span>
-                                    <span className="font-semibold">{Number(cartTotals?.tax_total ?? 0).toFixed(2)} TL</span>
-                                </div>
                                 <div className="flex items-center justify-between text-base font-black text-[#181113] dark:text-white">
                                     <span>Toplam</span>
                                     <span>{Number(cartTotals?.grand_total ?? 0).toFixed(2)} TL</span>

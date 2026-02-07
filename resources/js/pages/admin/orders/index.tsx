@@ -393,10 +393,9 @@ export default function OrdersIndex({ items, filters, statusOptions, paymentStat
                                                         variant="ghost"
                                                         size="icon"
                                                         onClick={() => {
-                                                            window.location.href = admin.orders.shipments.label({
-                                                                order: order.id,
-                                                                shipment: order.shipmentId as number,
-                                                            }).url;
+                                                            setSelectedShipments([order.shipmentId as number]);
+                                                            setLabelError(null);
+                                                            setIsProviderDialogOpen(true);
                                                         }}
                                                     >
                                                         <FileDown className="h-4 w-4" />
