@@ -349,7 +349,7 @@ export default function CheckoutPage({
     };
 
     return (
-        <StorefrontLayout title="Checkout">
+        <StorefrontLayout title="Ödeme">
             <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-8">
                 {flash?.paymentStatus ? (
                     <div

@@ -214,23 +214,23 @@ export default function CartPage({ totals: initialTotals, apiEndpoints }: CartPa
                         <div className="space-y-3 rounded border p-4">
                             <div className="flex items-center justify-between text-sm">
                                 <span>Ara Toplam</span>
-                                <span>{formatMoney(totals.subtotal)}</span>
+                                <span>{totals.subtotal} TL</span>
                             </div>
                             <div className="flex items-center justify-between text-sm">
                                 <span>Kargo</span>
-                                <span>{formatMoney(totals.shipping_total)}</span>
+                                <span>{totals.shipping_total} TL</span>
                             </div>
                             <div className="my-2 h-px bg-border" />
                             <div className="flex items-center justify-between text-base font-semibold">
                                 <span>Genel Toplam</span>
-                                <span>{formatMoney(totals.grand_total)}</span>
+                                <span>{totals.grand_total} TL</span>
                             </div>
 
                             <Link
                                 href={apiEndpoints.checkoutPage}
                                 className="mt-3 inline-flex w-full items-center justify-center rounded bg-black px-4 py-2 text-sm font-medium text-white"
                             >
-                                Odeme Adimina Gec
+                                Devam Et
                             </Link>
                         </div>
                     </div>
