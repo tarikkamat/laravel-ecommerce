@@ -47,7 +47,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AppLayout from '@/layouts/app-layout';
 import admin from '@/routes/admin';
-import type { BreadcrumbItem, User } from '@/types';
+import type { BreadcrumbItem, PaginatedData, User } from '@/types';
 import type { ProductComment } from '@/types/comment';
 
 type UserOrderSummary = {
@@ -63,8 +63,8 @@ type UserOrderSummary = {
 
 interface Props {
     item: User;
-    orders: UserOrderSummary[];
-    comments: ProductComment[];
+    orders: PaginatedData<UserOrderSummary>;
+    comments: PaginatedData<ProductComment>;
 }
 
 const roleLabels: Record<string, string> = {
@@ -135,6 +135,19 @@ export default function UsersShow({ item, orders, comments }: Props) {
 
     const formatNumber = (value: number) => new Intl.NumberFormat('tr-TR').format(value);
 
+    const withTabParam = (url: string | null, tab: string) => {
+        if (!url) {
+            return null;
+        }
+
+        if (url.includes('tab=')) {
+            return url;
+        }
+
+        const separator = url.includes('?') ? '&' : '?';
+        return `${url}${separator}tab=${tab}`;
+    };
+
     const orderStatusBadge = (status: string) => {
         const label = orderStatusLabels[status] ?? status;
         let variant: 'default' | 'secondary' | 'destructive' | 'outline' = 'secondary';
@@ -183,6 +196,29 @@ export default function UsersShow({ item, orders, comments }: Props) {
 
         return <Badge variant={variant}>{label}</Badge>;
     };
+
+    const initialTab = (() => {
+        if (typeof window === 'undefined') {
+            return 'general';
+        }
+
+        const params = new URLSearchParams(window.location.search);
+        const tab = params.get('tab');
+
+        if (tab === 'general' || tab === 'addresses' || tab === 'orders' || tab === 'comments') {
+            return tab;
+        }
+
+        if (params.has('orders_page')) {
+            return 'orders';
+        }
+
+        if (params.has('comments_page')) {
+            return 'comments';
+        }
+
+        return 'general';
+    })();
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -250,7 +286,7 @@ export default function UsersShow({ item, orders, comments }: Props) {
                 {/* Content */}
                 <div className="grid gap-6 md:grid-cols-3">
                     <div className="md:col-span-2">
-                        <Tabs defaultValue="general">
+                        <Tabs defaultValue={initialTab}>
                             <CardHeader className="pb-0">
                                 <div className="overflow-x-auto">
                                     <TabsList className="min-w-max justify-start gap-1">
@@ -264,11 +300,11 @@ export default function UsersShow({ item, orders, comments }: Props) {
                                         </TabsTrigger>
                                         <TabsTrigger value="orders">
                                             <ShoppingCart className="mr-1.5 h-4 w-4" />
-                                            Siparişler ({orders.length})
+                                            Siparişler ({orders.total})
                                         </TabsTrigger>
                                         <TabsTrigger value="comments">
                                             <MessageSquare className="mr-1.5 h-4 w-4" />
-                                            Yorumlar ({comments.length})
+                                            Yorumlar ({comments.total})
                                         </TabsTrigger>
                                     </TabsList>
                                 </div>
@@ -368,46 +404,98 @@ export default function UsersShow({ item, orders, comments }: Props) {
                                 </TabsContent>
 
                                 <TabsContent value="orders" className="mt-0 space-y-4">
-                                    {orders.length > 0 ? (
-                                        <div className="rounded-lg border">
-                                            <Table>
-                                                <TableHeader>
-                                                    <TableRow>
-                                                        <TableHead>Sipariş</TableHead>
-                                                        <TableHead>Tarih</TableHead>
-                                                        <TableHead>Durum</TableHead>
-                                                        <TableHead>Ödeme</TableHead>
-                                                        <TableHead className="text-right">Adet</TableHead>
-                                                        <TableHead className="text-right">Toplam</TableHead>
-                                                    </TableRow>
-                                                </TableHeader>
-                                                <TableBody>
-                                                    {orders.map((order) => (
-                                                        <TableRow key={order.id}>
-                                                            <TableCell>
-                                                                <Link
-                                                                    href={admin.orders.show(order.id).url}
-                                                                    className="font-medium hover:underline"
-                                                                >
-                                                                    #{order.id}
-                                                                </Link>
-                                                            </TableCell>
-                                                            <TableCell className="text-sm text-muted-foreground">
-                                                                {formatDate(order.createdAt)}
-                                                            </TableCell>
-                                                            <TableCell>{orderStatusBadge(order.status)}</TableCell>
-                                                            <TableCell>{paymentBadge(order.paymentStatus)}</TableCell>
-                                                            <TableCell className="text-right">
-                                                                {formatNumber(order.itemsCount)}
-                                                            </TableCell>
-                                                            <TableCell className="text-right font-medium">
-                                                                {formatCurrency(order.grandTotal, order.currency)}
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    ))}
-                                                </TableBody>
-                                            </Table>
+                                    {orders.total > 0 && (
+                                        <div className="flex flex-wrap items-center justify-between gap-2">
+                                            <p className="text-sm text-muted-foreground">
+                                                Son siparişler
+                                            </p>
+                                            <Button variant="outline" size="sm" asChild>
+                                                <Link
+                                                    href={admin.orders.index({
+                                                        query: { customer: item.email },
+                                                    }).url}
+                                                >
+                                                    Tümünü Gör
+                                                </Link>
+                                            </Button>
                                         </div>
+                                    )}
+
+                                    {orders.data.length > 0 ? (
+                                        <>
+                                            <div className="rounded-lg border">
+                                                <Table>
+                                                    <TableHeader>
+                                                        <TableRow>
+                                                            <TableHead>Sipariş</TableHead>
+                                                            <TableHead>Tarih</TableHead>
+                                                            <TableHead>Durum</TableHead>
+                                                            <TableHead>Ödeme</TableHead>
+                                                            <TableHead className="text-right">Adet</TableHead>
+                                                            <TableHead className="text-right">Toplam</TableHead>
+                                                        </TableRow>
+                                                    </TableHeader>
+                                                    <TableBody>
+                                                        {orders.data.map((order) => (
+                                                            <TableRow key={order.id}>
+                                                                <TableCell>
+                                                                    <Link
+                                                                        href={admin.orders.show(order.id).url}
+                                                                        className="font-medium hover:underline"
+                                                                    >
+                                                                        #{order.id}
+                                                                    </Link>
+                                                                </TableCell>
+                                                                <TableCell className="text-sm text-muted-foreground">
+                                                                    {formatDate(order.createdAt)}
+                                                                </TableCell>
+                                                                <TableCell>{orderStatusBadge(order.status)}</TableCell>
+                                                                <TableCell>{paymentBadge(order.paymentStatus)}</TableCell>
+                                                                <TableCell className="text-right">
+                                                                    {formatNumber(order.itemsCount)}
+                                                                </TableCell>
+                                                                <TableCell className="text-right font-medium">
+                                                                    {formatCurrency(order.grandTotal, order.currency)}
+                                                                </TableCell>
+                                                            </TableRow>
+                                                        ))}
+                                                    </TableBody>
+                                                </Table>
+                                            </div>
+
+                                            {orders.last_page > 1 && (
+                                                <div className="flex flex-wrap items-center justify-between gap-3">
+                                                    <p className="text-sm text-muted-foreground">
+                                                        {orders.from} - {orders.to} / {orders.total} kayıt gösteriliyor
+                                                    </p>
+                                                    <div className="flex flex-wrap items-center gap-2">
+                                                        {orders.links.map((link, index) => {
+                                                            const url = withTabParam(link.url, 'orders');
+
+                                                            return (
+                                                                <Button
+                                                                    key={index}
+                                                                    variant={link.active ? 'default' : 'outline'}
+                                                                    size="sm"
+                                                                    disabled={!url}
+                                                                    asChild={!!url}
+                                                                >
+                                                                    {url ? (
+                                                                        <Link
+                                                                            href={url}
+                                                                            preserveScroll
+                                                                            dangerouslySetInnerHTML={{ __html: link.label }}
+                                                                        />
+                                                                    ) : (
+                                                                        <span dangerouslySetInnerHTML={{ __html: link.label }} />
+                                                                    )}
+                                                                </Button>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </>
                                     ) : (
                                         <Empty className="border-dashed">
                                             <EmptyHeader>
@@ -424,51 +512,86 @@ export default function UsersShow({ item, orders, comments }: Props) {
                                 </TabsContent>
 
                                 <TabsContent value="comments" className="mt-0 space-y-4">
-                                    {comments.length > 0 ? (
-                                        <div className="rounded-lg border">
-                                            <Table>
-                                                <TableHeader>
-                                                    <TableRow>
-                                                        <TableHead>Ürün</TableHead>
-                                                        <TableHead>Yorum</TableHead>
-                                                        <TableHead>Durum</TableHead>
-                                                        <TableHead className="text-right">Tarih</TableHead>
-                                                    </TableRow>
-                                                </TableHeader>
-                                                <TableBody>
-                                                    {comments.map((comment) => (
-                                                        <TableRow key={comment.id}>
-                                                            <TableCell>
-                                                                {comment.product ? (
-                                                                    <Link
-                                                                        href={admin.products.show(comment.product.id).url}
-                                                                        className="font-medium hover:underline"
-                                                                    >
-                                                                        {comment.product.title}
-                                                                    </Link>
-                                                                ) : (
-                                                                    <span className="text-muted-foreground">-</span>
-                                                                )}
-                                                            </TableCell>
-                                                            <TableCell className="max-w-[320px]">
-                                                                <p className="line-clamp-2 text-sm text-foreground">
-                                                                    {comment.body}
-                                                                </p>
-                                                                {comment.parent_id && (
-                                                                    <Badge variant="outline" className="mt-1">
-                                                                        Yanıt
-                                                                    </Badge>
-                                                                )}
-                                                            </TableCell>
-                                                            <TableCell>{commentStatusBadge(comment.status)}</TableCell>
-                                                            <TableCell className="text-right text-sm text-muted-foreground">
-                                                                {formatDate(comment.created_at)}
-                                                            </TableCell>
+                                    {comments.data.length > 0 ? (
+                                        <>
+                                            <div className="rounded-lg border">
+                                                <Table>
+                                                    <TableHeader>
+                                                        <TableRow>
+                                                            <TableHead>Ürün</TableHead>
+                                                            <TableHead>Yorum</TableHead>
+                                                            <TableHead>Durum</TableHead>
+                                                            <TableHead className="text-right">Tarih</TableHead>
                                                         </TableRow>
-                                                    ))}
-                                                </TableBody>
-                                            </Table>
-                                        </div>
+                                                    </TableHeader>
+                                                    <TableBody>
+                                                        {comments.data.map((comment) => (
+                                                            <TableRow key={comment.id}>
+                                                                <TableCell>
+                                                                    {comment.product ? (
+                                                                        <Link
+                                                                            href={admin.products.show(comment.product.id).url}
+                                                                            className="font-medium hover:underline"
+                                                                        >
+                                                                            {comment.product.title}
+                                                                        </Link>
+                                                                    ) : (
+                                                                        <span className="text-muted-foreground">-</span>
+                                                                    )}
+                                                                </TableCell>
+                                                                <TableCell className="max-w-[320px]">
+                                                                    <p className="line-clamp-2 text-sm text-foreground">
+                                                                        {comment.body}
+                                                                    </p>
+                                                                    {comment.parent_id && (
+                                                                        <Badge variant="outline" className="mt-1">
+                                                                            Yanıt
+                                                                        </Badge>
+                                                                    )}
+                                                                </TableCell>
+                                                                <TableCell>{commentStatusBadge(comment.status)}</TableCell>
+                                                                <TableCell className="text-right text-sm text-muted-foreground">
+                                                                    {formatDate(comment.created_at)}
+                                                                </TableCell>
+                                                            </TableRow>
+                                                        ))}
+                                                    </TableBody>
+                                                </Table>
+                                            </div>
+
+                                            {comments.last_page > 1 && (
+                                                <div className="flex flex-wrap items-center justify-between gap-3">
+                                                    <p className="text-sm text-muted-foreground">
+                                                        {comments.from} - {comments.to} / {comments.total} kayıt gösteriliyor
+                                                    </p>
+                                                    <div className="flex flex-wrap items-center gap-2">
+                                                        {comments.links.map((link, index) => {
+                                                            const url = withTabParam(link.url, 'comments');
+
+                                                            return (
+                                                                <Button
+                                                                    key={index}
+                                                                    variant={link.active ? 'default' : 'outline'}
+                                                                    size="sm"
+                                                                    disabled={!url}
+                                                                    asChild={!!url}
+                                                                >
+                                                                    {url ? (
+                                                                        <Link
+                                                                            href={url}
+                                                                            preserveScroll
+                                                                            dangerouslySetInnerHTML={{ __html: link.label }}
+                                                                        />
+                                                                    ) : (
+                                                                        <span dangerouslySetInnerHTML={{ __html: link.label }} />
+                                                                    )}
+                                                                </Button>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </>
                                     ) : (
                                         <Empty className="border-dashed">
                                             <EmptyHeader>

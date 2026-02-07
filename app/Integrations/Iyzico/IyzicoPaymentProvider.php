@@ -296,13 +296,22 @@ class IyzicoPaymentProvider
 
     private function callbackUrl(): string
     {
-        $configured = (string) $this->settings->iyzico_callback_url;
+        $path = route('storefront.payments.iyzico.callback', [], false);
+        $request = request();
 
-        if ($configured !== '') {
-            return $configured;
+        if ($request) {
+            $baseUrl = $request->getSchemeAndHttpHost();
+
+            if (app()->environment('production') && str_starts_with($baseUrl, 'http://')) {
+                $baseUrl = 'https://' . substr($baseUrl, 7);
+            }
+
+            return rtrim($baseUrl, '/') . $path;
         }
 
-        return route('storefront.payments.iyzico.callback');
+        $baseUrl = rtrim((string) config('app.url'), '/');
+
+        return $baseUrl . $path;
     }
 
     private function money($value): string

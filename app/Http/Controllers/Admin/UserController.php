@@ -42,11 +42,15 @@ class UserController extends Controller
         $user = $this->service->findOrFail($id, ['*'], ['addresses']);
 
         $orders = Order::query()
-            ->with(['items', 'payments', 'shipments'])
+            ->with(['payments', 'shipments'])
+            ->withSum('items as items_count', 'qty')
             ->where('user_id', $user->id)
             ->latest('id')
-            ->get()
-            ->map(function (Order $order): array {
+            ->paginate(8, ['*'], 'orders_page')
+            ->withQueryString();
+
+        $orders->setCollection(
+            $orders->getCollection()->map(function (Order $order): array {
                 $payment = $order->payments->sortByDesc('id')->first();
                 $shipment = $order->shipments->first();
 
@@ -55,21 +59,23 @@ class UserController extends Controller
                     'status' => $order->status,
                     'currency' => $order->currency,
                     'grandTotal' => (float) $order->grand_total,
-                    'itemsCount' => (int) $order->items->sum('qty'),
+                    'itemsCount' => (int) ($order->items_count ?? 0),
                     'createdAt' => $order->created_at?->toIso8601String(),
                     'paymentStatus' => $payment?->status,
                     'shipmentStatus' => $shipment?->shipment_status,
                 ];
             })
-            ->values()
-            ->all();
+        );
 
         $comments = ProductComment::query()
             ->with('product:id,title')
             ->where('user_id', $user->id)
             ->latest('id')
-            ->get()
-            ->map(function (ProductComment $comment) use ($user): array {
+            ->paginate(8, ['*'], 'comments_page')
+            ->withQueryString();
+
+        $comments->setCollection(
+            $comments->getCollection()->map(function (ProductComment $comment) use ($user): array {
                 return [
                     'id' => $comment->id,
                     'product_id' => $comment->product_id,
@@ -91,8 +97,7 @@ class UserController extends Controller
                         : null,
                 ];
             })
-            ->values()
-            ->all();
+        );
 
         return Inertia::render('admin/users/show', [
             'item' => $user,
