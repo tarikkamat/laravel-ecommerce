@@ -11,6 +11,7 @@ use App\Http\Controllers\Storefront\CheckoutResultController;
 use App\Http\Controllers\Storefront\AccountOrderController;
 use App\Http\Controllers\Storefront\PageController;
 use App\Http\Controllers\Storefront\ProductController;
+use App\Http\Controllers\Storefront\ProductCommentController;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['as' => 'storefront.'], function () {
@@ -35,6 +36,9 @@ Route::group(['as' => 'storefront.'], function () {
 
     Route::get('/urunler', [ProductController::class, 'index'])->name('products.index');
     Route::get('/urunler/{identifier}', [ProductController::class, 'show'])->name('products.show');
+    Route::post('/urunler/{product}/yorumlar', [ProductCommentController::class, 'store'])
+        ->middleware(['auth', 'verified'])
+        ->name('products.comments.store');
 
     Route::get('/sepet', CartPageController::class)->name('cart.index');
     Route::get('/checkout', CheckoutPageController::class)->name('checkout.index');
