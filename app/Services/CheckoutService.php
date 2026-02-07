@@ -16,6 +16,7 @@ class CheckoutService
         private readonly CartResolver $resolver,
         private readonly CartTotalsService $totalsService,
         private readonly ShippingService $shippingService,
+        private readonly DiscountService $discountService,
         private readonly TaxService $taxService,
         private readonly TaxSettings $taxSettings,
         private readonly ShippingSettings $shippingSettings
@@ -28,13 +29,15 @@ class CheckoutService
     {
         $cart = $this->resolver->resolve($request, withItems: true);
         $shippingTotal = $this->shippingService->selectedShippingTotal($request, $cart);
-        $totals = $this->totalsService->totals($cart, $shippingTotal);
+        $discount = $this->discountService->getAppliedDiscount($request);
+        $totals = $this->totalsService->totals($cart, $shippingTotal, $discount);
 
         return [
             'address' => $this->shippingService->getStoredAddress($request),
             'billing_address' => $this->shippingService->getStoredBillingAddress($request),
             'selected_shipping' => $this->shippingService->getSelectedRate($request),
             'totals' => $totals,
+            'discount' => $this->discountService->discountPayload($discount),
             'items_count' => (int) $cart->items->sum('qty'),
         ];
     }
@@ -215,9 +218,12 @@ class CheckoutService
                 $taxTotal = round($taxTotal + $lineTaxTotal, 2);
             }
 
+            $discount = $this->discountService->getAppliedDiscount($request);
+            $discountTotal = $this->discountService->calculateDiscountTotal($discount, $subtotal);
+
             $grandTotal = $includeTax
-                ? round($subtotal + $shippingTotal, 2)
-                : round($subtotal + $taxTotal + $shippingTotal, 2);
+                ? round($subtotal + $shippingTotal - $discountTotal, 2)
+                : round($subtotal + $taxTotal + $shippingTotal - $discountTotal, 2);
 
             $order->shipments()->create([
                 'provider' => (string) ($selectedShipping['provider'] ?? 'geliver'),
@@ -230,6 +236,8 @@ class CheckoutService
 
             $order->forceFill([
                 'subtotal' => $subtotal,
+                'discount_total' => $discountTotal,
+                'discount_code' => $discount?->code,
                 'tax_total' => $taxTotal,
                 'shipping_total' => $shippingTotal,
                 'grand_total' => $grandTotal,

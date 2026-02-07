@@ -22,6 +22,7 @@ class Order extends Model
         'currency',
         'subtotal',
         'discount_total',
+        'discount_code',
         'tax_total',
         'shipping_total',
         'grand_total',

@@ -6,6 +6,7 @@ use App\Services\Contracts\IBrandService;
 use App\Services\Contracts\ICategoryService;
 use App\Services\CartResolver;
 use App\Services\CartTotalsService;
+use App\Services\DiscountService;
 use App\Services\ShippingService;
 use App\Settings\HomeSettings;
 use App\Settings\NavigationSettings;
@@ -30,7 +31,8 @@ class HandleInertiaRequests extends Middleware
         private readonly IBrandService $brandService,
         private readonly CartResolver $cartResolver,
         private readonly CartTotalsService $cartTotalsService,
-        private readonly ShippingService $shippingService
+        private readonly ShippingService $shippingService,
+        private readonly DiscountService $discountService
     ) {}
 
     /**
@@ -134,15 +136,18 @@ class HandleInertiaRequests extends Middleware
                     'items' => [],
                     'tax_lines' => [],
                 ],
+                'discount' => null,
             ];
         }
 
         $shippingTotal = $this->shippingService->selectedShippingTotal($request, $cart);
-        $totals = $this->cartTotalsService->totals($cart, $shippingTotal);
+        $discount = $this->discountService->getAppliedDiscount($request);
+        $totals = $this->cartTotalsService->totals($cart, $shippingTotal, $discount);
 
         return [
             'itemsCount' => (int) $cart->items->sum('qty'),
             'totals' => $totals,
+            'discount' => $this->discountService->discountPayload($discount),
         ];
     }
 

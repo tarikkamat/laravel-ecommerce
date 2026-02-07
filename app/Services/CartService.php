@@ -12,7 +12,8 @@ class CartService
     public function __construct(
         private readonly CartResolver $resolver,
         private readonly CartTotalsService $totalsService,
-        private readonly ShippingService $shippingService
+        private readonly ShippingService $shippingService,
+        private readonly DiscountService $discountService
     ) {}
 
     /**
@@ -22,11 +23,13 @@ class CartService
     {
         $cart = $this->resolver->resolve($request, withItems: true);
         $shippingTotal = $this->shippingService->selectedShippingTotal($request, $cart);
-        $totals = $this->totalsService->totals($cart, $shippingTotal);
+        $discount = $this->discountService->getAppliedDiscount($request);
+        $totals = $this->totalsService->totals($cart, $shippingTotal, $discount);
 
         return [
             'cart' => $cart,
             'totals' => $totals,
+            'discount' => $this->discountService->discountPayload($discount),
             'items_count' => (int) $cart->items->sum('qty'),
         ];
     }
@@ -118,6 +121,26 @@ class CartService
         $cart->items()->delete();
 
         $this->shippingService->clearSelections($request);
+
+        return $this->summary($request);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function applyDiscount(Request $request, string $code): array
+    {
+        $this->discountService->apply($request, $code);
+
+        return $this->summary($request);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function removeDiscount(Request $request): array
+    {
+        $this->discountService->remove($request);
 
         return $this->summary($request);
     }

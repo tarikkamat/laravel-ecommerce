@@ -24,6 +24,8 @@ Route::prefix('cart')->group(function () {
     Route::patch('/items/{itemId}', [CartController::class, 'updateItem'])->name('api.cart.items.update');
     Route::delete('/items/{itemId}', [CartController::class, 'destroyItem'])->name('api.cart.items.destroy');
     Route::delete('/clear', [CartController::class, 'clear'])->name('api.cart.clear');
+    Route::post('/discount', [CartController::class, 'applyDiscount'])->name('api.cart.discount.apply');
+    Route::delete('/discount', [CartController::class, 'removeDiscount'])->name('api.cart.discount.remove');
     Route::post('/merge', [CartController::class, 'merge'])->middleware('auth')->name('api.cart.merge');
 });
 

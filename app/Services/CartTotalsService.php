@@ -2,8 +2,10 @@
 
 namespace App\Services;
 
+use App\Enums\DiscountType;
 use App\Models\Cart;
 use App\Models\CartItem;
+use App\Models\Discount;
 use Illuminate\Support\Collection;
 
 class CartTotalsService
@@ -16,7 +18,7 @@ class CartTotalsService
     /**
      * @return array<string, mixed>
      */
-    public function totals(Cart $cart, ?float $shippingTotal = null): array
+    public function totals(Cart $cart, ?float $shippingTotal = null, ?Discount $discount = null): array
     {
         $items = $cart->items->map(function (CartItem $item): array {
             $unitEffective = $this->effectiveUnitPrice($item);
@@ -46,20 +48,22 @@ class CartTotalsService
 
         $taxResult = $this->taxService->calculateItemTaxes($cart, $taxBases);
 
+        $discountTotal = $this->discountTotal($discount, $subtotal);
+
         $resolvedShipping = $shippingTotal !== null
             ? round($shippingTotal, 2)
             : 0.0;
 
         $includeTax = $this->taxService->pricesIncludeTax();
         $grandTotal = $includeTax
-            ? round($subtotal + $resolvedShipping, 2)
-            : round($subtotal + $taxResult['total'] + $resolvedShipping, 2);
+            ? round($subtotal + $resolvedShipping - $discountTotal, 2)
+            : round($subtotal + $taxResult['total'] + $resolvedShipping - $discountTotal, 2);
 
         return [
             'currency' => $cart->currency,
             'items' => $items->all(),
             'subtotal' => $subtotal,
-            'discount_total' => 0.0,
+            'discount_total' => $discountTotal,
             'tax_total' => $taxResult['total'],
             'tax_lines' => $taxResult['lines'],
             'shipping_total' => $resolvedShipping,
@@ -78,5 +82,27 @@ class CartTotalsService
         }
 
         return round((float) $item->unit_price_snapshot, 2);
+    }
+
+    private function discountTotal(?Discount $discount, float $subtotal): float
+    {
+        if (! $discount || $subtotal <= 0) {
+            return 0.0;
+        }
+
+        $value = (float) $discount->value;
+
+        $type = $discount->type instanceof DiscountType
+            ? $discount->type
+            : DiscountType::tryFrom((string) $discount->type);
+
+        if ($type === DiscountType::PERCENTAGE) {
+            $rate = max(0, min(100, $value));
+            $amount = $subtotal * ($rate / 100);
+        } else {
+            $amount = max(0, $value);
+        }
+
+        return round(min($amount, $subtotal), 2);
     }
 }

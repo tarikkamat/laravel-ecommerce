@@ -57,6 +57,20 @@ class CartController extends Controller
         return response()->json($this->cartService->clear($request));
     }
 
+    public function applyDiscount(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'code' => ['required', 'string'],
+        ]);
+
+        return response()->json($this->cartService->applyDiscount($request, (string) $data['code']));
+    }
+
+    public function removeDiscount(Request $request): JsonResponse
+    {
+        return response()->json($this->cartService->removeDiscount($request));
+    }
+
     public function merge(Request $request): JsonResponse
     {
         $this->cartResolver->mergeGuestCartToUser($request);

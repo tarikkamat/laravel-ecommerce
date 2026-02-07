@@ -105,6 +105,7 @@ class CheckoutController extends Controller
             'status' => $order->status,
             'totals' => [
                 'subtotal' => (float) $order->subtotal,
+                'discount_total' => (float) $order->discount_total,
                 'tax_total' => (float) $order->tax_total,
                 'shipping_total' => (float) $order->shipping_total,
                 'grand_total' => (float) $order->grand_total,
