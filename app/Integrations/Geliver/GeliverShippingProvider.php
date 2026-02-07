@@ -64,18 +64,17 @@ class GeliverShippingProvider
         $offers = Arr::get($shipment, 'offers');
         $shipmentId = (string) Arr::get($shipment, 'id', '');
 
-        if ((! is_array($offers) || empty($offers['cheapest'])) && $shipmentId !== '') {
-            $offers = $this->client->waitOffers($shipmentId) ?? $offers;
+        if (! $this->offersReady($offers) && $shipmentId !== '') {
+            $offers = $this->client->waitOffers($shipmentId, 1, 10) ?? $offers;
         }
 
         if (! is_array($offers)) {
             return null;
         }
 
-        $offerList = Arr::get($offers, 'list', []);
+        $offerList = $this->normalizeOfferList($offers);
 
-        $normalizedOffers = collect(is_array($offerList) ? $offerList : [])
-            ->filter(fn ($offer) => is_array($offer))
+        $normalizedOffers = collect($offerList)
             ->map(fn (array $offer) => $this->mapOffer($offer))
             ->filter()
             ->values()
@@ -83,14 +82,6 @@ class GeliverShippingProvider
 
         if (count($normalizedOffers) > 0) {
             return $normalizedOffers;
-        }
-
-        $cheapest = Arr::get($offers, 'cheapest');
-
-        if (is_array($cheapest)) {
-            $mapped = $this->mapOffer($cheapest);
-
-            return $mapped ? [$mapped] : null;
         }
 
         return null;
@@ -153,22 +144,111 @@ class GeliverShippingProvider
     private function mapOffer(array $offer): ?array
     {
         $amount = $this->offerAmount($offer);
+        $offerId = (string) ($offer['id'] ?? '');
 
-        if ($amount <= 0) {
+        if ($amount <= 0 || $offerId === '') {
             return null;
         }
 
-        $serviceCode = (string) ($offer['id'] ?? $offer['providerAccountID'] ?? Str::uuid());
         $providerName = (string) ($offer['providerAccountName'] ?? $offer['owner'] ?? 'Geliver');
         $eta = (string) ($offer['averageEstimatedTimeHumanReadible'] ?? '');
 
         return [
             'provider' => 'geliver',
-            'service_code' => $serviceCode,
+            'service_code' => $offerId,
             'service_name' => trim($providerName.($eta !== '' ? ' • '.$eta : '')),
             'amount' => round($amount, 2),
+            'offer' => $offer,
             'raw' => $offer,
         ];
+    }
+
+    /**
+     * @param  mixed  $offers
+     */
+    private function offersReady($offers): bool
+    {
+        if (! is_array($offers)) {
+            return false;
+        }
+
+        if (array_is_list($offers) && count($offers) > 0) {
+            return true;
+        }
+
+        foreach (['list', 'items'] as $key) {
+            $list = Arr::get($offers, $key);
+            if (is_array($list) && count($list) > 0) {
+                return true;
+            }
+        }
+
+        foreach (['data.list', 'data.items'] as $key) {
+            $list = Arr::get($offers, $key);
+            if (is_array($list) && count($list) > 0) {
+                return true;
+            }
+        }
+
+        $cheapest = Arr::get($offers, 'cheapest');
+
+        return is_array($cheapest) && $cheapest !== [];
+    }
+
+    /**
+     * @param  array<string, mixed>  $offers
+     * @return array<int, array<string, mixed>>
+     */
+    private function normalizeOfferList(array $offers): array
+    {
+        $list = [];
+
+        if (array_is_list($offers)) {
+            $list = $offers;
+        } elseif (is_array($offers['list'] ?? null)) {
+            $list = $offers['list'];
+        } elseif (is_array($offers['items'] ?? null)) {
+            $list = $offers['items'];
+        } elseif (is_array(Arr::get($offers, 'data.list'))) {
+            $list = Arr::get($offers, 'data.list');
+        } elseif (is_array(Arr::get($offers, 'data.items'))) {
+            $list = Arr::get($offers, 'data.items');
+        }
+
+        $normalized = collect(is_array($list) ? $list : [])
+            ->filter(fn ($offer) => is_array($offer))
+            ->values()
+            ->all();
+
+        $cheapest = Arr::get($offers, 'cheapest');
+        if (is_array($cheapest)) {
+            $normalized[] = $cheapest;
+        }
+
+        if ($normalized === []) {
+            return [];
+        }
+
+        $unique = [];
+        $seen = [];
+
+        foreach ($normalized as $offer) {
+            if (! is_array($offer)) {
+                continue;
+            }
+
+            $id = (string) ($offer['id'] ?? '');
+            if ($id !== '') {
+                if (isset($seen[$id])) {
+                    continue;
+                }
+                $seen[$id] = true;
+            }
+
+            $unique[] = $offer;
+        }
+
+        return $unique;
     }
 
     private function offerAmount(array $offer): float

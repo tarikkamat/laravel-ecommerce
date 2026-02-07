@@ -64,17 +64,6 @@ export default function CartPage({ totals: initialTotals, discount: initialDisco
     const [discountCode, setDiscountCode] = useState(initialDiscount?.code ?? '');
     const [discountMessage, setDiscountMessage] = useState<string | null>(null);
 
-    const currency = useMemo(() => totals.currency ?? 'TRY', [totals.currency]);
-
-    const formatMoney = useCallback(
-        (value: number) =>
-            new Intl.NumberFormat('tr-TR', {
-                style: 'currency',
-                currency,
-            }).format(value ?? 0),
-        [currency],
-    );
-
     const applySummary = useCallback((data?: CartSummaryResponse | null) => {
         if (!data) return;
         if (data?.totals) {
@@ -264,7 +253,7 @@ export default function CartPage({ totals: initialTotals, discount: initialDisco
                                             <div className="text-xs text-muted-foreground">SKU: {item.sku}</div>
                                         ) : null}
                                         <div className="mt-1 text-sm text-muted-foreground">
-                                            Birim: {formatMoney(item.unit_effective)}
+                                            Birim: {item.unit_effective} TL
                                         </div>
                                     </div>
 
@@ -289,7 +278,7 @@ export default function CartPage({ totals: initialTotals, discount: initialDisco
                                     </div>
 
                                     <div className="flex items-center justify-between gap-3 sm:flex-col sm:items-end">
-                                        <div className="text-sm font-semibold">{formatMoney(item.line_subtotal)}</div>
+                                        <div className="text-sm font-semibold">{item.line_subtotal} TL</div>
                                         <button
                                             type="button"
                                             onClick={() => removeItem(item.id)}
@@ -354,22 +343,22 @@ export default function CartPage({ totals: initialTotals, discount: initialDisco
                             <div className="my-1 h-px bg-border" />
                             <div className="flex items-center justify-between text-sm">
                                 <span>Ara Toplam</span>
-                                <span>{formatMoney(totals.subtotal)}</span>
+                                <span>{totals.subtotal} TL</span>
                             </div>
                             {totals.discount_total > 0 ? (
                                 <div className="flex items-center justify-between text-sm text-emerald-700">
                                     <span>Indirim</span>
-                                    <span>{formatMoney(-totals.discount_total)}</span>
+                                    <span>-{totals.discount_total} TL</span>
                                 </div>
                             ) : null}
                             <div className="flex items-center justify-between text-sm">
                                 <span>Kargo</span>
-                                <span>{formatMoney(totals.shipping_total)}</span>
+                                <span>{totals.shipping_total} TL</span>
                             </div>
                             <div className="my-2 h-px bg-border" />
                             <div className="flex items-center justify-between text-base font-semibold">
                                 <span>Genel Toplam</span>
-                                <span>{formatMoney(totals.grand_total)}</span>
+                                <span>{totals.grand_total} TL</span>
                             </div>
 
                             <Link

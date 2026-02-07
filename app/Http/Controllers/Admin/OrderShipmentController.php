@@ -36,7 +36,7 @@ class OrderShipmentController extends Controller
     {
         $this->assertOrderShipment($order, $shipment);
 
-        $label = $this->resolveLabel($shipment);
+        $label = $this->ensureShipmentLabel($shipment);
 
         if (! $label) {
             throw ValidationException::withMessages([
@@ -54,7 +54,6 @@ class OrderShipmentController extends Controller
     public function labels(OrderShipmentBulkLabelRequest $request)
     {
         $shipmentIds = $request->validated('shipment_ids');
-        $providerAccountId = (string) $request->validated('provider_account_id');
 
         $shipments = OrderShipment::query()
             ->whereIn('id', $shipmentIds)
@@ -71,12 +70,6 @@ class OrderShipmentController extends Controller
         if (! $this->geliverClient->isConfigured()) {
             throw ValidationException::withMessages([
                 'shipment_ids' => 'Geliver ayarları tamamlanmamış.',
-            ]);
-        }
-
-        if ($providerAccountId === '') {
-            throw ValidationException::withMessages([
-                'provider_account_id' => 'Kargo firması seçimi zorunlu.',
             ]);
         }
 
@@ -124,7 +117,7 @@ class OrderShipmentController extends Controller
         $added = 0;
 
         foreach ($shipments as $shipment) {
-            $label = $this->ensureShipmentLabel($shipment, $providerAccountId);
+            $label = $this->ensureShipmentLabel($shipment);
             if (! $label) {
                 continue;
             }
@@ -164,6 +157,8 @@ class OrderShipmentController extends Controller
         $payload = (array) ($shipment->shipment_payload ?? []);
         $labelUrl = data_get($payload, 'transaction.shipment.labelURL')
             ?? data_get($payload, 'transaction.shipment.labelUrl')
+            ?? data_get($payload, 'transaction.shipment.responsiveLabelURL')
+            ?? data_get($payload, 'transaction.shipment.responsiveLabelUrl')
             ?? data_get($payload, 'shipment.labelURL')
             ?? data_get($payload, 'shipment.labelUrl')
             ?? data_get($payload, 'labelURL');
@@ -196,15 +191,25 @@ class OrderShipmentController extends Controller
     /**
      * @return array{content: string, filename: string}|null
      */
-    private function ensureShipmentLabel(OrderShipment $shipment, string $providerAccountId): ?array
+    private function ensureShipmentLabel(OrderShipment $shipment): ?array
     {
         $label = $this->resolveLabel($shipment);
         if ($label) {
             return $label;
         }
 
-        $payload = $this->buildTransactionPayload($shipment);
-        $tx = $this->geliverClient->createTransaction($payload, $providerAccountId);
+        $payload = is_array($shipment->shipment_payload) ? $shipment->shipment_payload : [];
+        $offerId = (string) ($shipment->service_code ?? '');
+
+        if ($offerId === '' || $offerId === 'flat') {
+            $offerId = (string) (data_get($payload, 'offer.id') ?? data_get($payload, 'offer_id') ?? '');
+        }
+
+        if ($offerId === '' || $offerId === 'flat') {
+            return null;
+        }
+
+        $tx = $this->geliverClient->acceptOffer($offerId);
 
         if (! $tx) {
             return null;
@@ -218,7 +223,6 @@ class OrderShipmentController extends Controller
         $mergedPayload = [
             ...$existingPayload,
             'transaction' => $tx,
-            'provider_account_id' => $providerAccountId,
         ];
 
         $shipment->forceFill([
@@ -228,71 +232,5 @@ class OrderShipmentController extends Controller
         ])->save();
 
         return $this->resolveLabel($shipment);
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    private function buildTransactionPayload(OrderShipment $shipment): array
-    {
-        $order = $shipment->order;
-        $address = $order?->addresses?->firstWhere('type', 'shipping');
-
-        if (! $order || ! $address) {
-            throw ValidationException::withMessages([
-                'shipment_ids' => 'Kargo adresi bulunamadı.',
-            ]);
-        }
-
-        $recipientName = trim((string) ($address->full_name ?? ''));
-        if ($recipientName === '') {
-            $recipientName = trim((string) ($order->user?->name ?? $order->user?->email ?? 'Müşteri'));
-        }
-
-        $recipient = [
-            'name' => $recipientName,
-            'email' => $order->user?->email,
-            'phone' => (string) $address->phone,
-            'address1' => (string) $address->line1,
-            'countryCode' => (string) ($address->country ?? 'TR'),
-            'cityName' => (string) $address->city,
-            'cityCode' => (string) ($this->shippingSettings->geliver_default_city_code ?: '34'),
-            'districtName' => (string) ($address->district ?? ''),
-            'zip' => (string) ($address->postal_code ?? ''),
-        ];
-
-        if (! $recipient['email']) {
-            unset($recipient['email']);
-        }
-
-        if ($recipient['districtName'] === '') {
-            unset($recipient['districtName']);
-        }
-
-        if ($recipient['zip'] === '') {
-            unset($recipient['zip']);
-        }
-
-        return [
-            'senderAddressID' => (string) $this->shippingSettings->geliver_sender_address_id,
-            'recipientAddress' => $recipient,
-            'length' => $this->shippingSettings->geliver_default_length,
-            'width' => $this->shippingSettings->geliver_default_width,
-            'height' => $this->shippingSettings->geliver_default_height,
-            'distanceUnit' => $this->shippingSettings->geliver_distance_unit,
-            'weight' => $this->shippingSettings->geliver_default_weight,
-            'massUnit' => $this->shippingSettings->geliver_mass_unit,
-            'order' => [
-                'orderNumber' => 'ORDER-'.$order->id,
-                'sourceIdentifier' => (string) $this->shippingSettings->geliver_source_identifier,
-                'totalAmount' => $this->formatMoney((float) $order->grand_total),
-                'totalAmountCurrency' => (string) $order->currency,
-            ],
-        ];
-    }
-
-    private function formatMoney(float $value): string
-    {
-        return number_format($value, 2, '.', '');
     }
 }

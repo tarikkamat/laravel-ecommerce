@@ -38,103 +38,9 @@ class GeliverClient
      */
     public function listProviderAccounts(): array
     {
-        $context = $this->settingsContext();
+        Log::warning('Geliver provider list disabled: marketplace flow only.', $this->settingsContext());
 
-        if (! class_exists(GeliverSdkClient::class)) {
-            Log::warning('Geliver provider list skipped: SDK missing.', $context);
-            return [];
-        }
-
-        if (! $this->settings->geliver_enabled || ($context['token_set'] ?? false) !== true) {
-            Log::warning('Geliver provider list skipped: not configured.', $context);
-            return [];
-        }
-
-        try {
-            $result = $this->client()->providers()->listAccounts();
-            Log::info('Geliver provider list response received.', [
-                ...$context,
-                'result_type' => gettype($result),
-            ]);
-        } catch (\Throwable $e) {
-            $errorContext = [
-                ...$context,
-                'message' => $e->getMessage(),
-            ];
-
-            if ($e instanceof \Geliver\ApiException) {
-                $errorContext['status'] = $e->status;
-                $errorContext['code'] = $e->codeStr;
-                $errorContext['additional'] = $e->additionalMessage;
-                $errorContext['body'] = $this->truncateBody($e->body);
-            }
-
-            Log::error('Geliver provider list failed.', $errorContext);
-            return [];
-        }
-
-        $items = [];
-
-        if (is_array($result)) {
-            $data = $result['data'] ?? null;
-            if (is_array($data)) {
-                if (array_is_list($data)) {
-                    $items = $data;
-                } elseif (is_array($data['list'] ?? null)) {
-                    $items = $data['list'];
-                } elseif (is_array($data['items'] ?? null)) {
-                    $items = $data['items'];
-                } elseif (is_array($data['providerAccounts'] ?? null)) {
-                    $items = $data['providerAccounts'];
-                } else {
-                    $items = $data;
-                }
-            } elseif (array_is_list($result)) {
-                $items = $result;
-            } else {
-                $items = $result;
-            }
-        }
-
-        Log::info('Geliver provider list parse info.', [
-            ...$context,
-            'result_keys' => is_array($result) ? array_keys($result) : null,
-            'data_keys' => is_array($result['data'] ?? null) ? array_keys($result['data']) : null,
-            'items_count' => is_array($items) ? count($items) : null,
-        ]);
-
-        $normalized = [];
-
-        foreach ($items as $item) {
-            if (! is_array($item)) {
-                continue;
-            }
-
-            $id = (string) ($item['id'] ?? $item['providerAccountID'] ?? '');
-            if ($id === '') {
-                continue;
-            }
-
-            $providerCode = (string) ($item['providerCode'] ?? '');
-            $label = trim((string) ($item['name'] ?? $item['providerName'] ?? $providerCode));
-
-            if ($label === '') {
-                $label = 'Kargo Firması';
-            }
-
-            $normalized[] = [
-                'id' => $id,
-                'label' => $label,
-                'providerCode' => $providerCode !== '' ? $providerCode : null,
-            ];
-        }
-
-        Log::info('Geliver provider list normalized.', [
-            ...$context,
-            'count' => count($normalized),
-        ]);
-
-        return $normalized;
+        return [];
     }
 
     /**
@@ -143,36 +49,13 @@ class GeliverClient
      */
     public function createTransaction(array $shipment, ?string $providerAccountId = null): ?array
     {
-        if (! class_exists(GeliverSdkClient::class) || ! $this->isConfigured()) {
-            return null;
-        }
+        Log::warning('Geliver createTransaction disabled: marketplace flow only.', [
+            ...$this->settingsContext(),
+            'provider_account_id' => $providerAccountId,
+            'order_number' => data_get($shipment, 'order.orderNumber'),
+        ]);
 
-        try {
-            $payload = ['shipment' => $shipment];
-
-            if ($providerAccountId !== null && $providerAccountId !== '') {
-                $payload['providerAccountID'] = $providerAccountId;
-            }
-
-            Log::info('Geliver transaction create requested.', [
-                ...$this->settingsContext(),
-                'provider_account_id' => $providerAccountId,
-                'order_number' => data_get($shipment, 'order.orderNumber'),
-            ]);
-
-            /** @var array<string, mixed> $tx */
-            $tx = $this->client()->transactions()->create($payload);
-
-            Log::info('Geliver transaction create response received.', [
-                ...$this->settingsContext(),
-                'transaction_id' => $tx['id'] ?? null,
-                'shipment_id' => data_get($tx, 'shipment.id'),
-            ]);
-
-            return $tx;
-        } catch (\Throwable) {
-            return null;
-        }
+        return null;
     }
 
     /**
@@ -218,13 +101,21 @@ class GeliverClient
         }
 
         $client = $this->client();
+        $context = $this->requestContext([
+            'order_number' => data_get($payload, 'order.orderNumber'),
+            'sender_address_id' => data_get($payload, 'senderAddressID'),
+        ]);
 
         try {
             /** @var array<string, mixed> $shipment */
             $shipment = $client->shipments()->create($payload);
 
             return $shipment;
-        } catch (\Throwable) {
+        } catch (\Geliver\ApiException $e) {
+            $this->logApiException('Geliver shipment create failed.', $context, $e);
+            return null;
+        } catch (\Throwable $e) {
+            $this->logThrowable('Geliver shipment create failed.', $context, $e);
             return null;
         }
     }
@@ -240,12 +131,22 @@ class GeliverClient
             return null;
         }
 
+        $context = $this->requestContext([
+            'shipment_id' => $shipmentId,
+            'interval_seconds' => $intervalSeconds,
+            'timeout_seconds' => $timeoutSeconds,
+        ]);
+
         try {
             /** @var array<string, mixed> $offers */
             $offers = $this->client()->shipments()->waitOffers($shipmentId, $intervalSeconds, $timeoutSeconds);
 
             return $offers;
-        } catch (\Throwable) {
+        } catch (\Geliver\ApiException $e) {
+            $this->logApiException('Geliver wait offers failed.', $context, $e);
+            return null;
+        } catch (\Throwable $e) {
+            $this->logThrowable('Geliver wait offers failed.', $context, $e);
             return null;
         }
     }
@@ -261,12 +162,20 @@ class GeliverClient
             return null;
         }
 
+        $context = $this->requestContext([
+            'offer_id' => $offerId,
+        ]);
+
         try {
             /** @var array<string, mixed> $tx */
             $tx = $this->client()->transactions()->acceptOffer($offerId);
 
             return $tx;
-        } catch (\Throwable) {
+        } catch (\Geliver\ApiException $e) {
+            $this->logApiException('Geliver accept offer failed.', $context, $e);
+            return null;
+        } catch (\Throwable $e) {
+            $this->logThrowable('Geliver accept offer failed.', $context, $e);
             return null;
         }
     }
@@ -280,9 +189,17 @@ class GeliverClient
             return null;
         }
 
+        $context = $this->requestContext([
+            'label_url_suffix' => Str::substr($url, -32),
+        ]);
+
         try {
             return $this->client()->shipments()->downloadLabelByUrl($url);
-        } catch (\Throwable) {
+        } catch (\Geliver\ApiException $e) {
+            $this->logApiException('Geliver label download by url failed.', $context, $e);
+            return null;
+        } catch (\Throwable $e) {
+            $this->logThrowable('Geliver label download by url failed.', $context, $e);
             return null;
         }
     }
@@ -296,10 +213,57 @@ class GeliverClient
             return null;
         }
 
+        $context = $this->requestContext([
+            'shipment_id' => $shipmentId,
+        ]);
+
         try {
             return $this->client()->shipments()->downloadLabel($shipmentId);
-        } catch (\Throwable) {
+        } catch (\Geliver\ApiException $e) {
+            $this->logApiException('Geliver label download by shipment id failed.', $context, $e);
+            return null;
+        } catch (\Throwable $e) {
+            $this->logThrowable('Geliver label download by shipment id failed.', $context, $e);
             return null;
         }
+    }
+
+    /**
+     * @param  array<string, mixed>  $extra
+     * @return array<string, mixed>
+     */
+    private function requestContext(array $extra = []): array
+    {
+        return [
+            ...$this->settingsContext(),
+            ...$extra,
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $context
+     */
+    private function logApiException(string $message, array $context, \Geliver\ApiException $e): void
+    {
+        Log::error($message, [
+            ...$context,
+            'status' => $e->status,
+            'code' => $e->codeStr,
+            'additional' => $e->additionalMessage,
+            'body' => $this->truncateBody($e->body),
+            'message' => $e->getMessage(),
+        ]);
+    }
+
+    /**
+     * @param  array<string, mixed>  $context
+     */
+    private function logThrowable(string $message, array $context, \Throwable $e): void
+    {
+        Log::error($message, [
+            ...$context,
+            'message' => $e->getMessage(),
+            'exception' => get_class($e),
+        ]);
     }
 }

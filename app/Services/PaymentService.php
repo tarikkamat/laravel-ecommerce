@@ -242,7 +242,9 @@ class PaymentService
             return;
         }
 
+        $existingPayload = is_array($shipment->shipment_payload) ? $shipment->shipment_payload : [];
         $shipmentPayload = [
+            ...$existingPayload,
             'offer_id' => $offerId,
             'transaction' => $tx,
         ];
