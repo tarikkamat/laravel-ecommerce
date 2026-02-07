@@ -75,23 +75,23 @@ export default function CartPage({ totals: initialTotals, discount: initialDisco
         [currency],
     );
 
-    const applySummary = useCallback(
-        (data?: CartSummaryResponse | null) => {
-            if (!data) return;
-            if (data?.totals) {
-                setTotals(data.totals);
-            }
-            if ('discount' in data) {
-                setAppliedDiscount(data.discount ?? null);
-                if (data.discount?.code) {
-                    setDiscountCode(data.discount.code);
-                } else if (appliedDiscount) {
+    const applySummary = useCallback((data?: CartSummaryResponse | null) => {
+        if (!data) return;
+        if (data?.totals) {
+            setTotals(data.totals);
+        }
+        if ('discount' in data) {
+            setAppliedDiscount((previous) => {
+                const next = data.discount ?? null;
+                if (next?.code) {
+                    setDiscountCode(next.code);
+                } else if (previous) {
                     setDiscountCode('');
                 }
-            }
-        },
-        [appliedDiscount],
-    );
+                return next;
+            });
+        }
+    }, []);
 
     const loadSummary = useCallback(async () => {
         setLoading(true);
@@ -264,7 +264,7 @@ export default function CartPage({ totals: initialTotals, discount: initialDisco
                                             <div className="text-xs text-muted-foreground">SKU: {item.sku}</div>
                                         ) : null}
                                         <div className="mt-1 text-sm text-muted-foreground">
-                                            Birim: {item.unit_effective} TL
+                                            Birim: {formatMoney(item.unit_effective)}
                                         </div>
                                     </div>
 

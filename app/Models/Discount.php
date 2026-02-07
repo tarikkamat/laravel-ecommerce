@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\DiscountType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 
 class Discount extends Model
 {
@@ -28,5 +29,20 @@ class Discount extends Model
             'starts_at' => 'datetime',
             'ends_at' => 'datetime',
         ];
+    }
+
+    public function isActive(?Carbon $now = null): bool
+    {
+        $at = $now ?? now();
+
+        if ($this->starts_at && $this->starts_at->gt($at)) {
+            return false;
+        }
+
+        if ($this->ends_at && $this->ends_at->lt($at)) {
+            return false;
+        }
+
+        return true;
     }
 }

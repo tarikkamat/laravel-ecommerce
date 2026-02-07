@@ -125,7 +125,7 @@ class DiscountService
             ->where('code', $code)
             ->first();
 
-        if (! $discount || ! $this->isActive($discount)) {
+        if (! $discount || ! $discount->isActive()) {
             if ($throwOnMissing) {
                 throw ValidationException::withMessages([
                     'code' => 'Kupon kodu gecersiz.',
@@ -136,21 +136,6 @@ class DiscountService
         }
 
         return $discount;
-    }
-
-    private function isActive(Discount $discount): bool
-    {
-        $now = now();
-
-        if ($discount->starts_at && $discount->starts_at->isFuture()) {
-            return false;
-        }
-
-        if ($discount->ends_at && $discount->ends_at->isPast()) {
-            return false;
-        }
-
-        return true;
     }
 
     private function assertUsageAvailable(Discount $discount): void
