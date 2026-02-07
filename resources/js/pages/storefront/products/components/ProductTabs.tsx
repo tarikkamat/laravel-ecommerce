@@ -11,26 +11,19 @@ export function ProductTabs({ product }: ProductTabsProps) {
     return (
         <Tabs defaultValue="description" className="w-full">
             <TabsList variant="line" className="w-full justify-start border-b rounded-none h-auto p-0 gap-8">
-                <TabsTrigger 
-                    value="description" 
+                <TabsTrigger
+                    value="description"
                     className="data-[state=active]:bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary px-1 py-4 text-sm font-semibold transition-all"
                 >
                     <FileText className="mr-2 size-4" />
                     Ürün Açıklaması
                 </TabsTrigger>
-                <TabsTrigger 
+                <TabsTrigger
                     value="ingredients"
                     className="data-[state=active]:bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary px-1 py-4 text-sm font-semibold transition-all"
                 >
                     <Beaker className="mr-2 size-4" />
                     İçerik ve Detaylar
-                </TabsTrigger>
-                <TabsTrigger 
-                    value="usage"
-                    className="data-[state=active]:bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary px-1 py-4 text-sm font-semibold transition-all"
-                >
-                    <Zap className="mr-2 size-4" />
-                    Kullanım Talimatı
                 </TabsTrigger>
             </TabsList>
 
@@ -72,7 +65,7 @@ export function ProductTabs({ product }: ProductTabsProps) {
                                     <p className="text-sm text-muted-foreground italic">İçerik bilgisi mevcut değil.</p>
                                 )}
                             </div>
-                            
+
                             <div className="space-y-3">
                                 <h4 className="text-sm font-bold flex items-center gap-2">
                                     <Info className="size-4 text-primary" />
@@ -94,20 +87,6 @@ export function ProductTabs({ product }: ProductTabsProps) {
                                 </ul>
                             </div>
                         </div>
-                    </div>
-                </TabsContent>
-
-                <TabsContent value="usage" className="mt-0">
-                    <div className="rounded-2xl bg-muted/30 p-6">
-                        <h4 className="text-sm font-bold mb-4 flex items-center gap-2">
-                            <Zap className="size-4 text-primary" />
-                            Nasıl Kullanılır?
-                        </h4>
-                        <p className="text-sm text-muted-foreground leading-relaxed">
-                            Ürünü temizlenmiş cilde dairesel hareketlerle masaj yaparak uygulayınız. 
-                            Sabah ve akşam olmak üzere günde iki kez kullanılması önerilir. 
-                            Gözle temasından kaçınınız.
-                        </p>
                     </div>
                 </TabsContent>
             </div>
