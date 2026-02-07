@@ -20,6 +20,7 @@ export interface Product {
     barcode: string | null;
     skt: string | null;
     active: boolean;
+    comments_enabled: boolean;
     views_count?: number;
     categories: Category[];
     tags: Tag[];
@@ -60,6 +61,7 @@ export interface ProductFormData {
     barcode: string;
     skt: string;
     active: boolean;
+    comments_enabled: boolean;
     category_ids: string[];
     tag_ids: string[];
     ingredient_ids: string[];

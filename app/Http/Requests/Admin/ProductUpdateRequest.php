@@ -30,6 +30,7 @@ class ProductUpdateRequest extends FormRequest
             'barcode' => ['nullable', 'string', Rule::unique('products', 'barcode')->ignore($productId)->whereNull('deleted_at')],
             'skt' => ['nullable', 'string', 'max:255', 'regex:/^\d{2}-\d{2}-\d{4}$/'],
             'active' => ['boolean'],
+            'comments_enabled' => ['boolean'],
             'category_ids' => ['nullable', 'array'],
             'category_ids.*' => ['integer', 'exists:categories,id'],
             'tag_ids' => ['nullable', 'array'],

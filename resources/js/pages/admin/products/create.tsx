@@ -136,6 +136,7 @@ interface FormData {
     barcode: string;
     skt: string;
     active: boolean;
+    comments_enabled: boolean;
     category_ids: string[];
     tag_ids: string[];
     ingredient_ids: string[];
@@ -169,6 +170,7 @@ export default function ProductsCreate({ brands, categories, tags, ingredients }
         barcode: '',
         skt: '',
         active: true,
+        comments_enabled: true,
         category_ids: [],
         tag_ids: [],
         ingredient_ids: [],
@@ -480,6 +482,28 @@ export default function ProductsCreate({ brands, categories, tags, ingredients }
                                     </label>
                                 </div>
                                 <FieldError>{errors.active}</FieldError>
+                            </Field>
+
+                            <Field>
+                                <div className="flex items-center space-x-2">
+                                    <Checkbox
+                                        id="comments_enabled"
+                                        checked={data.comments_enabled}
+                                        onCheckedChange={(checked) =>
+                                            setData('comments_enabled', checked === true)
+                                        }
+                                    />
+                                    <label
+                                        htmlFor="comments_enabled"
+                                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                    >
+                                        Yorumlara Açık
+                                    </label>
+                                </div>
+                                <FieldDescription>
+                                    Kapalıysa mağaza ürün sayfasında yorum formu görünmez.
+                                </FieldDescription>
+                                <FieldError>{errors.comments_enabled}</FieldError>
                             </Field>
                         </CardContent>
                     </Card>

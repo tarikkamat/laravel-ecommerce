@@ -11,6 +11,7 @@ export type * from './tag';
 export type * from './user';
 export type * from './page';
 export type * from './order';
+export type * from './comment';
 export type * from './dashboard';
 
 import type { Auth } from './auth';

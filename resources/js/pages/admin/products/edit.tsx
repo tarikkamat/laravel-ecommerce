@@ -125,6 +125,7 @@ interface FormData {
     barcode: string;
     skt: string;
     active: boolean;
+    comments_enabled: boolean;
     category_ids: string[];
     tag_ids: string[];
     ingredient_ids: string[];
@@ -196,6 +197,7 @@ export default function ProductsEdit({ item, brands, categories, tags, ingredien
         barcode: item.barcode || '',
         skt: normalizeDateValue(item.skt),
         active: item.active,
+        comments_enabled: item.comments_enabled ?? true,
         category_ids: (item.category_ids || []).map(String),
         tag_ids: (item.tag_ids || []).map(String),
         ingredient_ids: (item.ingredient_ids || []).map(String),
