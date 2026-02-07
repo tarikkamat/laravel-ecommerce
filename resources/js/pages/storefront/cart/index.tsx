@@ -285,7 +285,7 @@ export default function CartPage({ totals: initialTotals, discount: initialDisco
                                             disabled={loading}
                                             className="text-xs text-red-600"
                                         >
-                                            Kaldir
+                                            Sil
                                         </button>
                                     </div>
                                 </div>
@@ -294,7 +294,7 @@ export default function CartPage({ totals: initialTotals, discount: initialDisco
 
                         <div className="space-y-4 rounded border p-4">
                             <div className="space-y-2">
-                                <div className="text-sm font-medium">Indirim Kodu</div>
+                                <div className="text-sm font-medium">İndirim Kodu</div>
                                 {appliedDiscount ? (
                                     <div className="flex items-center justify-between rounded border px-3 py-2 text-sm">
                                         <div>
@@ -309,7 +309,7 @@ export default function CartPage({ totals: initialTotals, discount: initialDisco
                                             disabled={loading}
                                             className="text-xs text-red-600 disabled:opacity-50"
                                         >
-                                            Kaldir
+                                            Sil
                                         </button>
                                     </div>
                                 ) : (
@@ -347,7 +347,7 @@ export default function CartPage({ totals: initialTotals, discount: initialDisco
                             </div>
                             {totals.discount_total > 0 ? (
                                 <div className="flex items-center justify-between text-sm text-emerald-700">
-                                    <span>Indirim</span>
+                                    <span>İndirim</span>
                                     <span>-{totals.discount_total} TL</span>
                                 </div>
                             ) : null}

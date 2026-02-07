@@ -5,12 +5,19 @@ namespace App\Services;
 use App\Enums\DiscountType;
 use App\Models\Discount;
 use App\Models\Order;
+use App\Repositories\Contracts\IDiscountRepository;
+use App\Services\Contracts\IDiscountService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
-class DiscountService
+class DiscountService extends BaseService implements IDiscountService
 {
     private const SESSION_KEY = 'cart.discount_code';
+
+    public function __construct(IDiscountRepository $repository)
+    {
+        parent::__construct($repository);
+    }
 
     public function apply(Request $request, string $code): Discount
     {
