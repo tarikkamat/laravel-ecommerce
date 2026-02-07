@@ -3,6 +3,8 @@
 namespace App\Integrations\Geliver;
 
 use Geliver\Client as GeliverSdkClient;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use RuntimeException;
 use App\Settings\ShippingSettings;
 
@@ -36,13 +38,38 @@ class GeliverClient
      */
     public function listProviderAccounts(): array
     {
-        if (! class_exists(GeliverSdkClient::class) || ! $this->isConfigured()) {
+        $context = $this->settingsContext();
+
+        if (! class_exists(GeliverSdkClient::class)) {
+            Log::warning('Geliver provider list skipped: SDK missing.', $context);
+            return [];
+        }
+
+        if (! $this->settings->geliver_enabled || ($context['token_set'] ?? false) !== true) {
+            Log::warning('Geliver provider list skipped: not configured.', $context);
             return [];
         }
 
         try {
             $result = $this->client()->providers()->listAccounts();
-        } catch (\Throwable) {
+            Log::info('Geliver provider list response received.', [
+                ...$context,
+                'result_type' => gettype($result),
+            ]);
+        } catch (\Throwable $e) {
+            $errorContext = [
+                ...$context,
+                'message' => $e->getMessage(),
+            ];
+
+            if ($e instanceof \Geliver\ApiException) {
+                $errorContext['status'] = $e->status;
+                $errorContext['code'] = $e->codeStr;
+                $errorContext['additional'] = $e->additionalMessage;
+                $errorContext['body'] = $this->truncateBody($e->body);
+            }
+
+            Log::error('Geliver provider list failed.', $errorContext);
             return [];
         }
 
@@ -78,6 +105,11 @@ class GeliverClient
             ];
         }
 
+        Log::info('Geliver provider list normalized.', [
+            ...$context,
+            'count' => count($normalized),
+        ]);
+
         return $normalized;
     }
 
@@ -98,13 +130,55 @@ class GeliverClient
                 $payload['providerAccountID'] = $providerAccountId;
             }
 
+            Log::info('Geliver transaction create requested.', [
+                ...$this->settingsContext(),
+                'provider_account_id' => $providerAccountId,
+                'order_number' => data_get($shipment, 'order.orderNumber'),
+            ]);
+
             /** @var array<string, mixed> $tx */
             $tx = $this->client()->transactions()->create($payload);
+
+            Log::info('Geliver transaction create response received.', [
+                ...$this->settingsContext(),
+                'transaction_id' => $tx['id'] ?? null,
+                'shipment_id' => data_get($tx, 'shipment.id'),
+            ]);
 
             return $tx;
         } catch (\Throwable) {
             return null;
         }
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function settingsContext(): array
+    {
+        $token = (string) $this->settings->geliver_token;
+        $sender = (string) $this->settings->geliver_sender_address_id;
+
+        return [
+            'geliver_enabled' => (bool) $this->settings->geliver_enabled,
+            'token_set' => $token !== '',
+            'sender_set' => $sender !== '',
+            'token_suffix' => $token !== '' ? Str::substr($token, -6) : null,
+            'sender_suffix' => $sender !== '' ? Str::substr($sender, -6) : null,
+        ];
+    }
+
+    /**
+     * @param  mixed  $body
+     * @return mixed
+     */
+    private function truncateBody($body)
+    {
+        if (is_string($body)) {
+            return Str::limit($body, 1000);
+        }
+
+        return $body;
     }
 
     /**
