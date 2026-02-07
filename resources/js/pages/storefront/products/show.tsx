@@ -1,10 +1,6 @@
-import StorefrontLayout from '@/layouts/storefront/storefront-layout';
-import type { Product } from '@/types/product';
-import type { ProductComment, SharedData } from '@/types';
-import { ProductGallery } from './components/ProductGallery';
-import { ProductInfo } from './components/ProductInfo';
-import { ProductTabs } from './components/ProductTabs';
 import { Link, useForm, usePage } from '@inertiajs/react';
+import { type FormEventHandler, useState } from 'react';
+
 import {
     Breadcrumb,
     BreadcrumbItem,
@@ -13,10 +9,15 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Separator } from "@/components/ui/separator";
 import { Button } from '@/components/ui/button';
+import { Separator } from "@/components/ui/separator";
+import StorefrontLayout from '@/layouts/storefront/storefront-layout';
 import storefront from '@/routes/storefront';
-import { type FormEventHandler, useState } from 'react';
+import type { ProductComment, SharedData } from '@/types';
+import type { Product } from '@/types/product';
+import { ProductGallery } from './components/ProductGallery';
+import { ProductInfo } from './components/ProductInfo';
+import { ProductTabs } from './components/ProductTabs';
 
 type ProductShowProps = {
     product: Product;
