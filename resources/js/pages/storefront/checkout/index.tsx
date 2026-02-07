@@ -172,7 +172,7 @@ export default function CheckoutPage({
         `;
 
         const discountLine =
-            totals.discount_total > 0 ? `<p>İndirim: ${formatMoney(-totals.discount_total)}</p>` : '';
+            totals.discount_total > 0 ? `<p>Indirim: ${formatMoney(-totals.discount_total)}</p>` : '';
         const taxLine = pricesIncludeTax ? '' : `<p>Vergi Tutarı: ${formatMoney(totals.tax_total)}</p>`;
         const totalsTable = `
             <table style=\"width:100%;border-collapse:collapse;margin-top:12px\">
@@ -591,7 +591,7 @@ export default function CheckoutPage({
                         </div>
                         {totals.discount_total > 0 ? (
                             <div className="flex items-center justify-between text-sm text-emerald-700">
-                                <span>İndirim</span>
+                                <span>Indirim</span>
                                 <span>{formatMoney(-totals.discount_total)}</span>
                             </div>
                         ) : null}

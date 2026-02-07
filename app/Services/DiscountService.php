@@ -157,7 +157,7 @@ class DiscountService
     {
         if (! $this->isUsageAvailable($discount)) {
             throw ValidationException::withMessages([
-                'code' => 'Kupon kodu kullanım limiti doldu.',
+                'code' => 'Kupon kodu kullanim limiti doldu.',
             ]);
         }
     }

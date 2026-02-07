@@ -305,7 +305,7 @@ export default function CartPage({ totals: initialTotals, discount: initialDisco
 
                         <div className="space-y-4 rounded border p-4">
                             <div className="space-y-2">
-                                <div className="text-sm font-medium">İndirim Kodu</div>
+                                <div className="text-sm font-medium">Indirim Kodu</div>
                                 {appliedDiscount ? (
                                     <div className="flex items-center justify-between rounded border px-3 py-2 text-sm">
                                         <div>
@@ -329,7 +329,12 @@ export default function CartPage({ totals: initialTotals, discount: initialDisco
                                             className="h-9 flex-1 rounded border px-3 text-sm"
                                             placeholder="INDIRIM2024"
                                             value={discountCode}
-                                            onChange={(event) => setDiscountCode(event.target.value.toUpperCase())}
+                                            onChange={(event) => {
+                                                setDiscountCode(event.target.value.toUpperCase());
+                                                if (discountMessage) {
+                                                    setDiscountMessage(null);
+                                                }
+                                            }}
                                             disabled={loading}
                                         />
                                         <button
@@ -353,7 +358,7 @@ export default function CartPage({ totals: initialTotals, discount: initialDisco
                             </div>
                             {totals.discount_total > 0 ? (
                                 <div className="flex items-center justify-between text-sm text-emerald-700">
-                                    <span>İndirim</span>
+                                    <span>Indirim</span>
                                     <span>{formatMoney(-totals.discount_total)}</span>
                                 </div>
                             ) : null}
