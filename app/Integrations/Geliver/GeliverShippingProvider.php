@@ -55,7 +55,7 @@ class GeliverShippingProvider
         }
 
         $payload = $this->buildShipmentPayload($cart, $address);
-        $shipment = $this->client->createTestShipment($payload);
+        $shipment = $this->client->createShipment($payload);
 
         if (! $shipment) {
             return null;

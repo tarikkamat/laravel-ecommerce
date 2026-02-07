@@ -76,8 +76,32 @@ class GeliverClient
         $items = [];
 
         if (is_array($result)) {
-            $items = is_array($result['data'] ?? null) ? $result['data'] : $result;
+            $data = $result['data'] ?? null;
+            if (is_array($data)) {
+                if (array_is_list($data)) {
+                    $items = $data;
+                } elseif (is_array($data['list'] ?? null)) {
+                    $items = $data['list'];
+                } elseif (is_array($data['items'] ?? null)) {
+                    $items = $data['items'];
+                } elseif (is_array($data['providerAccounts'] ?? null)) {
+                    $items = $data['providerAccounts'];
+                } else {
+                    $items = $data;
+                }
+            } elseif (array_is_list($result)) {
+                $items = $result;
+            } else {
+                $items = $result;
+            }
         }
+
+        Log::info('Geliver provider list parse info.', [
+            ...$context,
+            'result_keys' => is_array($result) ? array_keys($result) : null,
+            'data_keys' => is_array($result['data'] ?? null) ? array_keys($result['data']) : null,
+            'items_count' => is_array($items) ? count($items) : null,
+        ]);
 
         $normalized = [];
 
@@ -187,7 +211,7 @@ class GeliverClient
      * @param  array<string, mixed>  $payload
      * @return array<string, mixed>|null
      */
-    public function createTestShipment(array $payload): ?array
+    public function createShipment(array $payload): ?array
     {
         if (! class_exists(GeliverSdkClient::class) || ! $this->isConfigured()) {
             return null;
@@ -197,7 +221,7 @@ class GeliverClient
 
         try {
             /** @var array<string, mixed> $shipment */
-            $shipment = $client->shipments()->createTest($payload);
+            $shipment = $client->shipments()->create($payload);
 
             return $shipment;
         } catch (\Throwable) {
