@@ -20,6 +20,7 @@ export interface Product {
     barcode: string | null;
     skt: string | null;
     active: boolean;
+    views_count?: number;
     categories: Category[];
     tags: Tag[];
     images: ImageModel[];

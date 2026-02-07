@@ -154,10 +154,14 @@ class ProductController extends Controller
         return $tree;
     }
 
-    public function show(string $identifier): Response
+    public function show(Request $request, string $identifier): Response
     {
         $product = $this->service->findBySlugOrIdOrFail($identifier);
         $product->load(['brand', 'categories', 'tags', 'ingredients', 'images']);
+
+        if (! $request->header('x-inertia-prefetch')) {
+            $product->increment('views_count');
+        }
 
         return Inertia::render('storefront/products/show', [
             'product' => $product,

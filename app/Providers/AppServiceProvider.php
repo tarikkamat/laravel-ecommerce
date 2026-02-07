@@ -30,6 +30,7 @@ class AppServiceProvider extends ServiceProvider
             \App\Services\Contracts\IBrandService::class => \App\Services\BrandService::class,
             \App\Services\Contracts\ICategoryService::class => \App\Services\CategoryService::class,
             \App\Services\Contracts\IDiscountService::class => \App\Services\DiscountService::class,
+            \App\Services\Contracts\IDashboardService::class => \App\Services\DashboardService::class,
             \App\Services\Contracts\IImageService::class => \App\Services\ImageService::class,
             \App\Services\Contracts\IIngredientService::class => \App\Services\IngredientService::class,
             \App\Services\Contracts\IPageService::class => \App\Services\PageService::class,
