@@ -19,6 +19,7 @@ export function StorefrontNav() {
     const [mobileCategoriesOpen, setMobileCategoriesOpen] = useState(false);
     const [mobileCategoryId, setMobileCategoryId] = useState<number | null>(null);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const bodyStyleRef = useRef<string>('');
     const navRef = useRef<HTMLElement>(null);
     const cartRef = useRef<HTMLDivElement>(null);
     const searchRef = useRef<HTMLDivElement>(null);
@@ -32,6 +33,23 @@ export function StorefrontNav() {
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
+
+    useEffect(() => {
+        if (!isMobileMenuOpen) return;
+        const scrollY = window.scrollY;
+        const body = document.body;
+        bodyStyleRef.current = body.style.cssText;
+        body.style.position = 'fixed';
+        body.style.top = `-${scrollY}px`;
+        body.style.left = '0';
+        body.style.right = '0';
+        body.style.width = '100%';
+        body.style.overflow = 'hidden';
+        return () => {
+            body.style.cssText = bodyStyleRef.current;
+            window.scrollTo(0, scrollY);
+        };
+    }, [isMobileMenuOpen]);
 
 
     useEffect(() => {
