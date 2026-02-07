@@ -86,6 +86,10 @@ export type SharedData = {
                 buttons?: { label: string; url: string; variant?: 'primary' | 'secondary' }[];
             }[];
         };
+        tax: {
+            prices_include_tax: boolean;
+            label: string;
+        };
     };
     [key: string]: unknown;
 };

@@ -76,6 +76,8 @@ class SettingsUpdateRequest extends FormRequest
 
             'free_shipping_enabled' => ['boolean'],
             'free_shipping_minimum' => ['nullable', 'numeric', 'min:0'],
+            'flat_rate_label' => ['nullable', 'string', 'max:255'],
+            'flat_rate' => ['nullable', 'numeric', 'min:0'],
 
             'geliver_enabled' => ['boolean'],
             'geliver_token' => ['nullable', 'string', 'max:255'],

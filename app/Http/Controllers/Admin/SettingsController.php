@@ -90,6 +90,8 @@ class SettingsController extends Controller
                 'shipping' => [
                     'free_shipping_enabled' => $shippingSettings->free_shipping_enabled,
                     'free_shipping_minimum' => $shippingSettings->free_shipping_minimum,
+                    'flat_rate_label' => $shippingSettings->flat_rate_label,
+                    'flat_rate' => $shippingSettings->flat_rate,
                     'geliver_enabled' => $shippingSettings->geliver_enabled,
                     'geliver_token' => $shippingSettings->geliver_token,
                     'geliver_sender_address_id' => $shippingSettings->geliver_sender_address_id,
@@ -200,6 +202,8 @@ class SettingsController extends Controller
 
         $shippingSettings->free_shipping_enabled = $request->boolean('free_shipping_enabled');
         $shippingSettings->free_shipping_minimum = (float) $request->input('free_shipping_minimum', 0);
+        $shippingSettings->flat_rate_label = $request->string('flat_rate_label', $shippingSettings->flat_rate_label)->toString();
+        $shippingSettings->flat_rate = (float) $request->input('flat_rate', $shippingSettings->flat_rate);
         $shippingSettings->geliver_enabled = $request->boolean('geliver_enabled');
         $shippingSettings->geliver_token = $request->string('geliver_token', '')->toString();
         $shippingSettings->geliver_sender_address_id = $request->string('geliver_sender_address_id', '')->toString();

@@ -88,6 +88,8 @@ type SettingsPayload = {
     shipping: {
         free_shipping_enabled: boolean;
         free_shipping_minimum: number;
+        flat_rate_label: string;
+        flat_rate: number;
         geliver_enabled: boolean;
         geliver_token: string;
         geliver_sender_address_id: string;
@@ -168,6 +170,8 @@ type SettingsFormData = {
     iyzico_webhook_secret: string;
     free_shipping_enabled: boolean;
     free_shipping_minimum: number;
+    flat_rate_label: string;
+    flat_rate: number;
     geliver_enabled: boolean;
     geliver_token: string;
     geliver_sender_address_id: string;
@@ -273,6 +277,8 @@ export default function SettingsIndex({ settings, categories, pages }: Props) {
         iyzico_webhook_secret: settings.payments.iyzico_webhook_secret ?? '',
         free_shipping_enabled: settings.shipping.free_shipping_enabled ?? false,
         free_shipping_minimum: settings.shipping.free_shipping_minimum ?? 0,
+        flat_rate_label: settings.shipping.flat_rate_label ?? 'Standart Kargo',
+        flat_rate: settings.shipping.flat_rate ?? 0,
         geliver_enabled: settings.shipping.geliver_enabled ?? true,
         geliver_token: settings.shipping.geliver_token ?? '',
         geliver_sender_address_id: settings.shipping.geliver_sender_address_id ?? '',
@@ -1167,6 +1173,31 @@ export default function SettingsIndex({ settings, categories, pages }: Props) {
                                     onChange={(event) => setData('free_shipping_minimum', Number(event.target.value))}
                                 />
                                 <FieldError>{errors.free_shipping_minimum}</FieldError>
+                            </Field>
+                        </div>
+
+                        <Separator />
+
+                        <div className="grid gap-4 md:grid-cols-2">
+                            <Field>
+                                <FieldLabel htmlFor="flat_rate_label">Standart Kargo Adı</FieldLabel>
+                                <Input
+                                    id="flat_rate_label"
+                                    value={data.flat_rate_label}
+                                    onChange={(event) => setData('flat_rate_label', event.target.value)}
+                                />
+                                <FieldError>{errors.flat_rate_label}</FieldError>
+                            </Field>
+                            <Field>
+                                <FieldLabel htmlFor="flat_rate">Standart Kargo Ücreti</FieldLabel>
+                                <Input
+                                    id="flat_rate"
+                                    type="number"
+                                    step="0.01"
+                                    value={data.flat_rate}
+                                    onChange={(event) => setData('flat_rate', Number(event.target.value))}
+                                />
+                                <FieldError>{errors.flat_rate}</FieldError>
                             </Field>
                         </div>
 

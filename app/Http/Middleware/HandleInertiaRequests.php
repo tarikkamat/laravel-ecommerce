@@ -10,6 +10,7 @@ use App\Services\ShippingService;
 use App\Settings\HomeSettings;
 use App\Settings\NavigationSettings;
 use App\Settings\SiteSettings;
+use App\Settings\TaxSettings;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -153,6 +154,8 @@ class HandleInertiaRequests extends Middleware
         $navigationSettings = app(NavigationSettings::class);
         /** @var HomeSettings $homeSettings */
         $homeSettings = app(HomeSettings::class);
+        /** @var TaxSettings $taxSettings */
+        $taxSettings = app(TaxSettings::class);
 
         return [
             'site' => [
@@ -192,6 +195,10 @@ class HandleInertiaRequests extends Middleware
             'home' => [
                 'hero_autoplay_ms' => $homeSettings->hero_autoplay_ms,
                 'hero_slides' => $homeSettings->hero_slides,
+            ],
+            'tax' => [
+                'prices_include_tax' => $taxSettings->prices_include_tax,
+                'label' => $taxSettings->label,
             ],
         ];
     }

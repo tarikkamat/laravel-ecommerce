@@ -8,6 +8,8 @@ class ShippingSettings extends Settings
 {
     public bool $free_shipping_enabled = false;
     public float $free_shipping_minimum = 0.0;
+    public string $flat_rate_label = 'Standart Kargo';
+    public float $flat_rate = 49.90;
 
     public bool $geliver_enabled = true;
     public string $geliver_token = '';

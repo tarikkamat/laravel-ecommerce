@@ -1,6 +1,7 @@
 import StorefrontLayout from '@/layouts/storefront/storefront-layout';
 import { Link, usePage } from '@inertiajs/react';
 import { useMemo } from 'react';
+import type { SharedData } from '@/types';
 
 type OrderItem = {
     id: number;
@@ -36,8 +37,9 @@ type ResultPageProps = {
 };
 
 export default function CheckoutResultPage({ order, paymentStatus, apiEndpoints }: ResultPageProps) {
-    const { flash } = usePage<{ flash?: FlashProps }>().props;
+    const { flash, storefrontSettings } = usePage<SharedData & { flash?: FlashProps }>().props;
     const currency = order.currency ?? 'TRY';
+    const pricesIncludeTax = storefrontSettings?.tax?.prices_include_tax ?? false;
     const statusFromCallback = paymentStatus ?? flash?.paymentStatus;
 
     const formatMoney = useMemo(
@@ -81,10 +83,12 @@ export default function CheckoutResultPage({ order, paymentStatus, apiEndpoints 
                             <span>Ara Toplam</span>
                             <span>{formatMoney(order.subtotal)}</span>
                         </div>
-                        <div className="flex items-center justify-between">
-                            <span>Vergi</span>
-                            <span>{formatMoney(order.taxTotal)}</span>
-                        </div>
+                        {!pricesIncludeTax ? (
+                            <div className="flex items-center justify-between">
+                                <span>Vergi</span>
+                                <span>{formatMoney(order.taxTotal)}</span>
+                            </div>
+                        ) : null}
                         <div className="flex items-center justify-between">
                             <span>Kargo</span>
                             <span>{formatMoney(order.shippingTotal)}</span>

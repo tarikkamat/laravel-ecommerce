@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Order;
 use App\Models\Product;
+use App\Settings\ShippingSettings;
 use App\Settings\TaxSettings;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -16,7 +17,8 @@ class CheckoutService
         private readonly CartTotalsService $totalsService,
         private readonly ShippingService $shippingService,
         private readonly TaxService $taxService,
-        private readonly TaxSettings $taxSettings
+        private readonly TaxSettings $taxSettings,
+        private readonly ShippingSettings $shippingSettings
     ) {}
 
     /**
@@ -112,7 +114,11 @@ class CheckoutService
         $taxLabel = $this->taxSettings->label ?: 'KDV';
         $shippingTotal = round((float) ($selectedShipping['amount'] ?? 0), 2);
 
-        return DB::transaction(function () use ($cart, $address, $selectedShipping, $shippingTotal, $taxLabel, $request): Order {
+        $shippingLabel = trim((string) $this->shippingSettings->flat_rate_label) !== ''
+            ? $this->shippingSettings->flat_rate_label
+            : 'Standart Kargo';
+
+        return DB::transaction(function () use ($cart, $address, $selectedShipping, $shippingTotal, $taxLabel, $shippingLabel, $request): Order {
             $order = Order::query()->create([
                 'user_id' => $request->user()?->id,
                 'cart_id' => $cart->id,
@@ -216,7 +222,7 @@ class CheckoutService
             $order->shipments()->create([
                 'provider' => (string) ($selectedShipping['provider'] ?? 'geliver'),
                 'service_code' => (string) ($selectedShipping['service_code'] ?? 'flat'),
-                'service_name' => (string) ($selectedShipping['service_name'] ?? 'Standart Kargo'),
+                'service_name' => (string) ($selectedShipping['service_name'] ?? $shippingLabel),
                 'shipping_total' => $shippingTotal,
                 'shipment_status' => 'draft',
                 'shipment_payload' => $selectedShipping,

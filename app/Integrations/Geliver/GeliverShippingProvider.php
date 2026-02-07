@@ -26,13 +26,16 @@ class GeliverShippingProvider
             return $sdkRates;
         }
 
-        $flatRate = round((float) config('shipping.flat_rate', 0), 2);
+        $flatRate = round((float) $this->settings->flat_rate, 2);
+        $flatRateLabel = trim((string) $this->settings->flat_rate_label) !== ''
+            ? $this->settings->flat_rate_label
+            : (string) config('shipping.flat_rate_label', 'Standart Kargo');
 
         return [
             [
                 'provider' => 'geliver',
                 'service_code' => 'flat',
-                'service_name' => config('shipping.flat_rate_label', 'Standart Kargo'),
+                'service_name' => $flatRateLabel,
                 'amount' => $flatRate,
                 'raw' => [
                     'source' => 'flat-rate-fallback',

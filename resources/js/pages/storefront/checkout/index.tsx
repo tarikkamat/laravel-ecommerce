@@ -134,6 +134,7 @@ export default function CheckoutPage({
     apiEndpoints,
 }: CheckoutPageProps) {
     const { flash, storefrontSettings } = usePage<SharedData & { flash?: FlashProps }>().props;
+    const pricesIncludeTax = storefrontSettings?.tax?.prices_include_tax ?? false;
     const [address, setAddress] = useState<Address>({ ...emptyAddress, ...initialAddress });
     const [billingAddress, setBillingAddress] = useState<Address>({
         ...emptyAddress,
@@ -175,6 +176,7 @@ export default function CheckoutPage({
             <p>Eposta/kullanıcı adı: ${billing.email || '-'}</p>
         `;
 
+        const taxLine = pricesIncludeTax ? '' : `<p>Vergi Tutarı: ${formatMoney(totals.tax_total)}</p>`;
         const totalsTable = `
             <table style=\"width:100%;border-collapse:collapse;margin-top:12px\">
                 <thead>
@@ -201,7 +203,7 @@ export default function CheckoutPage({
                 </tbody>
             </table>
             <p style=\"margin-top:12px\">Kargo Tutarı: ${formatMoney(totals.shipping_total)}</p>
-            <p>Vergi Tutarı: ${formatMoney(totals.tax_total)}</p>
+            ${taxLine}
             <p><strong>Toplam: ${formatMoney(totals.grand_total)}</strong></p>
         `;
 
@@ -226,7 +228,7 @@ export default function CheckoutPage({
         });
 
         return html;
-    }, [contractPage, totals, formatMoney, address, billingAddress, useBillingSame, storefrontSettings]);
+    }, [contractPage, totals, formatMoney, address, billingAddress, useBillingSame, storefrontSettings, pricesIncludeTax]);
 
     const loadSummary = useCallback(async () => {
         setLoading(true);
@@ -652,10 +654,12 @@ export default function CheckoutPage({
                             <span>Ara Toplam</span>
                             <span>{formatMoney(totals.subtotal)}</span>
                         </div>
-                        <div className="flex items-center justify-between text-sm">
-                            <span>Vergi</span>
-                            <span>{formatMoney(totals.tax_total)}</span>
-                        </div>
+                        {!pricesIncludeTax ? (
+                            <div className="flex items-center justify-between text-sm">
+                                <span>Vergi</span>
+                                <span>{formatMoney(totals.tax_total)}</span>
+                            </div>
+                        ) : null}
                         <div className="flex items-center justify-between text-sm">
                             <span>Kargo</span>
                             <span>{formatMoney(totals.shipping_total)}</span>
