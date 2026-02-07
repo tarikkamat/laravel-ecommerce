@@ -147,14 +147,13 @@ export default function CheckoutPage({
     const [isContractOpen, setIsContractOpen] = useState(false);
     const [hasAcceptedContract, setHasAcceptedContract] = useState(false);
 
-    const currency = useMemo(() => totals.currency ?? 'TRY', [totals.currency]);
     const formatMoney = useCallback(
         (value: number) =>
-            new Intl.NumberFormat('tr-TR', {
-                style: 'currency',
-                currency,
-            }).format(value ?? 0),
-        [currency],
+            `${new Intl.NumberFormat('tr-TR', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+            }).format(value ?? 0)} TL`,
+        [],
     );
 
     const contractHtml = useMemo(() => {

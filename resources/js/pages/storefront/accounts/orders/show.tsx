@@ -108,11 +108,11 @@ export default function OrdersShowPage({ order, apiEndpoints }: OrdersShowProps)
     const formatMoney = useMemo(
         () =>
             (value: number) =>
-                new Intl.NumberFormat('tr-TR', {
-                    style: 'currency',
-                    currency: order.currency || 'TRY',
-                }).format(value ?? 0),
-        [order.currency],
+                `${new Intl.NumberFormat('tr-TR', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                }).format(value ?? 0)} TL`,
+        [],
     );
 
     return (

@@ -39,11 +39,11 @@ export default function OrdersIndexPage({ orders, apiEndpoints }: OrdersIndexPro
 
     const formatMoney = useMemo(
         () =>
-            (value: number, currency: string) =>
-                new Intl.NumberFormat('tr-TR', {
-                    style: 'currency',
-                    currency: currency || 'TRY',
-                }).format(value ?? 0),
+            (value: number) =>
+                `${new Intl.NumberFormat('tr-TR', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                }).format(value ?? 0)} TL`,
         [],
     );
 
@@ -82,7 +82,7 @@ export default function OrdersIndexPage({ orders, apiEndpoints }: OrdersIndexPro
                                     <div>
                                         <span className="rounded border px-2 py-1 text-xs">{order.status}</span>
                                     </div>
-                                    <div className="font-medium">{formatMoney(order.grandTotal, order.currency)}</div>
+                                    <div className="font-medium">{formatMoney(order.grandTotal)}</div>
                                     <div className="text-right">
                                         <Link
                                             href={apiEndpoints.orderShow.replace('__ORDER_ID__', String(order.id))}

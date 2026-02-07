@@ -38,18 +38,17 @@ type ResultPageProps = {
 
 export default function CheckoutResultPage({ order, paymentStatus, apiEndpoints }: ResultPageProps) {
     const { flash, storefrontSettings } = usePage<SharedData & { flash?: FlashProps }>().props;
-    const currency = order.currency ?? 'TRY';
     const pricesIncludeTax = storefrontSettings?.tax?.prices_include_tax ?? false;
     const statusFromCallback = paymentStatus ?? flash?.paymentStatus;
 
     const formatMoney = useMemo(
         () =>
             (value: number) =>
-                new Intl.NumberFormat('tr-TR', {
-                    style: 'currency',
-                    currency,
-                }).format(value ?? 0),
-        [currency],
+                `${new Intl.NumberFormat('tr-TR', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                }).format(value ?? 0)} TL`,
+        [],
     );
 
     const isPaid = order.status === 'paid' || statusFromCallback === 'success';
