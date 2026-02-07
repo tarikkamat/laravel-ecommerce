@@ -8,6 +8,7 @@ class HomeSettings extends Settings
 {
     public string $brands_sort_by = 'title';
     public string $brands_sort_direction = 'asc';
+    public array $brands_manual_order = [];
 
     public string $product_grid_sort_by = 'title';
     public string $product_grid_sort_direction = 'asc';

@@ -66,14 +66,40 @@ class ApiHomeController extends Controller
 
     public function brands(): JsonResponse
     {
-        $orderBy = $this->normalizeSort($this->homeSettings->brands_sort_by, ['title', 'created_at']);
-        $direction = $this->normalizeDirection($this->homeSettings->brands_sort_direction);
+        $sortBy = $this->homeSettings->brands_sort_by;
 
-        $brands = Brand::query()
+        $query = Brand::query()
             ->select(['id', 'title', 'slug', 'image_id'])
-            ->with(['image:id,path'])
-            ->orderBy($orderBy, $direction)
-            ->get()
+            ->with(['image:id,path']);
+
+        if ($sortBy === 'manual') {
+            $manualOrder = collect($this->homeSettings->brands_manual_order ?? [])
+                ->filter(fn ($id) => is_numeric($id))
+                ->map(fn ($id) => (int) $id)
+                ->unique()
+                ->values()
+                ->all();
+
+            if (count($manualOrder) === 0) {
+                return response()->json([]);
+            }
+
+            $case = collect($manualOrder)
+                ->map(fn ($id, $index) => "WHEN ? THEN {$index}")
+                ->implode(' ');
+            $query
+                ->whereIn('id', $manualOrder)
+                ->orderByRaw(
+                    "CASE id {$case} ELSE " . count($manualOrder) . " END",
+                    $manualOrder
+                );
+        } else {
+            $orderBy = $this->normalizeSort($sortBy, ['title', 'created_at']);
+            $direction = $this->normalizeDirection($this->homeSettings->brands_sort_direction);
+            $query->orderBy($orderBy, $direction);
+        }
+
+        $brands = $query->get()
             ->map(fn ($brand) => [
                 'id' => $brand->id,
                 'title' => $brand->title,

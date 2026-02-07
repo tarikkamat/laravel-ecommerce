@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\SettingsUpdateRequest;
+use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Page;
 use App\Settings\CatalogSettings;
@@ -34,6 +35,11 @@ class SettingsController extends Controller
         $pages = Page::query()
             ->select(['id', 'title', 'slug'])
             ->where('active', true)
+            ->orderBy('title')
+            ->get();
+
+        $brands = Brand::query()
+            ->select(['id', 'title'])
             ->orderBy('title')
             ->get();
 
@@ -109,6 +115,7 @@ class SettingsController extends Controller
                 'home' => [
                     'brands_sort_by' => $homeSettings->brands_sort_by,
                     'brands_sort_direction' => $homeSettings->brands_sort_direction,
+                    'brands_manual_order' => $homeSettings->brands_manual_order,
                     'product_grid_sort_by' => $homeSettings->product_grid_sort_by,
                     'product_grid_sort_direction' => $homeSettings->product_grid_sort_direction,
                     'hero_autoplay_ms' => $homeSettings->hero_autoplay_ms,
@@ -124,6 +131,7 @@ class SettingsController extends Controller
             ],
             'categories' => $categories,
             'pages' => $pages,
+            'brands' => $brands,
         ]);
     }
 
@@ -221,6 +229,13 @@ class SettingsController extends Controller
 
         $homeSettings->brands_sort_by = $request->string('home_brands_sort_by', $homeSettings->brands_sort_by)->toString();
         $homeSettings->brands_sort_direction = $request->string('home_brands_sort_direction', $homeSettings->brands_sort_direction)->toString();
+        $manualOrder = collect($request->input('home_brands_manual_order', $homeSettings->brands_manual_order))
+            ->filter(fn ($id) => is_numeric($id))
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->values()
+            ->all();
+        $homeSettings->brands_manual_order = $manualOrder;
         $homeSettings->product_grid_sort_by = $request->string('home_product_grid_sort_by', $homeSettings->product_grid_sort_by)->toString();
         $homeSettings->product_grid_sort_direction = $request->string('home_product_grid_sort_direction', $homeSettings->product_grid_sort_direction)->toString();
         $homeSettings->hero_autoplay_ms = (int) $request->input('home_hero_autoplay_ms', $homeSettings->hero_autoplay_ms);

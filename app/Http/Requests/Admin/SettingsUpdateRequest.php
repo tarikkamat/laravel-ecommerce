@@ -95,6 +95,8 @@ class SettingsUpdateRequest extends FormRequest
 
             'home_brands_sort_by' => ['nullable', 'string', 'max:50'],
             'home_brands_sort_direction' => ['nullable', 'string', 'max:4'],
+            'home_brands_manual_order' => ['nullable', 'array'],
+            'home_brands_manual_order.*' => ['integer', 'exists:brands,id'],
             'home_product_grid_sort_by' => ['nullable', 'string', 'max:50'],
             'home_product_grid_sort_direction' => ['nullable', 'string', 'max:4'],
             'home_hero_autoplay_ms' => ['nullable', 'integer', 'min:1000', 'max:60000'],

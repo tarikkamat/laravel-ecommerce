@@ -1,5 +1,5 @@
 import { Head, useForm } from '@inertiajs/react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { ImagePickerModal } from '@/components/admin/image-picker-modal';
 import { Button } from '@/components/ui/button';
@@ -26,6 +26,11 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 type CategoryOption = {
+    id: number;
+    title: string;
+};
+
+type BrandOption = {
     id: number;
     title: string;
 };
@@ -107,6 +112,7 @@ type SettingsPayload = {
     home: {
         brands_sort_by: string;
         brands_sort_direction: string;
+        brands_manual_order: number[];
         product_grid_sort_by: string;
         product_grid_sort_direction: string;
         hero_autoplay_ms: number;
@@ -187,6 +193,7 @@ type SettingsFormData = {
     geliver_default_weight: number;
     home_brands_sort_by: string;
     home_brands_sort_direction: string;
+    home_brands_manual_order: number[];
     home_product_grid_sort_by: string;
     home_product_grid_sort_direction: string;
     home_hero_autoplay_ms: number;
@@ -208,6 +215,7 @@ type Props = {
     settings: SettingsPayload;
     categories: CategoryOption[];
     pages: PageOption[];
+    brands: BrandOption[];
 };
 
 const toStoragePath = (value: string) => {
@@ -222,7 +230,7 @@ const toStorageUrl = (value: string) => {
     return value.startsWith('/storage/') ? value : `/storage/${value}`;
 };
 
-export default function SettingsIndex({ settings, categories, pages }: Props) {
+export default function SettingsIndex({ settings, categories, pages, brands }: Props) {
     const [imagePickerTarget, setImagePickerTarget] = useState<
         | { type: 'header' | 'footer' }
         | { type: 'hero'; slideIndex: number }
@@ -294,6 +302,11 @@ export default function SettingsIndex({ settings, categories, pages }: Props) {
         geliver_default_weight: settings.shipping.geliver_default_weight ?? 0,
         home_brands_sort_by: settings.home.brands_sort_by ?? 'title',
         home_brands_sort_direction: settings.home.brands_sort_direction ?? 'asc',
+        home_brands_manual_order: Array.isArray(settings.home.brands_manual_order)
+            ? settings.home.brands_manual_order
+                  .map((id) => Number(id))
+                  .filter((id) => Number.isFinite(id))
+            : [],
         home_product_grid_sort_by: settings.home.product_grid_sort_by ?? 'title',
         home_product_grid_sort_direction: settings.home.product_grid_sort_direction ?? 'asc',
         home_hero_autoplay_ms: settings.home.hero_autoplay_ms ?? 6000,
@@ -315,6 +328,8 @@ export default function SettingsIndex({ settings, categories, pages }: Props) {
         ingredients_per_page: settings.catalog.ingredients_per_page ?? 15,
     });
 
+    const [manualBrandToAdd, setManualBrandToAdd] = useState('');
+
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         put(admin.settings.update().url, {
@@ -324,6 +339,25 @@ export default function SettingsIndex({ settings, categories, pages }: Props) {
 
     const headerLogoUrl = useMemo(() => toStorageUrl(data.header_logo_path), [data.header_logo_path]);
     const footerLogoUrl = useMemo(() => toStorageUrl(data.footer_logo_path), [data.footer_logo_path]);
+    const manualOrderBrands = useMemo(() => {
+        const brandMap = new Map(brands.map((brand) => [brand.id, brand]));
+        return data.home_brands_manual_order
+            .map((id) => brandMap.get(id))
+            .filter((brand): brand is BrandOption => Boolean(brand));
+    }, [brands, data.home_brands_manual_order]);
+    const availableBrands = useMemo(
+        () => brands.filter((brand) => !data.home_brands_manual_order.includes(brand.id)),
+        [brands, data.home_brands_manual_order]
+    );
+    const brandIdSet = useMemo(() => new Set(brands.map((brand) => brand.id)), [brands]);
+
+    useEffect(() => {
+        if (data.home_brands_manual_order.length === 0) return;
+        const normalized = Array.from(new Set(data.home_brands_manual_order)).filter((id) => brandIdSet.has(id));
+        if (normalized.length !== data.home_brands_manual_order.length) {
+            setData('home_brands_manual_order', normalized);
+        }
+    }, [brandIdSet, data.home_brands_manual_order, setData]);
 
     const openLogoPicker = (target: 'header' | 'footer') => {
         setImagePickerTarget({ type: target });
@@ -404,6 +438,34 @@ export default function SettingsIndex({ settings, categories, pages }: Props) {
         buttons[buttonIndex] = { ...buttons[buttonIndex], [key]: value };
         next[slideIndex] = { ...slide, buttons };
         setData('home_hero_slides', next);
+    };
+
+    const addManualBrand = () => {
+        if (!manualBrandToAdd) return;
+        const brandId = Number(manualBrandToAdd);
+        const isAvailable = availableBrands.some((brand) => brand.id === brandId);
+        if (!Number.isFinite(brandId) || !isAvailable) {
+            setManualBrandToAdd('');
+            return;
+        }
+        setData('home_brands_manual_order', [...data.home_brands_manual_order, brandId]);
+        setManualBrandToAdd('');
+    };
+
+    const removeManualBrand = (brandId: number) => {
+        setData(
+            'home_brands_manual_order',
+            data.home_brands_manual_order.filter((id) => id !== brandId)
+        );
+    };
+
+    const moveManualBrand = (fromIndex: number, direction: number) => {
+        const next = [...data.home_brands_manual_order];
+        const toIndex = fromIndex + direction;
+        if (toIndex < 0 || toIndex >= next.length) return;
+        const [moved] = next.splice(fromIndex, 1);
+        next.splice(toIndex, 0, moved);
+        setData('home_brands_manual_order', next);
     };
 
     const updateHeaderMenuItem = (index: number, key: 'label' | 'url', value: string) => {
@@ -1697,24 +1759,30 @@ export default function SettingsIndex({ settings, categories, pages }: Props) {
                                     <SelectContent>
                                         <SelectItem value="title">Başlık</SelectItem>
                                         <SelectItem value="created_at">Oluşturma Tarihi</SelectItem>
+                                        <SelectItem value="manual">Manuel</SelectItem>
                                     </SelectContent>
                                 </Select>
+                                <FieldDescription>
+                                    Manuel seçerseniz anasayfada gösterilecek marka sırasını aşağıdan belirleyin.
+                                </FieldDescription>
                             </Field>
-                            <Field>
-                                <FieldLabel>Marka Sıralama Yönü</FieldLabel>
-                                <Select
-                                    value={data.home_brands_sort_direction}
-                                    onValueChange={(value) => setData('home_brands_sort_direction', value)}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Seçin" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="asc">Artan</SelectItem>
-                                        <SelectItem value="desc">Azalan</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </Field>
+                            {data.home_brands_sort_by !== 'manual' && (
+                                <Field>
+                                    <FieldLabel>Marka Sıralama Yönü</FieldLabel>
+                                    <Select
+                                        value={data.home_brands_sort_direction}
+                                        onValueChange={(value) => setData('home_brands_sort_direction', value)}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Seçin" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="asc">Artan</SelectItem>
+                                            <SelectItem value="desc">Azalan</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </Field>
+                            )}
                             <Field>
                                 <FieldLabel>Ürün Grid Sıralaması</FieldLabel>
                                 <Select
@@ -1746,6 +1814,96 @@ export default function SettingsIndex({ settings, categories, pages }: Props) {
                                 </Select>
                             </Field>
                         </div>
+                        {data.home_brands_sort_by === 'manual' && (
+                            <div className="space-y-4 rounded-xl border border-gray-100 p-4 dark:border-gray-800">
+                                <Field>
+                                    <FieldLabel>Manuel Marka Sırası</FieldLabel>
+                                    <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+                                        <div className="flex-1">
+                                            <Select
+                                                value={manualBrandToAdd}
+                                                onValueChange={(value) => setManualBrandToAdd(value)}
+                                            >
+                                                <SelectTrigger className="w-full">
+                                                    <SelectValue placeholder="Marka seçin" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {availableBrands.length === 0 ? (
+                                                        <SelectItem value="empty" disabled>
+                                                            Tüm markalar eklendi
+                                                        </SelectItem>
+                                                    ) : (
+                                                        availableBrands.map((brand) => (
+                                                            <SelectItem key={brand.id} value={String(brand.id)}>
+                                                                {brand.title}
+                                                            </SelectItem>
+                                                        ))
+                                                    )}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            onClick={addManualBrand}
+                                            disabled={!manualBrandToAdd}
+                                        >
+                                            Ekle
+                                        </Button>
+                                    </div>
+                                    <FieldDescription>
+                                        Seçtiğiniz markalar anasayfada ürün gridleri ve logo alanında bu sırayla gösterilir.
+                                    </FieldDescription>
+                                </Field>
+                                <div className="space-y-2">
+                                    {manualOrderBrands.length === 0 ? (
+                                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                                            Henüz marka eklenmedi.
+                                        </p>
+                                    ) : (
+                                        manualOrderBrands.map((brand, index) => (
+                                            <div
+                                                key={brand.id}
+                                                className="flex flex-col gap-2 rounded-lg border border-gray-100 p-3 dark:border-gray-800 sm:flex-row sm:items-center sm:justify-between"
+                                            >
+                                                <span className="text-sm font-medium">{brand.title}</span>
+                                                <div className="flex flex-wrap gap-2">
+                                                    <Button
+                                                        type="button"
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => moveManualBrand(index, -1)}
+                                                        disabled={index === 0}
+                                                    >
+                                                        Yukarı
+                                                    </Button>
+                                                    <Button
+                                                        type="button"
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => moveManualBrand(index, 1)}
+                                                        disabled={index === manualOrderBrands.length - 1}
+                                                    >
+                                                        Aşağı
+                                                    </Button>
+                                                    <Button
+                                                        type="button"
+                                                        variant="destructive"
+                                                        size="sm"
+                                                        onClick={() => removeManualBrand(brand.id)}
+                                                    >
+                                                        Sil
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">
+                                    Liste boşsa anasayfada marka alanları gösterilmez.
+                                </p>
+                            </div>
+                        )}
                     </CardContent>
                 </Card>
                     </TabsContent>
