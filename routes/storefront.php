@@ -43,7 +43,13 @@ Route::group(['as' => 'storefront.'], function () {
     Route::get('/sepet', CartPageController::class)->name('cart.index');
     Route::get('/checkout', CheckoutPageController::class)->name('checkout.index');
     Route::get('/checkout/sonuc/{order}', CheckoutResultController::class)->name('checkout.result');
-    Route::post('/odeme/iyzico/callback', IyzicoCallbackController::class)->name('payments.iyzico.callback');
+    Route::post('/odeme/iyzico/callback', IyzicoCallbackController::class)
+        ->withoutMiddleware([
+            \Illuminate\Session\Middleware\StartSession::class,
+            \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+            \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+        ])
+        ->name('payments.iyzico.callback');
 
     Route::get('/sayfa/{slug}', [PageController::class, 'show'])->name('pages.show');
     Route::post('/sayfa/{slug}/iletisim', [PageController::class, 'contact'])->name('pages.contact');
