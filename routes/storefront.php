@@ -42,4 +42,5 @@ Route::group(['as' => 'storefront.'], function () {
     Route::post('/odeme/iyzico/callback', IyzicoCallbackController::class)->name('payments.iyzico.callback');
 
     Route::get('/sayfa/{slug}', [PageController::class, 'show'])->name('pages.show');
+    Route::post('/sayfa/{slug}/iletisim', [PageController::class, 'contact'])->name('pages.contact');
 });
