@@ -41,7 +41,7 @@ export default function HomePage({ apiEndpoints }: HomePageProps) {
     }, [apiEndpoints.brands]);
 
     return (
-        <StorefrontLayout title="Home">
+        <StorefrontLayout title="Anasayfa">
             <div className="w-full">
                 {/* Brands Section */}
                 <BrandsSection endpoint={apiEndpoints.brands} />
