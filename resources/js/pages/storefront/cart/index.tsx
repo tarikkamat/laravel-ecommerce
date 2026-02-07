@@ -63,6 +63,7 @@ export default function CartPage({ totals: initialTotals, discount: initialDisco
     const [appliedDiscount, setAppliedDiscount] = useState<AppliedDiscount | null>(initialDiscount ?? null);
     const [discountCode, setDiscountCode] = useState(initialDiscount?.code ?? '');
     const [discountMessage, setDiscountMessage] = useState<string | null>(null);
+    const [showDiscountInput, setShowDiscountInput] = useState(false);
 
     const applySummary = useCallback((data?: CartSummaryResponse | null) => {
         if (!data) return;
@@ -313,27 +314,39 @@ export default function CartPage({ totals: initialTotals, discount: initialDisco
                                         </button>
                                     </div>
                                 ) : (
-                                    <form onSubmit={submitDiscount} className="flex items-center gap-2">
-                                        <input
-                                            className="h-9 flex-1 rounded border px-3 text-sm"
-                                            placeholder="INDIRIM2024"
-                                            value={discountCode}
-                                            onChange={(event) => {
-                                                setDiscountCode(event.target.value.toUpperCase());
-                                                if (discountMessage) {
-                                                    setDiscountMessage(null);
-                                                }
-                                            }}
-                                            disabled={loading}
-                                        />
+                                    <>
                                         <button
-                                            type="submit"
-                                            disabled={loading || discountCode.trim() === ''}
-                                            className="h-9 rounded bg-black px-3 text-xs font-medium text-white disabled:opacity-50"
+                                            type="button"
+                                            className="h-9 rounded bg-gray-100 px-3 text-xs font-medium text-gray-700 transition hover:bg-gray-200"
+                                            onClick={() => setShowDiscountInput((prev: boolean) => !prev)}
+                                            disabled={loading}
                                         >
-                                            Uygula
+                                            İndirim Kodum Var
                                         </button>
-                                    </form>
+                                        {showDiscountInput && (
+                                            <form onSubmit={submitDiscount} className="flex items-center gap-2 mt-2">
+                                                <input
+                                                    className="h-9 flex-1 rounded border px-3 text-sm"
+                                                    placeholder="INDIRIM2024"
+                                                    value={discountCode}
+                                                    onChange={(event) => {
+                                                        setDiscountCode(event.target.value.toUpperCase());
+                                                        if (discountMessage) {
+                                                            setDiscountMessage(null);
+                                                        }
+                                                    }}
+                                                    disabled={loading}
+                                                />
+                                                <button
+                                                    type="submit"
+                                                    disabled={loading || discountCode.trim() === ''}
+                                                    className="h-9 rounded bg-black px-3 text-xs font-medium text-white disabled:opacity-50"
+                                                >
+                                                    Uygula
+                                                </button>
+                                            </form>
+                                        )}
+                                    </>
                                 )}
                                 {discountMessage ? (
                                     <div className="text-xs text-red-600">{discountMessage}</div>

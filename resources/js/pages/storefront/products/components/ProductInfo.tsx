@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { ShoppingCart, Heart, Share2 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { useState } from 'react';
+import { Badge } from '@/components/ui/badge';
 
 type ProductInfoProps = {
     product: Product;
@@ -130,7 +131,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
                 <Separator className="my-6" />
 
                 {product.skt && (
-                    <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 dark:border-amber-800 dark:bg-amber-950/40">
+                    <div>
                         <p className="text-xs font-semibold uppercase tracking-wide text-amber-800 dark:text-amber-200">
                             Son kullanma tarihi
                         </p>
@@ -139,6 +140,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
                         </p>
                     </div>
                 )}
+
 
                 {product.description && (
                     <div
