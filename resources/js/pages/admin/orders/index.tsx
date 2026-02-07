@@ -1,6 +1,6 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { Eye, FileDown, ShoppingCart } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import {
     Empty,
@@ -12,6 +12,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import {
     Select,
@@ -38,6 +39,12 @@ type SelectOption = {
     label: string;
 };
 
+type ShipmentProvider = {
+    id: string;
+    label: string;
+    providerCode?: string | null;
+};
+
 interface Props {
     items: PaginatedData<OrderListItem>;
     filters: {
@@ -50,6 +57,7 @@ interface Props {
     };
     statusOptions: SelectOption[];
     paymentStatusOptions: SelectOption[];
+    shipmentProviders: ShipmentProvider[];
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -82,7 +90,7 @@ const getCsrfToken = (): string => {
     return meta?.getAttribute('content') ?? '';
 };
 
-export default function OrdersIndex({ items, filters, statusOptions, paymentStatusOptions }: Props) {
+export default function OrdersIndex({ items, filters, statusOptions, paymentStatusOptions, shipmentProviders }: Props) {
     const [form, setForm] = useState({
         status: filters.status || 'all',
         payment_status: filters.payment_status || 'all',
@@ -92,6 +100,10 @@ export default function OrdersIndex({ items, filters, statusOptions, paymentStat
         date_to: filters.date_to ?? '',
     });
     const [selectedShipments, setSelectedShipments] = useState<number[]>([]);
+    const [isProviderDialogOpen, setIsProviderDialogOpen] = useState(false);
+    const [selectedProviderId, setSelectedProviderId] = useState('');
+    const [isGeneratingLabels, setIsGeneratingLabels] = useState(false);
+    const [labelError, setLabelError] = useState<string | null>(null);
 
     const selectableShipmentIds = useMemo(() => {
         return items.data
@@ -100,6 +112,12 @@ export default function OrdersIndex({ items, filters, statusOptions, paymentStat
     }, [items.data]);
 
     const allSelected = selectableShipmentIds.length > 0 && selectableShipmentIds.every((id) => selectedShipments.includes(id));
+
+    useEffect(() => {
+        if (shipmentProviders.length > 0 && selectedProviderId === '') {
+            setSelectedProviderId(shipmentProviders[0].id);
+        }
+    }, [shipmentProviders, selectedProviderId]);
 
     const applyFilters = () => {
         const payload = {
@@ -148,10 +166,13 @@ export default function OrdersIndex({ items, filters, statusOptions, paymentStat
     };
 
     const handleBulkDownload = async () => {
-        if (selectedShipments.length === 0) return;
+        if (selectedShipments.length === 0 || selectedProviderId === '') return;
+
+        setIsGeneratingLabels(true);
+        setLabelError(null);
 
         try {
-            const response = await fetch(admin.orders.shipmentLabels().url, {
+            const response = await fetch(admin.orders.shipments.labels().url, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -159,10 +180,15 @@ export default function OrdersIndex({ items, filters, statusOptions, paymentStat
                     'X-CSRF-TOKEN': getCsrfToken(),
                 },
                 credentials: 'same-origin',
-                body: JSON.stringify({ shipment_ids: selectedShipments }),
+                body: JSON.stringify({
+                    shipment_ids: selectedShipments,
+                    provider_account_id: selectedProviderId,
+                }),
             });
 
             if (!response.ok) {
+                const errorPayload = await response.json().catch(() => null);
+                setLabelError(errorPayload?.message ?? 'Kargo fişi oluşturulamadı.');
                 return;
             }
 
@@ -175,8 +201,12 @@ export default function OrdersIndex({ items, filters, statusOptions, paymentStat
             link.click();
             link.remove();
             window.URL.revokeObjectURL(url);
+            setIsProviderDialogOpen(false);
         } catch (error) {
             console.error('Bulk label download failed:', error);
+            setLabelError('Kargo fişi oluşturulamadı.');
+        } finally {
+            setIsGeneratingLabels(false);
         }
     };
 
@@ -210,7 +240,10 @@ export default function OrdersIndex({ items, filters, statusOptions, paymentStat
                         <p className="text-muted-foreground">Toplam {items.total} sipariş bulunmaktadır.</p>
                     </div>
                     <Button
-                        onClick={handleBulkDownload}
+                        onClick={() => {
+                            setLabelError(null);
+                            setIsProviderDialogOpen(true);
+                        }}
                         disabled={selectedShipments.length === 0}
                         variant="outline"
                     >
@@ -360,7 +393,7 @@ export default function OrdersIndex({ items, filters, statusOptions, paymentStat
                                                         variant="ghost"
                                                         size="icon"
                                                         onClick={() => {
-                                                            window.location.href = admin.orders.shipmentLabel({
+                                                            window.location.href = admin.orders.shipments.label({
                                                                 order: order.id,
                                                                 shipment: order.shipmentId as number,
                                                             }).url;
@@ -403,6 +436,65 @@ export default function OrdersIndex({ items, filters, statusOptions, paymentStat
                     </div>
                 )}
             </div>
+
+            <Dialog open={isProviderDialogOpen} onOpenChange={setIsProviderDialogOpen}>
+                <DialogContent className="sm:max-w-lg">
+                    <DialogHeader>
+                        <DialogTitle>Kargo Firması Seç</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                        <p className="text-sm text-muted-foreground">
+                            Seçili {selectedShipments.length} gönderi için barkod oluşturulacak.
+                        </p>
+                        {shipmentProviders.length === 0 ? (
+                            <div className="rounded-md border border-dashed p-3 text-sm text-muted-foreground">
+                                Aktif kargo firması bulunamadı. Geliver hesaplarını kontrol edin.
+                            </div>
+                        ) : (
+                            <div className="space-y-2">
+                                <div className="text-sm font-medium">Kargo Firması</div>
+                                <Select value={selectedProviderId} onValueChange={setSelectedProviderId}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Seçiniz" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {shipmentProviders.map((provider) => (
+                                            <SelectItem key={provider.id} value={provider.id}>
+                                                {provider.label}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        )}
+
+                        {labelError ? <div className="text-sm text-destructive">{labelError}</div> : null}
+
+                        <div className="flex justify-end gap-2">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => setIsProviderDialogOpen(false)}
+                                disabled={isGeneratingLabels}
+                            >
+                                Vazgeç
+                            </Button>
+                            <Button
+                                type="button"
+                                onClick={handleBulkDownload}
+                                disabled={
+                                    isGeneratingLabels ||
+                                    selectedProviderId === '' ||
+                                    shipmentProviders.length === 0 ||
+                                    selectedShipments.length === 0
+                                }
+                            >
+                                Barkod Oluştur ve İndir
+                            </Button>
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </AppLayout>
     );
 }

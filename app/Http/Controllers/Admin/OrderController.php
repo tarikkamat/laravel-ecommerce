@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\OrderActionRequest;
 use App\Http\Requests\Admin\OrderStatusUpdateRequest;
+use App\Integrations\Geliver\GeliverClient;
 use App\Models\Order;
 use App\Services\OrderAdminService;
 use Illuminate\Http\Request;
@@ -12,7 +13,10 @@ use Inertia\Inertia;
 
 class OrderController extends Controller
 {
-    public function __construct(private readonly OrderAdminService $service) {}
+    public function __construct(
+        private readonly OrderAdminService $service,
+        private readonly GeliverClient $geliverClient
+    ) {}
 
     public function index(Request $request)
     {
@@ -93,6 +97,7 @@ class OrderController extends Controller
             ],
             'statusOptions' => $this->statusOptions(),
             'paymentStatusOptions' => $this->paymentStatusOptions(),
+            'shipmentProviders' => $this->geliverClient->listProviderAccounts(),
         ]);
     }
 

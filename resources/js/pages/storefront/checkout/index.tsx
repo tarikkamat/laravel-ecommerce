@@ -46,10 +46,6 @@ type CheckoutSummaryResponse = {
     totals: CartTotals;
 };
 
-type RatesResponse = CheckoutSummaryResponse & {
-    rates: ShippingRate[];
-};
-
 type ConfirmResponse = {
     order_id: number;
     status: string;
@@ -144,7 +140,6 @@ export default function CheckoutPage({
         isAddressEmpty(initialBillingAddress) || JSON.stringify(initialBillingAddress ?? {}) === JSON.stringify(initialAddress ?? {})
     );
     const [selectedShipping, setSelectedShipping] = useState<ShippingRate | null>(initialSelectedShipping);
-    const [rates, setRates] = useState<ShippingRate[]>([]);
     const [totals, setTotals] = useState<CartTotals>(initialTotals);
     const [orderId, setOrderId] = useState<number | null>(null);
     const [paymentMessage, setPaymentMessage] = useState<string | null>(null);
@@ -283,7 +278,9 @@ export default function CheckoutPage({
             if (data?.totals) {
                 setTotals(data.totals);
             }
-            await fetchRates();
+            if (data?.selected_shipping) {
+                setSelectedShipping(data.selected_shipping);
+            }
         } catch (error) {
             console.error('Address submit failed:', error);
         } finally {
@@ -291,51 +288,7 @@ export default function CheckoutPage({
         }
     };
 
-    const fetchRates = async () => {
-        try {
-            const response = await fetch(apiEndpoints.rates, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Accept: 'application/json',
-                },
-                credentials: 'same-origin',
-                body: JSON.stringify({ address }),
-            });
-            const data = (await response.json()) as RatesResponse;
-            setRates(Array.isArray(data?.rates) ? data.rates : []);
-            if (data?.totals) {
-                setTotals(data.totals);
-            }
-        } catch (error) {
-            console.error('Shipping rates fetch failed:', error);
-        }
-    };
-
-    const selectShipping = async (serviceCode: string) => {
-        setLoading(true);
-        setPaymentMessage(null);
-        try {
-            const response = await fetch(apiEndpoints.selectShipping, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Accept: 'application/json',
-                },
-                credentials: 'same-origin',
-                body: JSON.stringify({ service_code: serviceCode }),
-            });
-            const data = (await response.json()) as CheckoutSummaryResponse;
-            setSelectedShipping(data.selected_shipping ?? null);
-            if (data?.totals) {
-                setTotals(data.totals);
-            }
-        } catch (error) {
-            console.error('Shipping select failed:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
+    const shippingLabel = selectedShipping?.service_name ?? 'Standart Kargo';
 
     const confirmCheckout = async () => {
         setLoading(true);
@@ -574,40 +527,19 @@ export default function CheckoutPage({
                                     disabled={loading}
                                     className="rounded bg-black px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
                                 >
-                                    Adresi Kaydet ve Kargo Hesapla
+                                    Adresi Kaydet
                                 </button>
                             </div>
                         </form>
 
                         <div className="space-y-3 rounded border p-4">
-                            <div className="text-sm font-medium">Kargo Secimi</div>
-                            {rates.length === 0 ? (
-                                <div className="text-xs text-muted-foreground">
-                                    Oranlari gormek icin once adresi kaydedin.
-                                </div>
-                            ) : (
-                                <div className="space-y-2">
-                                    {rates.map((rate) => {
-                                        const isSelected = selectedShipping?.service_code === rate.service_code;
-                                        return (
-                                            <button
-                                                key={rate.service_code}
-                                                type="button"
-                                                onClick={() => selectShipping(rate.service_code)}
-                                                className={`flex w-full items-center justify-between rounded border px-3 py-2 text-left text-sm ${
-                                                    isSelected ? 'border-black' : ''
-                                                }`}
-                                            >
-                                                <span>
-                                                    {rate.service_name}
-                                                    <span className="ml-2 text-xs text-muted-foreground">({rate.service_code})</span>
-                                                </span>
-                                                <span className="font-medium">{formatMoney(rate.amount)}</span>
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                            )}
+                            <div className="text-sm font-medium">Kargo</div>
+                            <div className="flex items-center justify-between text-sm">
+                                <span>{shippingLabel}</span>
+                                <span className="font-medium">
+                                    {totals.shipping_total === 0 ? 'Ücretsiz' : formatMoney(totals.shipping_total)}
+                                </span>
+                            </div>
                         </div>
 
                         <div className="space-y-3 rounded border p-4">

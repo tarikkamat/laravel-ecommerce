@@ -16,6 +16,7 @@ class OrderShipmentBulkLabelRequest extends FormRequest
         return [
             'shipment_ids' => ['required', 'array', 'min:1'],
             'shipment_ids.*' => ['integer', 'min:1'],
+            'provider_account_id' => ['required', 'string'],
         ];
     }
 }

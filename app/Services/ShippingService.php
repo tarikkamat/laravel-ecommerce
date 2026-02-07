@@ -145,7 +145,23 @@ class ShippingService
         /** @var array<string, mixed>|null $selected */
         $selected = $request->session()->get(self::SHIPPING_SELECTION_KEY);
 
-        return $selected;
+        if ($selected) {
+            return $selected;
+        }
+
+        $rates = $this->getStoredRates($request);
+        if (count($rates) > 0) {
+            $selected = $rates[0];
+            $request->session()->put(self::SHIPPING_SELECTION_KEY, $selected);
+
+            return $selected;
+        }
+
+        $defaultRate = $this->buildDefaultRate();
+        $request->session()->put(self::SHIPPING_RATES_KEY, [$defaultRate]);
+        $request->session()->put(self::SHIPPING_SELECTION_KEY, $defaultRate);
+
+        return $defaultRate;
     }
 
     public function selectedShippingTotal(Request $request, ?Cart $cart = null): ?float
@@ -197,6 +213,26 @@ class ShippingService
         $rates = $request->session()->get(self::SHIPPING_RATES_KEY, []);
 
         return $rates;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function buildDefaultRate(): array
+    {
+        $label = trim((string) $this->settings->flat_rate_label) !== ''
+            ? $this->settings->flat_rate_label
+            : 'Standart Kargo';
+
+        return [
+            'provider' => 'geliver',
+            'service_code' => 'flat',
+            'service_name' => $label,
+            'amount' => round((float) $this->settings->flat_rate, 2),
+            'raw' => [
+                'source' => 'flat-rate-default',
+            ],
+        ];
     }
 
     private function cartSubtotal(Cart $cart): float

@@ -32,6 +32,82 @@ class GeliverClient
     }
 
     /**
+     * @return array<int, array{id: string, label: string, providerCode?: string}>
+     */
+    public function listProviderAccounts(): array
+    {
+        if (! class_exists(GeliverSdkClient::class) || ! $this->isConfigured()) {
+            return [];
+        }
+
+        try {
+            $result = $this->client()->providers()->listAccounts();
+        } catch (\Throwable) {
+            return [];
+        }
+
+        $items = [];
+
+        if (is_array($result)) {
+            $items = is_array($result['data'] ?? null) ? $result['data'] : $result;
+        }
+
+        $normalized = [];
+
+        foreach ($items as $item) {
+            if (! is_array($item)) {
+                continue;
+            }
+
+            $id = (string) ($item['id'] ?? $item['providerAccountID'] ?? '');
+            if ($id === '') {
+                continue;
+            }
+
+            $providerCode = (string) ($item['providerCode'] ?? '');
+            $label = trim((string) ($item['name'] ?? $item['providerName'] ?? $providerCode));
+
+            if ($label === '') {
+                $label = 'Kargo Firması';
+            }
+
+            $normalized[] = [
+                'id' => $id,
+                'label' => $label,
+                'providerCode' => $providerCode !== '' ? $providerCode : null,
+            ];
+        }
+
+        return $normalized;
+    }
+
+    /**
+     * @param  array<string, mixed>  $shipment
+     * @return array<string, mixed>|null
+     */
+    public function createTransaction(array $shipment, ?string $providerAccountId = null): ?array
+    {
+        if (! class_exists(GeliverSdkClient::class) || ! $this->isConfigured()) {
+            return null;
+        }
+
+        try {
+            $payload = ['shipment' => $shipment];
+
+            if ($providerAccountId !== null && $providerAccountId !== '') {
+                $payload['providerAccountID'] = $providerAccountId;
+            }
+
+            /** @var array<string, mixed> $tx */
+            $tx = $this->client()->transactions()->create($payload);
+
+            return $tx;
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
+    /**
      * Create a test shipment and return its offers for rate estimation.
      *
      * @param  array<string, mixed>  $payload

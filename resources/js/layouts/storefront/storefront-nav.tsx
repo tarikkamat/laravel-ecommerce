@@ -103,16 +103,16 @@ export function StorefrontNav() {
                 {/* Logo Area */}
                 <Link
                     href={storefront.home.index.url()}
-                    className="group flex h-[110px] items-center transition-transform hover:scale-105"
+                    className="group flex h-[99px] items-center transition-transform hover:scale-105"
                 >
                     {headerLogoPath ? (
                         <img
                             src={headerLogoPath}
                             alt={headerLogoText}
-                            className="h-[110px] w-[280px] object-contain transition-transform group-hover:rotate-1"
+                            className="h-[99px] w-[252px] object-contain transition-transform group-hover:rotate-1"
                         />
                     ) : (
-                        <div className="flex h-[110px] w-[280px] items-center justify-center rounded-xl bg-[#ec135b] text-white shadow-lg shadow-[#ec135b]/20 transition-transform group-hover:rotate-1">
+                        <div className="flex h-[99px] w-[252px] items-center justify-center rounded-xl bg-[#ec135b] text-white shadow-lg shadow-[#ec135b]/20 transition-transform group-hover:rotate-1">
                             <span className="material-symbols-outlined !text-[32px]">spa</span>
                         </div>
                     )}
@@ -124,11 +124,11 @@ export function StorefrontNav() {
                     {showHomeLink && (
                         <Link
                             href={storefront.home.index.url()}
-                            className="group relative px-5 py-2 text-[13px] font-black uppercase tracking-widest text-[#181113] transition-colors hover:text-[#ec135b] dark:text-[#f4f0f2]"
+                            className="group relative px-4 py-2 text-[13px] font-black uppercase tracking-widest text-[#181113] transition-colors hover:text-[#ec135b] dark:text-[#f4f0f2]"
                             onMouseEnter={() => handleMenuEnter(null)}
                         >
                             Anasayfa
-                            <span className="absolute bottom-1 left-5 right-5 h-0.5 scale-x-0 bg-[#ec135b] transition-transform duration-300 group-hover:scale-x-100"></span>
+                            <span className="absolute bottom-1 left-4 right-4 h-0.5 scale-x-0 bg-[#ec135b] transition-transform duration-300 group-hover:scale-x-100"></span>
                         </Link>
                     )}
 
@@ -141,7 +141,7 @@ export function StorefrontNav() {
                         >
                             <Link
                                 href={storefront.brands.index.url()}
-                                className={`group relative flex items-center gap-1 px-5 py-2 text-[13px] font-black uppercase tracking-widest transition-colors ${
+                                className={`group relative flex items-center gap-1 px-4 py-2 text-[13px] font-black uppercase tracking-widest transition-colors ${
                                     activeMegaMenu === 'brands'
                                         ? 'text-[#ec135b]'
                                         : 'text-[#181113] hover:text-[#ec135b] dark:text-[#f4f0f2]'
@@ -152,7 +152,7 @@ export function StorefrontNav() {
                                     expand_more
                                 </span>
                                 <span
-                                    className={`absolute bottom-1 left-5 right-5 h-0.5 bg-[#ec135b] transition-transform duration-300 ${
+                                    className={`absolute bottom-1 left-4 right-4 h-0.5 bg-[#ec135b] transition-transform duration-300 ${
                                         activeMegaMenu === 'brands' ? 'scale-x-100' : 'scale-x-0'
                                     }`}
                                 ></span>
@@ -171,7 +171,7 @@ export function StorefrontNav() {
                             >
                                 <Link
                                     href={storefront.categories.products.url(category.slug)}
-                                    className={`group relative flex items-center gap-1 px-5 py-2 text-[13px] font-black uppercase tracking-widest transition-colors ${
+                                    className={`group relative flex items-center gap-1 px-4 py-2 text-[13px] font-black uppercase tracking-widest transition-colors ${
                                         activeMegaMenu === 'category' && activeCategory?.id === category.id
                                             ? 'text-[#ec135b]'
                                             : 'text-[#181113] hover:text-[#ec135b] dark:text-[#f4f0f2]'
@@ -184,7 +184,7 @@ export function StorefrontNav() {
                                         </span>
                                     )}
                                     <span
-                                        className={`absolute bottom-1 left-5 right-5 h-0.5 bg-[#ec135b] transition-transform duration-300 ${
+                                        className={`absolute bottom-1 left-4 right-4 h-0.5 bg-[#ec135b] transition-transform duration-300 ${
                                             activeMegaMenu === 'category' && activeCategory?.id === category.id
                                                 ? 'scale-x-100'
                                                 : 'scale-x-0'
