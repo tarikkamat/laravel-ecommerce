@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Storefront;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\ProductComment;
 use App\Services\Contracts\IProductService;
 use App\Settings\CatalogSettings;
 use Illuminate\Http\Request;
@@ -163,8 +164,27 @@ class ProductController extends Controller
             $product->increment('views_count');
         }
 
+        $comments = ProductComment::query()
+            ->select(['id', 'product_id', 'user_id', 'parent_id', 'body', 'status', 'created_at'])
+            ->where('product_id', $product->id)
+            ->whereNull('parent_id')
+            ->where('status', ProductComment::STATUS_APPROVED)
+            ->with([
+                'user:id,name,email',
+                'replies' => function ($builder) {
+                    $builder
+                        ->select(['id', 'product_id', 'user_id', 'parent_id', 'body', 'status', 'created_at'])
+                        ->where('status', ProductComment::STATUS_APPROVED)
+                        ->with('user:id,name,email')
+                        ->orderBy('created_at', 'asc');
+                },
+            ])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
         return Inertia::render('storefront/products/show', [
             'product' => $product,
+            'comments' => $comments,
         ]);
     }
 }

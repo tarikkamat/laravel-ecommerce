@@ -1,5 +1,16 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { Calendar, Home, Mail, MapPin, Pencil, Shield, Trash2, User as UserIcon } from 'lucide-react';
+import {
+    Calendar,
+    Home,
+    Mail,
+    MapPin,
+    MessageSquare,
+    Pencil,
+    Shield,
+    ShoppingCart,
+    Trash2,
+    User as UserIcon,
+} from 'lucide-react';
 
 import {
     AlertDialog,
@@ -16,15 +27,44 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { CardContent, CardHeader } from '@/components/ui/card';
+import {
+    Empty,
+    EmptyDescription,
+    EmptyHeader,
+    EmptyMedia,
+    EmptyTitle,
+} from '@/components/ui/empty';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AppLayout from '@/layouts/app-layout';
 import admin from '@/routes/admin';
 import type { BreadcrumbItem, User } from '@/types';
+import type { ProductComment } from '@/types/comment';
+
+type UserOrderSummary = {
+    id: number;
+    status: string;
+    currency: string;
+    grandTotal: number;
+    itemsCount: number;
+    createdAt: string | null;
+    paymentStatus?: string | null;
+    shipmentStatus?: string | null;
+};
 
 interface Props {
     item: User;
+    orders: UserOrderSummary[];
+    comments: ProductComment[];
 }
 
 const roleLabels: Record<string, string> = {
@@ -37,7 +77,27 @@ const addressTypeLabels: Record<string, string> = {
     shipping: 'Teslimat Adresi',
 };
 
-export default function UsersShow({ item }: Props) {
+const orderStatusLabels: Record<string, string> = {
+    pending_payment: 'Ödeme Bekleniyor',
+    paid: 'Ödendi',
+    failed: 'Başarısız',
+    cancelled: 'İptal',
+    refunded: 'İade',
+};
+
+const paymentStatusLabels: Record<string, string> = {
+    pending: 'Beklemede',
+    success: 'Başarılı',
+    failure: 'Başarısız',
+};
+
+const commentStatusLabels: Record<string, string> = {
+    pending: 'Beklemede',
+    approved: 'Onaylandı',
+    rejected: 'Reddedildi',
+};
+
+export default function UsersShow({ item, orders, comments }: Props) {
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Dashboard',
@@ -53,7 +113,11 @@ export default function UsersShow({ item }: Props) {
         },
     ];
 
-    const formatDate = (dateString: string) => {
+    const formatDate = (dateString?: string | null) => {
+        if (!dateString) {
+            return '-';
+        }
+
         return new Date(dateString).toLocaleDateString('tr-TR', {
             year: 'numeric',
             month: 'long',
@@ -61,6 +125,63 @@ export default function UsersShow({ item }: Props) {
             hour: '2-digit',
             minute: '2-digit',
         });
+    };
+
+    const formatCurrency = (value: number, currency: string = 'TRY') =>
+        new Intl.NumberFormat('tr-TR', {
+            style: 'currency',
+            currency,
+        }).format(value);
+
+    const formatNumber = (value: number) => new Intl.NumberFormat('tr-TR').format(value);
+
+    const orderStatusBadge = (status: string) => {
+        const label = orderStatusLabels[status] ?? status;
+        let variant: 'default' | 'secondary' | 'destructive' | 'outline' = 'secondary';
+
+        if (status === 'paid') {
+            variant = 'default';
+        }
+
+        if (status === 'failed' || status === 'cancelled' || status === 'refunded') {
+            variant = 'destructive';
+        }
+
+        return <Badge variant={variant}>{label}</Badge>;
+    };
+
+    const paymentBadge = (status?: string | null) => {
+        if (!status) {
+            return <Badge variant="secondary">-</Badge>;
+        }
+
+        const label = paymentStatusLabels[status] ?? status;
+        let variant: 'default' | 'secondary' | 'destructive' | 'outline' = 'secondary';
+
+        if (status === 'success') {
+            variant = 'default';
+        }
+
+        if (status === 'failure') {
+            variant = 'destructive';
+        }
+
+        return <Badge variant={variant}>{label}</Badge>;
+    };
+
+    const commentStatusBadge = (status: string) => {
+        const label = commentStatusLabels[status] ?? status;
+        let variant: 'default' | 'secondary' | 'destructive' | 'outline' = 'secondary';
+
+        if (status === 'approved') {
+            variant = 'default';
+        }
+
+        if (status === 'rejected') {
+            variant = 'destructive';
+        }
+
+        return <Badge variant={variant}>{label}</Badge>;
     };
 
     return (
@@ -131,16 +252,26 @@ export default function UsersShow({ item }: Props) {
                     <div className="md:col-span-2">
                         <Tabs defaultValue="general">
                             <CardHeader className="pb-0">
-                                <TabsList>
-                                    <TabsTrigger value="general">
-                                        <UserIcon className="mr-1.5 h-4 w-4" />
-                                        Genel Bilgiler
-                                    </TabsTrigger>
-                                    <TabsTrigger value="addresses">
-                                        <MapPin className="mr-1.5 h-4 w-4" />
-                                        Adresler ({item.addresses?.length || 0})
-                                    </TabsTrigger>
-                                </TabsList>
+                                <div className="overflow-x-auto">
+                                    <TabsList className="min-w-max justify-start gap-1">
+                                        <TabsTrigger value="general">
+                                            <UserIcon className="mr-1.5 h-4 w-4" />
+                                            Genel Bilgiler
+                                        </TabsTrigger>
+                                        <TabsTrigger value="addresses">
+                                            <MapPin className="mr-1.5 h-4 w-4" />
+                                            Adresler ({item.addresses?.length || 0})
+                                        </TabsTrigger>
+                                        <TabsTrigger value="orders">
+                                            <ShoppingCart className="mr-1.5 h-4 w-4" />
+                                            Siparişler ({orders.length})
+                                        </TabsTrigger>
+                                        <TabsTrigger value="comments">
+                                            <MessageSquare className="mr-1.5 h-4 w-4" />
+                                            Yorumlar ({comments.length})
+                                        </TabsTrigger>
+                                    </TabsList>
+                                </div>
                             </CardHeader>
                             <CardContent className="pt-6">
                                 <TabsContent value="general" className="mt-0 space-y-5">
@@ -233,6 +364,123 @@ export default function UsersShow({ item }: Props) {
                                             <Home className="h-8 w-8 mx-auto mb-2 opacity-50" />
                                             <p className="text-sm">Henüz kayıtlı adres bulunmuyor.</p>
                                         </div>
+                                    )}
+                                </TabsContent>
+
+                                <TabsContent value="orders" className="mt-0 space-y-4">
+                                    {orders.length > 0 ? (
+                                        <div className="rounded-lg border">
+                                            <Table>
+                                                <TableHeader>
+                                                    <TableRow>
+                                                        <TableHead>Sipariş</TableHead>
+                                                        <TableHead>Tarih</TableHead>
+                                                        <TableHead>Durum</TableHead>
+                                                        <TableHead>Ödeme</TableHead>
+                                                        <TableHead className="text-right">Adet</TableHead>
+                                                        <TableHead className="text-right">Toplam</TableHead>
+                                                    </TableRow>
+                                                </TableHeader>
+                                                <TableBody>
+                                                    {orders.map((order) => (
+                                                        <TableRow key={order.id}>
+                                                            <TableCell>
+                                                                <Link
+                                                                    href={admin.orders.show(order.id).url}
+                                                                    className="font-medium hover:underline"
+                                                                >
+                                                                    #{order.id}
+                                                                </Link>
+                                                            </TableCell>
+                                                            <TableCell className="text-sm text-muted-foreground">
+                                                                {formatDate(order.createdAt)}
+                                                            </TableCell>
+                                                            <TableCell>{orderStatusBadge(order.status)}</TableCell>
+                                                            <TableCell>{paymentBadge(order.paymentStatus)}</TableCell>
+                                                            <TableCell className="text-right">
+                                                                {formatNumber(order.itemsCount)}
+                                                            </TableCell>
+                                                            <TableCell className="text-right font-medium">
+                                                                {formatCurrency(order.grandTotal, order.currency)}
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    ))}
+                                                </TableBody>
+                                            </Table>
+                                        </div>
+                                    ) : (
+                                        <Empty className="border-dashed">
+                                            <EmptyHeader>
+                                                <EmptyMedia variant="icon">
+                                                    <ShoppingCart className="h-5 w-5" />
+                                                </EmptyMedia>
+                                                <EmptyTitle>Sipariş bulunamadı</EmptyTitle>
+                                                <EmptyDescription>
+                                                    Bu kullanıcıya ait sipariş kaydı yok.
+                                                </EmptyDescription>
+                                            </EmptyHeader>
+                                        </Empty>
+                                    )}
+                                </TabsContent>
+
+                                <TabsContent value="comments" className="mt-0 space-y-4">
+                                    {comments.length > 0 ? (
+                                        <div className="rounded-lg border">
+                                            <Table>
+                                                <TableHeader>
+                                                    <TableRow>
+                                                        <TableHead>Ürün</TableHead>
+                                                        <TableHead>Yorum</TableHead>
+                                                        <TableHead>Durum</TableHead>
+                                                        <TableHead className="text-right">Tarih</TableHead>
+                                                    </TableRow>
+                                                </TableHeader>
+                                                <TableBody>
+                                                    {comments.map((comment) => (
+                                                        <TableRow key={comment.id}>
+                                                            <TableCell>
+                                                                {comment.product ? (
+                                                                    <Link
+                                                                        href={admin.products.show(comment.product.id).url}
+                                                                        className="font-medium hover:underline"
+                                                                    >
+                                                                        {comment.product.title}
+                                                                    </Link>
+                                                                ) : (
+                                                                    <span className="text-muted-foreground">-</span>
+                                                                )}
+                                                            </TableCell>
+                                                            <TableCell className="max-w-[320px]">
+                                                                <p className="line-clamp-2 text-sm text-foreground">
+                                                                    {comment.body}
+                                                                </p>
+                                                                {comment.parent_id && (
+                                                                    <Badge variant="outline" className="mt-1">
+                                                                        Yanıt
+                                                                    </Badge>
+                                                                )}
+                                                            </TableCell>
+                                                            <TableCell>{commentStatusBadge(comment.status)}</TableCell>
+                                                            <TableCell className="text-right text-sm text-muted-foreground">
+                                                                {formatDate(comment.created_at)}
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    ))}
+                                                </TableBody>
+                                            </Table>
+                                        </div>
+                                    ) : (
+                                        <Empty className="border-dashed">
+                                            <EmptyHeader>
+                                                <EmptyMedia variant="icon">
+                                                    <MessageSquare className="h-5 w-5" />
+                                                </EmptyMedia>
+                                                <EmptyTitle>Yorum bulunamadı</EmptyTitle>
+                                                <EmptyDescription>
+                                                    Bu kullanıcı henüz yorum bırakmamış.
+                                                </EmptyDescription>
+                                            </EmptyHeader>
+                                        </Empty>
                                     )}
                                 </TabsContent>
                             </CardContent>

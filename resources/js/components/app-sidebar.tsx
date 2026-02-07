@@ -26,6 +26,7 @@ import {
     FileText,
     Settings,
     ShoppingCart,
+    MessageSquare,
 } from 'lucide-react';
 import AppLogo from './app-logo';
 import { useCurrentUrl } from '@/hooks/use-current-url';
@@ -89,6 +90,11 @@ const adminNavItems: NavItem[] = [
                 icon: Plus,
             },
         ],
+    },
+    {
+        title: 'Yorumlar',
+        href: admin.comments.index(),
+        icon: MessageSquare,
     },
     {
         title: 'Kullanıcılar',

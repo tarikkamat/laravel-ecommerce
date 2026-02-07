@@ -6,6 +6,8 @@ use App\Enums\Role;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UserStoreRequest;
 use App\Http\Requests\Admin\UserUpdateRequest;
+use App\Models\Order;
+use App\Models\ProductComment;
 use App\Services\Contracts\IUserService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -37,8 +39,65 @@ class UserController extends Controller
 
     public function show(int $id)
     {
+        $user = $this->service->findOrFail($id, ['*'], ['addresses']);
+
+        $orders = Order::query()
+            ->with(['items', 'payments', 'shipments'])
+            ->where('user_id', $user->id)
+            ->latest('id')
+            ->get()
+            ->map(function (Order $order): array {
+                $payment = $order->payments->sortByDesc('id')->first();
+                $shipment = $order->shipments->first();
+
+                return [
+                    'id' => $order->id,
+                    'status' => $order->status,
+                    'currency' => $order->currency,
+                    'grandTotal' => (float) $order->grand_total,
+                    'itemsCount' => (int) $order->items->sum('qty'),
+                    'createdAt' => $order->created_at?->toIso8601String(),
+                    'paymentStatus' => $payment?->status,
+                    'shipmentStatus' => $shipment?->shipment_status,
+                ];
+            })
+            ->values()
+            ->all();
+
+        $comments = ProductComment::query()
+            ->with('product:id,title')
+            ->where('user_id', $user->id)
+            ->latest('id')
+            ->get()
+            ->map(function (ProductComment $comment) use ($user): array {
+                return [
+                    'id' => $comment->id,
+                    'product_id' => $comment->product_id,
+                    'parent_id' => $comment->parent_id,
+                    'body' => $comment->body,
+                    'status' => $comment->status,
+                    'approved_at' => $comment->approved_at?->toIso8601String(),
+                    'created_at' => $comment->created_at->toIso8601String(),
+                    'user' => [
+                        'id' => $user->id,
+                        'name' => $user->name,
+                        'email' => $user->email,
+                    ],
+                    'product' => $comment->product
+                        ? [
+                            'id' => $comment->product->id,
+                            'title' => $comment->product->title,
+                        ]
+                        : null,
+                ];
+            })
+            ->values()
+            ->all();
+
         return Inertia::render('admin/users/show', [
-            'item' => $this->service->findOrFail($id)
+            'item' => $user,
+            'orders' => $orders,
+            'comments' => $comments,
         ]);
     }
 

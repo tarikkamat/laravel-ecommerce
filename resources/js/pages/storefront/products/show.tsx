@@ -1,9 +1,10 @@
 import StorefrontLayout from '@/layouts/storefront/storefront-layout';
 import type { Product } from '@/types/product';
+import type { ProductComment, SharedData } from '@/types';
 import { ProductGallery } from './components/ProductGallery';
 import { ProductInfo } from './components/ProductInfo';
 import { ProductTabs } from './components/ProductTabs';
-import { Link } from '@inertiajs/react';
+import { Link, useForm, usePage } from '@inertiajs/react';
 import {
     Breadcrumb,
     BreadcrumbItem,
@@ -13,13 +14,42 @@ import {
     BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
+import { Button } from '@/components/ui/button';
+import storefront from '@/routes/storefront';
+import { type FormEventHandler, useState } from 'react';
 
 type ProductShowProps = {
     product: Product;
+    comments: ProductComment[];
 };
 
-export default function ProductShow({ product }: ProductShowProps) {
-    console.log(product);
+const formatDate = (value: string) => {
+    return new Date(value).toLocaleDateString('tr-TR', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+    });
+};
+
+export default function ProductShow({ product, comments }: ProductShowProps) {
+    const { auth } = usePage<SharedData>().props;
+    const [notice, setNotice] = useState<string | null>(null);
+    const { data, setData, post, processing, reset, errors } = useForm({ body: '' });
+    const commentsEnabled = product.comments_enabled;
+    const user = auth.user;
+
+    const submitComment: FormEventHandler = (event) => {
+        event.preventDefault();
+
+        post(storefront.products.comments.store(product.id).url, {
+            preserveScroll: true,
+            onSuccess: () => {
+                reset();
+                setNotice('Yorumunuz onaydan sonra görünecek.');
+            },
+        });
+    };
+
     return (
         <StorefrontLayout title={product.title}>
             <main className="mx-auto w-full max-w-7xl px-4 py-6 md:px-6 lg:py-10">
@@ -63,6 +93,94 @@ export default function ProductShow({ product }: ProductShowProps) {
                     <Separator className="mb-8 md:mb-12" />
                     <div className="mx-auto max-w-4xl">
                         <ProductTabs product={product} />
+                    </div>
+                </div>
+
+                {/* Comments Section */}
+                <div className="mt-12 md:mt-16 lg:mt-20">
+                    <Separator className="mb-8 md:mb-12" />
+                    <div className="mx-auto max-w-4xl space-y-8">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h2 className="text-xl font-bold tracking-tight md:text-2xl">Yorumlar</h2>
+                                <p className="text-sm text-muted-foreground">
+                                    {comments.length > 0 ? `${comments.length} onaylı yorum` : 'Henüz yorum yok.'}
+                                </p>
+                            </div>
+                        </div>
+
+                        {commentsEnabled ? (
+                            user ? (
+                                <form onSubmit={submitComment} className="space-y-3 rounded-2xl border bg-muted/20 p-4 md:p-6">
+                                    <div>
+                                        <label htmlFor="comment-body" className="text-sm font-semibold">
+                                            Yorumunuzu Yazın
+                                        </label>
+                                        <textarea
+                                            id="comment-body"
+                                            className="mt-2 min-h-[120px] w-full rounded-xl border border-input bg-background px-4 py-3 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                                            placeholder="Bu ürün hakkında düşüncelerinizi paylaşın..."
+                                            value={data.body}
+                                            onChange={(event) => setData('body', event.target.value)}
+                                        />
+                                        {errors.body && (
+                                            <p className="mt-2 text-xs text-destructive">{errors.body}</p>
+                                        )}
+                                    </div>
+                                    {notice && (
+                                        <p className="text-xs font-medium text-emerald-600">{notice}</p>
+                                    )}
+                                    <div className="flex items-center justify-between">
+                                        <p className="text-xs text-muted-foreground">
+                                            Yorumunuz onaydan sonra görünür.
+                                        </p>
+                                        <Button type="submit" disabled={processing || data.body.trim() === ''}>
+                                            Gönder
+                                        </Button>
+                                    </div>
+                                </form>
+                            ) : (
+                                <div className="rounded-2xl border bg-muted/20 p-4 text-sm text-muted-foreground">
+                                    Yorum yapmak için giriş yapmalısınız.
+                                </div>
+                            )
+                        ) : (
+                            <div className="rounded-2xl border bg-muted/20 p-4 text-sm text-muted-foreground">
+                                Bu ürün yoruma kapalı.
+                            </div>
+                        )}
+
+                        {comments.length > 0 && (
+                            <div className="space-y-4">
+                                {comments.map((comment) => (
+                                    <div key={comment.id} className="rounded-2xl border bg-white p-4 shadow-sm">
+                                        <div className="flex flex-wrap items-center justify-between gap-2">
+                                            <div className="text-sm font-semibold">
+                                                {comment.user?.name || comment.user?.email || 'Müşteri'}
+                                            </div>
+                                            <div className="text-xs text-muted-foreground">
+                                                {formatDate(comment.created_at)}
+                                            </div>
+                                        </div>
+                                        <p className="mt-3 text-sm text-muted-foreground">{comment.body}</p>
+
+                                        {comment.replies && comment.replies.length > 0 && (
+                                            <div className="mt-4 space-y-3 border-l border-muted pl-4">
+                                                {comment.replies.map((reply) => (
+                                                    <div key={reply.id} className="rounded-xl bg-muted/30 p-3">
+                                                        <div className="flex items-center justify-between text-xs text-muted-foreground">
+                                                            <span>Yönetici</span>
+                                                            <span>{formatDate(reply.created_at)}</span>
+                                                        </div>
+                                                        <p className="mt-2 text-sm text-foreground">{reply.body}</p>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </div>
 

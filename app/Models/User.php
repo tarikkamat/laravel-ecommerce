@@ -53,6 +53,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the product comments for the user.
+     */
+    public function productComments(): HasMany
+    {
+        return $this->hasMany(ProductComment::class);
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
