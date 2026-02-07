@@ -17,7 +17,7 @@ class ProductUpdateRequest extends FormRequest
         $productId = $this->route('product');
 
         return [
-            'brand_id' => ['required', 'integer', 'exists:brands,id'],
+            'brand_id' => ['nullable', 'integer', 'exists:brands,id'],
             'slug' => ['required', 'string', Rule::unique('products', 'slug')->ignore($productId)->whereNull('deleted_at')],
             'title' => ['required', 'string'],
             'description' => ['nullable', 'string'],

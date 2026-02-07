@@ -105,11 +105,6 @@ export function ProductInfo({ product }: ProductInfoProps) {
                             SKU: <span className="font-medium">{product.sku}</span>
                         </p>
                     )}
-                    {product.skt && (
-                        <p className="text-xs text-muted-foreground">
-                            SKT: <span className="font-medium">{formatDate(product.skt)}</span>
-                        </p>
-                    )}
                 </div>
 
                 <div className="flex items-center gap-3">
@@ -133,6 +128,17 @@ export function ProductInfo({ product }: ProductInfoProps) {
                 </div>
 
                 <Separator className="my-6" />
+
+                {product.skt && (
+                    <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 dark:border-amber-800 dark:bg-amber-950/40">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-amber-800 dark:text-amber-200">
+                            Son kullanma tarihi
+                        </p>
+                        <p className="mt-0.5 text-base font-semibold text-amber-900 dark:text-amber-100">
+                            {formatDate(product.skt)}
+                        </p>
+                    </div>
+                )}
 
                 {product.description && (
                     <div
