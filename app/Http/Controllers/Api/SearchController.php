@@ -36,6 +36,7 @@ class SearchController extends Controller
             ->get()
             ->map(function ($product) {
                 $imagePath = $product->images->first()?->path;
+
                 return [
                     'id' => $product->id,
                     'title' => $product->title,

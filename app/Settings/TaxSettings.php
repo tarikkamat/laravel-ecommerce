@@ -7,7 +7,9 @@ use Spatie\LaravelSettings\Settings;
 class TaxSettings extends Settings
 {
     public float $default_rate = 0.2;
+
     public string $label = 'KDV';
+
     public bool $prices_include_tax = false;
 
     public array $category_rates = [];

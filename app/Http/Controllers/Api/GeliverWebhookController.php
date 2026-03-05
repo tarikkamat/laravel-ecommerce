@@ -36,10 +36,10 @@ class GeliverWebhookController extends Controller
         $event = (string) ($payload['event'] ?? '');
         $data = is_array($payload['data'] ?? null) ? $payload['data'] : [];
 
-        $evt = new WebhookUpdateTrackingRequest();
+        $evt = new WebhookUpdateTrackingRequest;
         $evt->event = $event;
         $evt->metadata = $payload['metadata'] ?? null;
-        $evt->data = new Shipment();
+        $evt->data = new Shipment;
 
         foreach ($data as $key => $value) {
             if (property_exists($evt->data, $key)) {

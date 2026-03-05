@@ -54,8 +54,8 @@ abstract class BaseRepository implements IBaseRepository
     {
         $model = $this->findBySlugOrId($identifier, $columns, $relations);
 
-        if (!$model) {
-            throw new \Illuminate\Database\Eloquent\ModelNotFoundException();
+        if (! $model) {
+            throw new \Illuminate\Database\Eloquent\ModelNotFoundException;
         }
 
         return $model;

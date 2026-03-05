@@ -1,20 +1,20 @@
 <?php
 
 use App\Http\Controllers\Admin\BrandController;
-use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DiscountController;
 use App\Http\Controllers\Admin\ImageController;
-use App\Http\Controllers\Admin\IngredientController;
-use App\Http\Controllers\Admin\ProductCommentController;
-use App\Http\Controllers\Admin\PageController;
-use App\Http\Controllers\Admin\ProductController;
-use App\Http\Controllers\Admin\TagController;
-use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\ImagePickerController;
-use App\Http\Controllers\Admin\SettingsController;
+use App\Http\Controllers\Admin\IngredientController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\OrderShipmentController;
+use App\Http\Controllers\Admin\PageController;
+use App\Http\Controllers\Admin\ProductCommentController;
+use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\SettingsController;
+use App\Http\Controllers\Admin\TagController;
+use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'verified', 'role.admin'])->prefix('suug')->as('admin.')->group(function () {

@@ -19,7 +19,7 @@ class DiscountController extends Controller
         $perPage = (int) $request->integer('per_page', 15);
 
         return Inertia::render('admin/discounts/index', [
-            'items' => $this->service->paginate($perPage)
+            'items' => $this->service->paginate($perPage),
         ]);
     }
 
@@ -38,7 +38,7 @@ class DiscountController extends Controller
     public function show(int $id)
     {
         return Inertia::render('admin/discounts/show', [
-            'item' => $this->service->findOrFail($id)
+            'item' => $this->service->findOrFail($id),
         ]);
     }
 
@@ -46,7 +46,7 @@ class DiscountController extends Controller
     {
         return Inertia::render('admin/discounts/edit', [
             'item' => $this->service->findOrFail($id),
-            ...$this->options()
+            ...$this->options(),
         ]);
     }
 

@@ -18,7 +18,7 @@ class TagController extends Controller
         $perPage = (int) $request->integer('per_page', 15);
 
         return Inertia::render('admin/tags/index', [
-            'items' => $this->service->paginate($perPage)
+            'items' => $this->service->paginate($perPage),
         ]);
     }
 

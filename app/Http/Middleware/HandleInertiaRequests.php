@@ -2,10 +2,10 @@
 
 namespace App\Http\Middleware;
 
-use App\Services\Contracts\IBrandService;
-use App\Services\Contracts\ICategoryService;
 use App\Services\CartResolver;
 use App\Services\CartTotalsService;
+use App\Services\Contracts\IBrandService;
+use App\Services\Contracts\ICategoryService;
 use App\Services\DiscountService;
 use App\Services\ShippingService;
 use App\Settings\HomeSettings;
@@ -82,7 +82,7 @@ class HandleInertiaRequests extends Middleware
                 'id' => $category->id,
                 'title' => $category->title,
                 'slug' => $category->slug,
-                'image' => $category->image?->path ? '/storage/' . $category->image->path : null,
+                'image' => $category->image?->path ? '/storage/'.$category->image->path : null,
                 'children' => $category->children->map(fn ($child) => [
                     'id' => $child->id,
                     'title' => $child->title,
@@ -108,7 +108,7 @@ class HandleInertiaRequests extends Middleware
                 'id' => $brand->id,
                 'title' => $brand->title,
                 'slug' => $brand->slug,
-                'image' => $brand->image?->path ? '/storage/' . $brand->image->path : null,
+                'image' => $brand->image?->path ? '/storage/'.$brand->image->path : null,
             ])
             ->values()
             ->toArray();

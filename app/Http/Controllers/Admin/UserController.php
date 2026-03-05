@@ -21,7 +21,7 @@ class UserController extends Controller
         $perPage = (int) $request->integer('per_page', 15);
 
         return Inertia::render('admin/users/index', [
-            'items' => $this->service->paginate($perPage)
+            'items' => $this->service->paginate($perPage),
         ]);
     }
 
@@ -110,7 +110,7 @@ class UserController extends Controller
     {
         return Inertia::render('admin/users/edit', [
             'item' => $this->service->findOrFail($id),
-            ...$this->options()
+            ...$this->options(),
         ]);
     }
 

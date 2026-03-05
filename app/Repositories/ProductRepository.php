@@ -26,8 +26,7 @@ class ProductRepository extends BaseRepository implements IProductRepository
         array $relations = [],
         ?string $orderBy = null,
         string $direction = 'desc'
-    ): Collection
-    {
+    ): Collection {
         $orderColumn = $orderBy ?: 'created_at';
         $orderDirection = strtolower($direction) === 'asc' ? 'asc' : 'desc';
 

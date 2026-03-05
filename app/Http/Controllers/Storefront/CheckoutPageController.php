@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Storefront;
 
-use App\Http\Controllers\Controller;
 use App\Enums\PageType;
+use App\Http\Controllers\Controller;
 use App\Models\Page;
 use App\Services\CheckoutService;
 use Illuminate\Http\Request;

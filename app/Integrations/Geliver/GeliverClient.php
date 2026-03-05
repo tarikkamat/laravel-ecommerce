@@ -2,11 +2,11 @@
 
 namespace App\Integrations\Geliver;
 
+use App\Settings\ShippingSettings;
 use Geliver\Client as GeliverSdkClient;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use RuntimeException;
-use App\Settings\ShippingSettings;
 
 class GeliverClient
 {
@@ -113,9 +113,11 @@ class GeliverClient
             return $shipment;
         } catch (\Geliver\ApiException $e) {
             $this->logApiException('Geliver shipment create failed.', $context, $e);
+
             return null;
         } catch (\Throwable $e) {
             $this->logThrowable('Geliver shipment create failed.', $context, $e);
+
             return null;
         }
     }
@@ -144,9 +146,11 @@ class GeliverClient
             return $offers;
         } catch (\Geliver\ApiException $e) {
             $this->logApiException('Geliver wait offers failed.', $context, $e);
+
             return null;
         } catch (\Throwable $e) {
             $this->logThrowable('Geliver wait offers failed.', $context, $e);
+
             return null;
         }
     }
@@ -173,9 +177,11 @@ class GeliverClient
             return $tx;
         } catch (\Geliver\ApiException $e) {
             $this->logApiException('Geliver accept offer failed.', $context, $e);
+
             return null;
         } catch (\Throwable $e) {
             $this->logThrowable('Geliver accept offer failed.', $context, $e);
+
             return null;
         }
     }
@@ -197,9 +203,11 @@ class GeliverClient
             return $this->client()->shipments()->downloadLabelByUrl($url);
         } catch (\Geliver\ApiException $e) {
             $this->logApiException('Geliver label download by url failed.', $context, $e);
+
             return null;
         } catch (\Throwable $e) {
             $this->logThrowable('Geliver label download by url failed.', $context, $e);
+
             return null;
         }
     }
@@ -221,9 +229,11 @@ class GeliverClient
             return $this->client()->shipments()->downloadLabel($shipmentId);
         } catch (\Geliver\ApiException $e) {
             $this->logApiException('Geliver label download by shipment id failed.', $context, $e);
+
             return null;
         } catch (\Throwable $e) {
             $this->logThrowable('Geliver label download by shipment id failed.', $context, $e);
+
             return null;
         }
     }

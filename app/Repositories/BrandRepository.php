@@ -24,8 +24,7 @@ class BrandRepository extends BaseRepository implements IBrandRepository
         ?string $search = null,
         ?float $priceMin = null,
         ?float $priceMax = null
-    ): LengthAwarePaginator
-    {
+    ): LengthAwarePaginator {
         $brand = $this->findBySlugOrIdOrFail($identifier);
 
         $query = $brand->products()

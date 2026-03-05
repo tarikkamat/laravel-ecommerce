@@ -32,8 +32,7 @@ class ProductService extends BaseService implements IProductService
         array $relations = [],
         ?string $orderBy = null,
         string $direction = 'desc'
-    ): Collection
-    {
+    ): Collection {
         /** @var IProductRepository $repository */
         $repository = $this->repository;
 

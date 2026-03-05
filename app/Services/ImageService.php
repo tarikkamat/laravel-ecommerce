@@ -25,11 +25,11 @@ class ImageService extends BaseService implements IImageService
         $extension = $file->getClientOriginalExtension();
         $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
         $slug = Str::slug($metadata['slug'] ?? $originalName);
-        $filename = $slug . '-' . Str::random(8) . '.' . $extension;
-        
+        $filename = $slug.'-'.Str::random(8).'.'.$extension;
+
         // Store file
         $path = $file->storeAs($directory, $filename, 'public');
-        
+
         // Create image record
         return $this->create([
             'slug' => $slug,
@@ -47,28 +47,28 @@ class ImageService extends BaseService implements IImageService
     public function updateWithFile(int $id, ?UploadedFile $file = null, array $metadata = [], string $directory = 'images'): Image
     {
         $image = $this->findOrFail($id);
-        
+
         // If new file provided, delete old and upload new
         if ($file) {
             // Delete old file
             if ($image->path && Storage::disk('public')->exists($image->path)) {
                 Storage::disk('public')->delete($image->path);
             }
-            
+
             // Upload new file
             $extension = $file->getClientOriginalExtension();
             $slug = Str::slug($metadata['slug'] ?? $image->slug);
-            $filename = $slug . '-' . Str::random(8) . '.' . $extension;
+            $filename = $slug.'-'.Str::random(8).'.'.$extension;
             $path = $file->storeAs($directory, $filename, 'public');
-            
+
             $metadata['path'] = $path;
         }
-        
+
         // Update slug if provided
         if (isset($metadata['slug'])) {
             $metadata['slug'] = Str::slug($metadata['slug']);
         }
-        
+
         return $this->update($id, $metadata);
     }
 
@@ -78,12 +78,12 @@ class ImageService extends BaseService implements IImageService
     public function deleteWithFile(int $id): bool
     {
         $image = $this->findOrFail($id);
-        
+
         // Delete file from storage
         if ($image->path && Storage::disk('public')->exists($image->path)) {
             Storage::disk('public')->delete($image->path);
         }
-        
+
         return $this->delete($id);
     }
 }

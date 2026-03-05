@@ -18,7 +18,7 @@ class IngredientController extends Controller
         $perPage = (int) $request->integer('per_page', 15);
 
         return Inertia::render('admin/ingredients/index', [
-            'items' => $this->service->paginate($perPage)
+            'items' => $this->service->paginate($perPage),
         ]);
     }
 
@@ -37,14 +37,14 @@ class IngredientController extends Controller
     public function show(int $id)
     {
         return Inertia::render('admin/ingredients/show', [
-            'item' => $this->service->findOrFail($id)
+            'item' => $this->service->findOrFail($id),
         ]);
     }
 
     public function edit(int $id)
     {
         return Inertia::render('admin/ingredients/edit', [
-            'item' => $this->service->findOrFail($id)
+            'item' => $this->service->findOrFail($id),
         ]);
     }
 

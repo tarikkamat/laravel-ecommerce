@@ -45,7 +45,7 @@ class OrderShipmentController extends Controller
         }
 
         return response()->streamDownload(
-            fn () => print($label['content']),
+            fn () => print ($label['content']),
             $label['filename'],
             ['Content-Type' => 'application/pdf']
         );
@@ -106,7 +106,7 @@ class OrderShipmentController extends Controller
         File::ensureDirectoryExists($tmpDir);
 
         $zipPath = $tmpDir.'/labels-'.now()->format('Ymd-His').'.zip';
-        $zip = new ZipArchive();
+        $zip = new ZipArchive;
 
         if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
             throw ValidationException::withMessages([

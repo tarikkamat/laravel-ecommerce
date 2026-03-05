@@ -37,7 +37,7 @@ class IyzicoClient
             throw new RuntimeException('Iyzico konfig eksik: api key, secret key veya base url bos.');
         }
 
-        $options = new Options();
+        $options = new Options;
         $options->setApiKey($apiKey);
         $options->setSecretKey($secretKey);
         $options->setBaseUrl($baseUrl);

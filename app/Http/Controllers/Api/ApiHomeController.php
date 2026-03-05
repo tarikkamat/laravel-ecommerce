@@ -26,7 +26,7 @@ class ApiHomeController extends Controller
                 'id' => $category->id,
                 'name' => $category->title,
                 'slug' => $category->slug,
-                'image' => $category->image?->path ? '/storage/' . $category->image->path : null,
+                'image' => $category->image?->path ? '/storage/'.$category->image->path : null,
             ]);
 
         return response()->json($categories);
@@ -90,7 +90,7 @@ class ApiHomeController extends Controller
             $query
                 ->whereIn('id', $manualOrder)
                 ->orderByRaw(
-                    "CASE id {$case} ELSE " . count($manualOrder) . " END",
+                    "CASE id {$case} ELSE ".count($manualOrder).' END',
                     $manualOrder
                 );
         } else {

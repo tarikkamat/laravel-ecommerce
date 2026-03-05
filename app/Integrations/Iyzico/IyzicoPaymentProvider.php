@@ -2,10 +2,10 @@
 
 namespace App\Integrations\Iyzico;
 
-use App\Settings\PaymentSettings;
-use App\Settings\TaxSettings;
 use App\Models\Order;
 use App\Models\OrderAddress;
+use App\Settings\PaymentSettings;
+use App\Settings\TaxSettings;
 use Iyzipay\Model\Address;
 use Iyzipay\Model\BasketItem;
 use Iyzipay\Model\BasketItemType;
@@ -54,7 +54,7 @@ class IyzicoPaymentProvider
 
         try {
             $options = $this->client->options();
-            $request = new CreateCheckoutFormInitializeRequest();
+            $request = new CreateCheckoutFormInitializeRequest;
 
             $request->setLocale(Locale::TR);
             $request->setConversationId($conversationId);
@@ -119,7 +119,7 @@ class IyzicoPaymentProvider
 
             $message = 'Iyzico initialize sirasinda beklenmeyen hata.';
             if (config('app.debug')) {
-                $message .= ' ' . $e->getMessage();
+                $message .= ' '.$e->getMessage();
             }
 
             return [
@@ -155,7 +155,7 @@ class IyzicoPaymentProvider
 
         try {
             $options = $this->client->options();
-            $request = new RetrieveCheckoutFormRequest();
+            $request = new RetrieveCheckoutFormRequest;
             $request->setLocale(Locale::TR);
             $request->setConversationId($conversationId);
             $request->setToken($token);
@@ -202,7 +202,7 @@ class IyzicoPaymentProvider
         $fullName = (string) ($address?->full_name ?? 'Misafir Kullanici');
         [$name, $surname] = $this->splitName($fullName);
 
-        $buyer = new Buyer();
+        $buyer = new Buyer;
         $buyer->setId((string) ($order->user_id ?? 'guest-'.$order->id));
         $buyer->setName($name);
         $buyer->setSurname($surname);
@@ -236,7 +236,7 @@ class IyzicoPaymentProvider
 
     private function toIyzicoAddress(?OrderAddress $address): Address
     {
-        $addressModel = new Address();
+        $addressModel = new Address;
         $addressModel->setContactName((string) ($address?->full_name ?? 'Misafir Kullanici'));
         $addressModel->setCity((string) ($address?->city ?? 'Istanbul'));
         $addressModel->setCountry($this->mapCountry((string) ($address?->country ?? 'TR')));
@@ -257,7 +257,7 @@ class IyzicoPaymentProvider
         $items = [];
 
         foreach ($order->items as $item) {
-            $basketItem = new BasketItem();
+            $basketItem = new BasketItem;
             $basketItem->setId('item-'.$item->id);
             $basketItem->setName((string) $item->title_snapshot);
             $basketItem->setCategory1('Genel');
@@ -269,7 +269,7 @@ class IyzicoPaymentProvider
 
         $taxTotal = (float) $order->tax_total;
         if (! $this->taxSettings->prices_include_tax && $taxTotal > 0) {
-            $taxItem = new BasketItem();
+            $taxItem = new BasketItem;
             $taxItem->setId('tax');
             $taxItem->setName('KDV');
             $taxItem->setCategory1('Genel');
@@ -281,7 +281,7 @@ class IyzicoPaymentProvider
 
         $shippingTotal = (float) $order->shipping_total;
         if ($shippingTotal > 0) {
-            $shippingItem = new BasketItem();
+            $shippingItem = new BasketItem;
             $shippingItem->setId('shipping');
             $shippingItem->setName('Kargo');
             $shippingItem->setCategory1('Genel');
@@ -303,15 +303,15 @@ class IyzicoPaymentProvider
             $baseUrl = $request->getSchemeAndHttpHost();
 
             if (app()->environment('production') && str_starts_with($baseUrl, 'http://')) {
-                $baseUrl = 'https://' . substr($baseUrl, 7);
+                $baseUrl = 'https://'.substr($baseUrl, 7);
             }
 
-            return rtrim($baseUrl, '/') . $path;
+            return rtrim($baseUrl, '/').$path;
         }
 
         $baseUrl = rtrim((string) config('app.url'), '/');
 
-        return $baseUrl . $path;
+        return $baseUrl.$path;
     }
 
     private function money($value): string

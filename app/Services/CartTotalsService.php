@@ -6,7 +6,6 @@ use App\Enums\DiscountType;
 use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Discount;
-use Illuminate\Support\Collection;
 
 class CartTotalsService
 {

@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Storefront;
 
 use App\Http\Controllers\Controller;
+use App\Services\Contracts\IBrandService;
 use App\Services\Contracts\ICategoryService;
 use App\Services\Contracts\IProductService;
-use App\Services\Contracts\IBrandService;
 use Inertia\Inertia;
 use Inertia\Response;
 

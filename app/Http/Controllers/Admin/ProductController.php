@@ -23,7 +23,7 @@ class ProductController extends Controller
         $perPage = (int) $request->integer('per_page', 15);
 
         return Inertia::render('admin/products/index', [
-            'items' => $this->service->paginate($perPage)
+            'items' => $this->service->paginate($perPage),
         ]);
     }
 
@@ -57,7 +57,7 @@ class ProductController extends Controller
         $product->load(['brand', 'categories', 'tags', 'ingredients', 'images']);
 
         return Inertia::render('admin/products/show', [
-            'item' => $product
+            'item' => $product,
         ]);
     }
 
@@ -83,7 +83,7 @@ class ProductController extends Controller
 
         return Inertia::render('admin/products/edit', [
             'item' => $product,
-            ...$this->options()
+            ...$this->options(),
         ]);
     }
 

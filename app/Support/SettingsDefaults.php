@@ -2,7 +2,6 @@
 
 namespace App\Support;
 
-use Illuminate\Support\Collection;
 use ReflectionProperty;
 use Spatie\LaravelSettings\Migrations\SettingsMigrator;
 use Spatie\LaravelSettings\SettingsConfig;
@@ -13,8 +12,7 @@ class SettingsDefaults
     public function __construct(
         private readonly SettingsContainer $settingsContainer,
         private readonly SettingsMigrator $settingsMigrator,
-    ) {
-    }
+    ) {}
 
     public function sync(array $settingsClasses = []): int
     {

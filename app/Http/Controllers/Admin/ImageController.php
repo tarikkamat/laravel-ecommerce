@@ -18,7 +18,7 @@ class ImageController extends Controller
         $perPage = (int) $request->integer('per_page', 15);
 
         return Inertia::render('admin/images/index', [
-            'items' => $this->service->paginate($perPage)
+            'items' => $this->service->paginate($perPage),
         ]);
     }
 
@@ -35,15 +35,15 @@ class ImageController extends Controller
 
         unset($data['image_file'], $data['image_files']);
 
-        if (!empty($files)) {
+        if (! empty($files)) {
             $baseMetadata = $data;
             $totalFiles = count($files);
 
             foreach ($files as $uploadedFile) {
                 $originalName = pathinfo($uploadedFile->getClientOriginalName(), PATHINFO_FILENAME);
                 $metadata = $baseMetadata;
-                $metadata['title'] = $totalFiles === 1 && !empty($data['title']) ? $data['title'] : $originalName;
-                $metadata['slug'] = $totalFiles === 1 && !empty($data['slug']) ? $data['slug'] : $originalName;
+                $metadata['title'] = $totalFiles === 1 && ! empty($data['title']) ? $data['title'] : $originalName;
+                $metadata['slug'] = $totalFiles === 1 && ! empty($data['slug']) ? $data['slug'] : $originalName;
 
                 $this->service->upload($uploadedFile, $metadata);
             }
@@ -60,14 +60,14 @@ class ImageController extends Controller
     public function show(int $id)
     {
         return Inertia::render('admin/images/show', [
-            'item' => $this->service->findOrFail($id)
+            'item' => $this->service->findOrFail($id),
         ]);
     }
 
     public function edit(int $id)
     {
         return Inertia::render('admin/images/edit', [
-            'item' => $this->service->findOrFail($id)
+            'item' => $this->service->findOrFail($id),
         ]);
     }
 

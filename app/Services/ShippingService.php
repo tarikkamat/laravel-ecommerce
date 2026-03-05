@@ -12,8 +12,11 @@ use Illuminate\Validation\ValidationException;
 class ShippingService
 {
     private const ADDRESS_SESSION_KEY = 'checkout.address';
+
     private const BILLING_ADDRESS_SESSION_KEY = 'checkout.billing_address';
+
     private const SHIPPING_SELECTION_KEY = 'checkout.shipping_selection';
+
     private const SHIPPING_RATES_KEY = 'checkout.shipping_rates';
 
     public function __construct(

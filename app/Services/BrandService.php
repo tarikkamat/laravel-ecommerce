@@ -30,8 +30,7 @@ class BrandService extends BaseService implements IBrandService
         ?string $search = null,
         ?float $priceMin = null,
         ?float $priceMax = null
-    ): LengthAwarePaginator
-    {
+    ): LengthAwarePaginator {
         return $this->brandRepository->getProductsByBrandSlug(
             $identifier,
             $perPage,
@@ -62,21 +61,21 @@ class BrandService extends BaseService implements IBrandService
                 'seo_title' => $data['image_seo_title'] ?? null,
                 'seo_description' => $data['image_seo_description'] ?? null,
             ];
-            
+
             $image = $this->imageService->upload($data['logo_file'], $imageMetadata, 'brands');
             $data['image_id'] = $image->id;
         }
-        
+
         // Remove non-model fields
         unset($data['logo_file'], $data['logo_url'], $data['image'], $data['image_title'], $data['image_slug'], $data['image_description'], $data['image_seo_title'], $data['image_seo_description']);
-        
+
         return parent::create($data);
     }
 
     public function update(int $id, array $data): Model
     {
         $brand = $this->findOrFail($id);
-        
+
         // Handle image upload
         if (isset($data['logo_file']) && $data['logo_file'] instanceof UploadedFile) {
             $imageMetadata = [
@@ -86,7 +85,7 @@ class BrandService extends BaseService implements IBrandService
                 'seo_title' => $data['image_seo_title'] ?? null,
                 'seo_description' => $data['image_seo_description'] ?? null,
             ];
-            
+
             // If brand already has an image, update it
             if ($brand->image_id) {
                 $this->imageService->updateWithFile($brand->image_id, $data['logo_file'], $imageMetadata, 'brands');
@@ -96,10 +95,10 @@ class BrandService extends BaseService implements IBrandService
                 $data['image_id'] = $image->id;
             }
         }
-        
+
         // Remove non-model fields
         unset($data['logo_file'], $data['logo_url'], $data['image'], $data['image_title'], $data['image_slug'], $data['image_description'], $data['image_seo_title'], $data['image_seo_description']);
-        
+
         return parent::update($id, $data);
     }
 }
