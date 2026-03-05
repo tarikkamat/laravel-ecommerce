@@ -39,6 +39,7 @@ Route::prefix('checkout')->group(function () {
 
 Route::prefix('payments')->group(function () {
     Route::post('/iyzico/initialize', [PaymentController::class, 'initialize'])->name('api.payments.iyzico.initialize');
+    Route::post('/vakif-katilim/initialize', [PaymentController::class, 'initializeVakifKatilim'])->name('api.payments.vakif.initialize');
     Route::post('/iyzico/webhook', [PaymentController::class, 'webhook'])->name('api.payments.iyzico.webhook');
 });
 

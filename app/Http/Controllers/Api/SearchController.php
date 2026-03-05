@@ -22,14 +22,7 @@ class SearchController extends Controller
 
         $products = Product::query()
             ->where('active', true)
-            ->where(function ($builder) use ($query) {
-                $builder
-                    ->where('title', 'like', "%{$query}%")
-                    ->orWhere('description', 'like', "%{$query}%")
-                    ->orWhereHas('brand', function ($inner) use ($query) {
-                        $inner->where('title', 'like', "%{$query}%");
-                    });
-            })
+            ->where('title', 'like', "%{$query}%")
             ->with(['brand:id,title,slug', 'images:id,path'])
             ->select(['id', 'title', 'slug', 'brand_id'])
             ->limit(6)

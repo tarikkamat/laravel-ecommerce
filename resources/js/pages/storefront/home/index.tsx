@@ -59,6 +59,7 @@ export default function HomePage({ apiEndpoints }: HomePageProps) {
                         title={`${brand.title} Ürünleri`}
                         subtitle={brand.title}
                         endpoint={apiEndpoints.brandProducts.replace(':brandId', String(brand.id))}
+                        allHref={`/markalar/${brand.slug}/urunler`}
                     />
                 ))}
             </div>

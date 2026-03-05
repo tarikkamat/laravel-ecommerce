@@ -9,12 +9,14 @@ type ProductGridProps = {
     endpoint: string;
     title?: string;
     subtitle?: string;
+    allHref?: string;
 };
 
 export function ProductGrid({
     endpoint,
     title = 'Öne Çıkan Ürünler',
     subtitle = 'Senin İçin Seçtiklerimiz',
+    allHref = '/urunler',
 }: ProductGridProps) {
     const [products, setProducts] = useState<Product[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -102,7 +104,7 @@ export function ProductGrid({
                         </span>
                     </button>
                     <Link
-                        href="#"
+                        href={allHref}
                         className="ml-2 flex items-center gap-2 text-xs font-black uppercase tracking-widest text-[#ec135b] hover:opacity-80 transition-opacity"
                     >
                         Tümünü Gör

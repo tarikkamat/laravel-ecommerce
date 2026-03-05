@@ -12,6 +12,7 @@ use App\Http\Controllers\Storefront\IyzicoCallbackController;
 use App\Http\Controllers\Storefront\PageController;
 use App\Http\Controllers\Storefront\ProductCommentController;
 use App\Http\Controllers\Storefront\ProductController;
+use App\Http\Controllers\Storefront\VakifKatilimCallbackController;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['as' => 'storefront.'], function () {
@@ -50,6 +51,13 @@ Route::group(['as' => 'storefront.'], function () {
             \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
         ])
         ->name('payments.iyzico.callback');
+    Route::match(['GET', 'POST'], '/odeme/vakif-katilim/3d/response/{payment?}', VakifKatilimCallbackController::class)
+        ->withoutMiddleware([
+            \Illuminate\Session\Middleware\StartSession::class,
+            \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+            \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+        ])
+        ->name('payments.vakif.response');
 
     Route::get('/sayfa/{slug}', [PageController::class, 'show'])->name('pages.show');
     Route::post('/sayfa/{slug}/iletisim', [PageController::class, 'contact'])->name('pages.contact');

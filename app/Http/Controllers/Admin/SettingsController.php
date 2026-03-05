@@ -92,6 +92,16 @@ class SettingsController extends Controller
                     'iyzico_base_url' => $paymentSettings->iyzico_base_url,
                     'iyzico_callback_url' => $paymentSettings->iyzico_callback_url,
                     'iyzico_webhook_secret' => $paymentSettings->iyzico_webhook_secret,
+                    'vakif_katilim_enabled' => $paymentSettings->vakif_katilim_enabled,
+                    'vakif_katilim_merchant_id' => $paymentSettings->vakif_katilim_merchant_id,
+                    'vakif_katilim_terminal_id' => $paymentSettings->vakif_katilim_terminal_id,
+                    'vakif_katilim_user_name' => $paymentSettings->vakif_katilim_user_name,
+                    'vakif_katilim_enc_key' => $paymentSettings->vakif_katilim_enc_key,
+                    'vakif_katilim_test_mode' => $paymentSettings->vakif_katilim_test_mode,
+                    'vakif_katilim_disable_3d_hash_check' => $paymentSettings->vakif_katilim_disable_3d_hash_check,
+                    'vakif_katilim_payment_api' => $paymentSettings->vakif_katilim_payment_api,
+                    'vakif_katilim_gateway_3d' => $paymentSettings->vakif_katilim_gateway_3d,
+                    'vakif_katilim_gateway_3d_host' => $paymentSettings->vakif_katilim_gateway_3d_host,
                 ],
                 'shipping' => [
                     'free_shipping_enabled' => $shippingSettings->free_shipping_enabled,
@@ -206,6 +216,22 @@ class SettingsController extends Controller
         $paymentSettings->iyzico_base_url = $request->string('iyzico_base_url', $paymentSettings->iyzico_base_url)->toString();
         $paymentSettings->iyzico_callback_url = $request->string('iyzico_callback_url', '')->toString();
         $paymentSettings->iyzico_webhook_secret = $request->string('iyzico_webhook_secret', '')->toString();
+        $paymentSettings->vakif_katilim_enabled = $request->boolean('vakif_katilim_enabled');
+        $paymentSettings->vakif_katilim_merchant_id = $request->string('vakif_katilim_merchant_id', '')->toString();
+        $paymentSettings->vakif_katilim_terminal_id = $request->string('vakif_katilim_terminal_id', '')->toString();
+        $paymentSettings->vakif_katilim_user_name = $request->string('vakif_katilim_user_name', '')->toString();
+        $paymentSettings->vakif_katilim_enc_key = $request->string('vakif_katilim_enc_key', '')->toString();
+        $paymentSettings->vakif_katilim_test_mode = $request->boolean('vakif_katilim_test_mode');
+        $paymentSettings->vakif_katilim_disable_3d_hash_check = $request->boolean('vakif_katilim_disable_3d_hash_check');
+        $paymentSettings->vakif_katilim_payment_api = $request
+            ->string('vakif_katilim_payment_api', $paymentSettings->vakif_katilim_payment_api)
+            ->toString();
+        $paymentSettings->vakif_katilim_gateway_3d = $request
+            ->string('vakif_katilim_gateway_3d', $paymentSettings->vakif_katilim_gateway_3d)
+            ->toString();
+        $paymentSettings->vakif_katilim_gateway_3d_host = $request
+            ->string('vakif_katilim_gateway_3d_host', $paymentSettings->vakif_katilim_gateway_3d_host)
+            ->toString();
         $paymentSettings->save();
 
         $shippingSettings->free_shipping_enabled = $request->boolean('free_shipping_enabled');

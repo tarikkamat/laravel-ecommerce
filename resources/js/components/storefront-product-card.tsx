@@ -107,7 +107,7 @@ export function StorefrontProductCard({ product }: StorefrontProductCardProps) {
                             </span>
                         )}
                         <Link href={`/urunler/${product.slug}`}>
-                            <h3 className="line-clamp-2 text-sm font-bold leading-snug text-[#181113] hover:text-[#ec135b] transition-colors dark:text-[#f4f0f2]">
+                            <h3 className="line-clamp-3 min-h-[3.9rem] text-sm font-bold leading-snug text-[#181113] hover:text-[#ec135b] transition-colors dark:text-[#f4f0f2]">
                                 {product.title}
                             </h3>
                         </Link>

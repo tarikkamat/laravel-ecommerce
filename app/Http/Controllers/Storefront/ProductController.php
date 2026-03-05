@@ -79,14 +79,7 @@ class ProductController extends Controller
         }
 
         if ($search !== '') {
-            $query->where(function ($builder) use ($search) {
-                $builder
-                    ->where('title', 'like', "%{$search}%")
-                    ->orWhere('description', 'like', "%{$search}%")
-                    ->orWhereHas('brand', function ($inner) use ($search) {
-                        $inner->where('title', 'like', "%{$search}%");
-                    });
-            });
+            $query->where('title', 'like', "%{$search}%");
         }
 
         switch ($sort) {
@@ -159,6 +152,7 @@ class ProductController extends Controller
     {
         $product = $this->service->findBySlugOrIdOrFail($identifier);
         $product->load(['brand', 'categories', 'tags', 'ingredients', 'images']);
+        $categoryIds = $product->categories->pluck('id')->all();
 
         if (! $request->header('x-inertia-prefetch')) {
             $product->increment('views_count');
@@ -182,9 +176,49 @@ class ProductController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
+        $relatedProductsQuery = Product::query()
+            ->with(['brand', 'images'])
+            ->where('active', true)
+            ->where('id', '!=', $product->id);
+
+        if ($product->brand_id || count($categoryIds) > 0) {
+            $relatedProductsQuery->where(function ($builder) use ($product, $categoryIds) {
+                if ($product->brand_id) {
+                    $builder->where('brand_id', $product->brand_id);
+                }
+
+                if (count($categoryIds) > 0) {
+                    if ($product->brand_id) {
+                        $builder->orWhereHas('categories', function ($inner) use ($categoryIds) {
+                            $inner->whereIn('categories.id', $categoryIds);
+                        });
+                    } else {
+                        $builder->whereHas('categories', function ($inner) use ($categoryIds) {
+                            $inner->whereIn('categories.id', $categoryIds);
+                        });
+                    }
+                }
+            });
+        }
+
+        if (count($categoryIds) > 0) {
+            $relatedProductsQuery
+                ->withCount(['categories as shared_categories_count' => function ($inner) use ($categoryIds) {
+                    $inner->whereIn('categories.id', $categoryIds);
+                }])
+                ->orderByDesc('shared_categories_count');
+        }
+
+        $relatedProductsQuery
+            ->orderByDesc('views_count')
+            ->orderByDesc('created_at');
+
+        $relatedProducts = $relatedProductsQuery->limit(8)->get();
+
         return Inertia::render('storefront/products/show', [
             'product' => $product,
             'comments' => $comments,
+            'relatedProducts' => $relatedProducts,
         ]);
     }
 }

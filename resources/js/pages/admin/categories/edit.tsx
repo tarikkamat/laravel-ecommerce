@@ -72,7 +72,7 @@ export default function CategoriesEdit({ item, categories }: Props) {
     );
     const [tempImageData, setTempImageData] = useState<ImageFormData | null>(null);
 
-    const { data, setData, post, processing, errors } = useForm<CategoryFormData>({
+    const { data, setData, post, processing, errors } = useForm<CategoryFormData & { _method: string }>({
         parent_id: item.parent_id,
         title: item.title,
         slug: item.slug,
@@ -85,6 +85,7 @@ export default function CategoriesEdit({ item, categories }: Props) {
         image_description: item.image?.description || '',
         image_seo_title: item.image?.seo_title || '',
         image_seo_description: item.image?.seo_description || '',
+        _method: 'PUT',
     });
 
     const generateSlug = (text: string): string => {
@@ -204,8 +205,7 @@ export default function CategoriesEdit({ item, categories }: Props) {
         e.preventDefault();
         post(admin.categories.update(item.id).url, {
             forceFormData: true,
-            _method: 'PUT',
-        } as any);
+        });
     };
 
     // Build category options with hierarchy, excluding current category and its children

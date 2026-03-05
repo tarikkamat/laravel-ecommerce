@@ -1,8 +1,13 @@
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 import StorefrontLayout from '@/layouts/storefront/storefront-layout';
+import type { SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import type { SharedData } from '@/types';
 
 type CartTotals = {
     currency: string;
@@ -57,6 +62,18 @@ type PaymentInitResponse = {
     payment_status: string;
     message?: string;
     redirect_url?: string | null;
+    form_data?:
+        | string
+        | {
+              gateway: string;
+              method: string;
+              inputs: Record<string, string>;
+          };
+};
+
+type PaymentMethod = {
+    code: 'iyzico' | 'vakif_katilim';
+    label: string;
 };
 
 type CheckoutPageProps = {
@@ -64,6 +81,7 @@ type CheckoutPageProps = {
     billingAddress?: Partial<Address>;
     selectedShipping: ShippingRate | null;
     totals: CartTotals;
+    paymentMethods: PaymentMethod[];
     contractPage?: {
         title: string;
         content: string | null;
@@ -74,7 +92,8 @@ type CheckoutPageProps = {
         rates: string;
         selectShipping: string;
         confirm: string;
-        initializePayment: string;
+        initializeIyzicoPayment: string;
+        initializeVakifKatilimPayment: string;
         cartPage: string;
     };
 };
@@ -126,22 +145,43 @@ export default function CheckoutPage({
     billingAddress: initialBillingAddress,
     selectedShipping: initialSelectedShipping,
     totals: initialTotals,
+    paymentMethods,
     contractPage,
     apiEndpoints,
 }: CheckoutPageProps) {
-    const { flash, storefrontSettings } = usePage<SharedData & { flash?: FlashProps }>().props;
-    const pricesIncludeTax = storefrontSettings?.tax?.prices_include_tax ?? false;
-    const [address, setAddress] = useState<Address>({ ...emptyAddress, ...initialAddress });
+    const { flash, storefrontSettings } = usePage<
+        SharedData & { flash?: FlashProps }
+    >().props;
+    const pricesIncludeTax =
+        storefrontSettings?.tax?.prices_include_tax ?? false;
+    const [address, setAddress] = useState<Address>({
+        ...emptyAddress,
+        ...initialAddress,
+    });
     const [billingAddress, setBillingAddress] = useState<Address>({
         ...emptyAddress,
         ...initialBillingAddress,
     });
     const [useBillingSame, setUseBillingSame] = useState(
-        isAddressEmpty(initialBillingAddress) || JSON.stringify(initialBillingAddress ?? {}) === JSON.stringify(initialAddress ?? {})
+        isAddressEmpty(initialBillingAddress) ||
+            JSON.stringify(initialBillingAddress ?? {}) ===
+                JSON.stringify(initialAddress ?? {}),
     );
-    const [selectedShipping, setSelectedShipping] = useState<ShippingRate | null>(initialSelectedShipping);
+    const [selectedShipping, setSelectedShipping] =
+        useState<ShippingRate | null>(initialSelectedShipping);
     const [totals, setTotals] = useState<CartTotals>(initialTotals);
     const [orderId, setOrderId] = useState<number | null>(null);
+    const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<
+        PaymentMethod['code'] | ''
+    >(paymentMethods[0]?.code ?? '');
+    const [vakifCard, setVakifCard] = useState({
+        card_holder: '',
+        card_number: '',
+        card_exp_month: '',
+        card_exp_year: '',
+        card_cvv: '',
+        installment: 0,
+    });
     const [paymentMessage, setPaymentMessage] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [isContractOpen, setIsContractOpen] = useState(false);
@@ -171,8 +211,12 @@ export default function CheckoutPage({
         `;
 
         const discountLine =
-            totals.discount_total > 0 ? `<p>İndirim: ${formatMoney(-totals.discount_total)}</p>` : '';
-        const taxLine = pricesIncludeTax ? '' : `<p>Vergi Tutarı: ${formatMoney(totals.tax_total)}</p>`;
+            totals.discount_total > 0
+                ? `<p>İndirim: ${formatMoney(-totals.discount_total)}</p>`
+                : '';
+        const taxLine = pricesIncludeTax
+            ? ''
+            : `<p>Vergi Tutarı: ${formatMoney(totals.tax_total)}</p>`;
         const totalsTable = `
             <table style=\"width:100%;border-collapse:collapse;margin-top:12px\">
                 <thead>
@@ -225,7 +269,16 @@ export default function CheckoutPage({
         });
 
         return html;
-    }, [contractPage, totals, formatMoney, address, billingAddress, useBillingSame, storefrontSettings, pricesIncludeTax]);
+    }, [
+        contractPage,
+        totals,
+        formatMoney,
+        address,
+        billingAddress,
+        useBillingSame,
+        storefrontSettings,
+        pricesIncludeTax,
+    ]);
 
     const loadSummary = useCallback(async () => {
         setLoading(true);
@@ -242,7 +295,10 @@ export default function CheckoutPage({
                 setAddress((prev) => ({ ...prev, ...data.address }));
             }
             if (data?.billing_address) {
-                setBillingAddress((prev) => ({ ...prev, ...data.billing_address }));
+                setBillingAddress((prev) => ({
+                    ...prev,
+                    ...data.billing_address,
+                }));
                 if (!isAddressEmpty(data.billing_address)) {
                     setUseBillingSame(false);
                 }
@@ -258,6 +314,18 @@ export default function CheckoutPage({
     useEffect(() => {
         loadSummary();
     }, [loadSummary]);
+
+    useEffect(() => {
+        if (
+            paymentMethods.some(
+                (method) => method.code === selectedPaymentMethod,
+            )
+        ) {
+            return;
+        }
+
+        setSelectedPaymentMethod(paymentMethods[0]?.code ?? '');
+    }, [paymentMethods, selectedPaymentMethod]);
 
     const submitAddress = async (event: FormEvent) => {
         event.preventDefault();
@@ -301,14 +369,20 @@ export default function CheckoutPage({
                 headers: { Accept: 'application/json' },
                 credentials: 'same-origin',
             });
-            const data = (await response.json()) as ConfirmResponse & { message?: string; errors?: Record<string, string[]> };
+            const data = (await response.json()) as ConfirmResponse & {
+                message?: string;
+                errors?: Record<string, string[]>;
+            };
             setOrderId(data.order_id ?? null);
             if (data?.totals) {
                 setTotals(data.totals);
             }
 
             if (!response.ok) {
-                const msg = data?.message ?? data?.errors?.order_id?.[0] ?? 'Siparis olusturulamadi.';
+                const msg =
+                    data?.message ??
+                    data?.errors?.order_id?.[0] ??
+                    'Siparis olusturulamadi.';
                 setPaymentMessage(msg);
                 return;
             }
@@ -326,27 +400,117 @@ export default function CheckoutPage({
         }
     };
 
+    const submitGatewayFormData = (
+        formData: PaymentInitResponse['form_data'],
+    ) => {
+        if (!formData || typeof formData === 'string') {
+            setPaymentMessage('Banka form verisi gecersiz.');
+            return;
+        }
+
+        const form = document.createElement('form');
+        form.method = (formData.method || 'POST').toUpperCase();
+        form.action = formData.gateway;
+        form.style.display = 'none';
+
+        Object.entries(formData.inputs ?? {}).forEach(([key, value]) => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = key;
+            input.value = String(value ?? '');
+            form.appendChild(input);
+        });
+
+        document.body.appendChild(form);
+        form.submit();
+    };
+
     const initializePayment = async (order_id: number) => {
+        if (!selectedPaymentMethod) {
+            setPaymentMessage('Aktif odeme yontemi bulunamadi.');
+            return;
+        }
+
+        if (selectedPaymentMethod === 'vakif_katilim') {
+            const requiredVakifFields: Array<{
+                key: keyof typeof vakifCard;
+                label: string;
+            }> = [
+                { key: 'card_holder', label: 'Kart sahibi' },
+                { key: 'card_number', label: 'Kart numarasi' },
+                { key: 'card_exp_month', label: 'Son kullanma ayi' },
+                { key: 'card_exp_year', label: 'Son kullanma yili' },
+                { key: 'card_cvv', label: 'CVV' },
+            ];
+
+            const missing = requiredVakifFields.find(
+                ({ key }) => !String(vakifCard[key]).trim(),
+            );
+            if (missing) {
+                setPaymentMessage(`${missing.label} alani zorunlu.`);
+                return;
+            }
+        }
+
+        const endpoint =
+            selectedPaymentMethod === 'vakif_katilim'
+                ? apiEndpoints.initializeVakifKatilimPayment
+                : apiEndpoints.initializeIyzicoPayment;
+
+        const body =
+            selectedPaymentMethod === 'vakif_katilim'
+                ? {
+                      order_id,
+                      card_holder: vakifCard.card_holder,
+                      card_number: vakifCard.card_number,
+                      card_exp_month: vakifCard.card_exp_month,
+                      card_exp_year: vakifCard.card_exp_year,
+                      card_cvv: vakifCard.card_cvv,
+                      installment: vakifCard.installment || 0,
+                  }
+                : { order_id };
+
         try {
-            const response = await fetch(apiEndpoints.initializePayment, {
+            const response = await fetch(endpoint, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     Accept: 'application/json',
                 },
                 credentials: 'same-origin',
-                body: JSON.stringify({ order_id }),
+                body: JSON.stringify(body),
             });
             const data = (await response.json()) as PaymentInitResponse;
+
+            if (!response.ok) {
+                const firstError =
+                    typeof (data as { errors?: Record<string, string[]> })
+                        .errors === 'object'
+                        ? Object.values(
+                              (data as { errors?: Record<string, string[]> })
+                                  .errors ?? {},
+                          )[0]?.[0]
+                        : null;
+                setPaymentMessage(
+                    data.message ?? firstError ?? 'Odeme baslatilamadi.',
+                );
+                return;
+            }
 
             if (data.redirect_url) {
                 window.location.assign(data.redirect_url);
                 return;
             }
 
+            if (data.form_data) {
+                submitGatewayFormData(data.form_data);
+                return;
+            }
+
             setPaymentMessage(data.message ?? 'Odeme baslatildi.');
         } catch (error) {
             console.error('Payment initialize failed:', error);
+            setPaymentMessage('Odeme baslatilirken hata olustu.');
         }
     };
 
@@ -361,41 +525,70 @@ export default function CheckoutPage({
                                 : 'border-red-600 text-red-700'
                         }`}
                     >
-                        {flash.paymentStatus === 'success' ? 'Odeme basarili.' : 'Odeme basarisiz.'}
-                        {flash.orderId ? <span className="ml-2">Siparis: #{flash.orderId}</span> : null}
+                        {flash.paymentStatus === 'success'
+                            ? 'Odeme basarili.'
+                            : 'Odeme basarisiz.'}
+                        {flash.orderId ? (
+                            <span className="ml-2">
+                                Siparis: #{flash.orderId}
+                            </span>
+                        ) : null}
                     </div>
                 ) : null}
 
                 <div className="flex items-center justify-between">
                     <h1 className="text-2xl font-semibold">Checkout</h1>
-                    <Link href={apiEndpoints.cartPage} className="text-sm underline">
+                    <Link
+                        href={apiEndpoints.cartPage}
+                        className="text-sm underline"
+                    >
                         Sepete Don
                     </Link>
                 </div>
 
                 <div className="grid gap-6 md:grid-cols-[2fr_1fr]">
                     <div className="space-y-6">
-                        <form onSubmit={submitAddress} className="space-y-3 rounded border p-4">
-                            <div className="text-sm font-medium">Teslimat Adresi</div>
+                        <form
+                            onSubmit={submitAddress}
+                            className="space-y-3 rounded border p-4"
+                        >
+                            <div className="text-sm font-medium">
+                                Teslimat Adresi
+                            </div>
 
                             <div className="grid gap-3 sm:grid-cols-2">
                                 <input
                                     className="rounded border px-3 py-2 text-sm"
                                     placeholder="Ad Soyad"
                                     value={address.full_name}
-                                    onChange={(e) => setAddress((prev) => ({ ...prev, full_name: e.target.value }))}
+                                    onChange={(e) =>
+                                        setAddress((prev) => ({
+                                            ...prev,
+                                            full_name: e.target.value,
+                                        }))
+                                    }
                                 />
                                 <input
                                     className="rounded border px-3 py-2 text-sm"
                                     placeholder="Telefon"
                                     value={address.phone ?? ''}
-                                    onChange={(e) => setAddress((prev) => ({ ...prev, phone: e.target.value }))}
+                                    onChange={(e) =>
+                                        setAddress((prev) => ({
+                                            ...prev,
+                                            phone: e.target.value,
+                                        }))
+                                    }
                                 />
                                 <input
                                     className="rounded border px-3 py-2 text-sm sm:col-span-2"
                                     placeholder="E-posta"
                                     value={address.email ?? ''}
-                                    onChange={(e) => setAddress((prev) => ({ ...prev, email: e.target.value }))}
+                                    onChange={(e) =>
+                                        setAddress((prev) => ({
+                                            ...prev,
+                                            email: e.target.value,
+                                        }))
+                                    }
                                 />
                             </div>
 
@@ -404,19 +597,34 @@ export default function CheckoutPage({
                                     className="rounded border px-3 py-2 text-sm"
                                     placeholder="Ulke"
                                     value={address.country}
-                                    onChange={(e) => setAddress((prev) => ({ ...prev, country: e.target.value }))}
+                                    onChange={(e) =>
+                                        setAddress((prev) => ({
+                                            ...prev,
+                                            country: e.target.value,
+                                        }))
+                                    }
                                 />
                                 <input
                                     className="rounded border px-3 py-2 text-sm"
                                     placeholder="Sehir"
                                     value={address.city}
-                                    onChange={(e) => setAddress((prev) => ({ ...prev, city: e.target.value }))}
+                                    onChange={(e) =>
+                                        setAddress((prev) => ({
+                                            ...prev,
+                                            city: e.target.value,
+                                        }))
+                                    }
                                 />
                                 <input
                                     className="rounded border px-3 py-2 text-sm"
                                     placeholder="Ilce"
                                     value={address.district ?? ''}
-                                    onChange={(e) => setAddress((prev) => ({ ...prev, district: e.target.value }))}
+                                    onChange={(e) =>
+                                        setAddress((prev) => ({
+                                            ...prev,
+                                            district: e.target.value,
+                                        }))
+                                    }
                                 />
                             </div>
 
@@ -425,20 +633,35 @@ export default function CheckoutPage({
                                     className="rounded border px-3 py-2 text-sm"
                                     placeholder="Adres satiri"
                                     value={address.line1}
-                                    onChange={(e) => setAddress((prev) => ({ ...prev, line1: e.target.value }))}
+                                    onChange={(e) =>
+                                        setAddress((prev) => ({
+                                            ...prev,
+                                            line1: e.target.value,
+                                        }))
+                                    }
                                 />
                                 <div className="grid gap-3 sm:grid-cols-2">
                                     <input
                                         className="rounded border px-3 py-2 text-sm"
                                         placeholder="Adres satiri 2"
                                         value={address.line2 ?? ''}
-                                        onChange={(e) => setAddress((prev) => ({ ...prev, line2: e.target.value }))}
+                                        onChange={(e) =>
+                                            setAddress((prev) => ({
+                                                ...prev,
+                                                line2: e.target.value,
+                                            }))
+                                        }
                                     />
                                     <input
                                         className="rounded border px-3 py-2 text-sm"
                                         placeholder="Posta kodu"
                                         value={address.postal_code ?? ''}
-                                        onChange={(e) => setAddress((prev) => ({ ...prev, postal_code: e.target.value }))}
+                                        onChange={(e) =>
+                                            setAddress((prev) => ({
+                                                ...prev,
+                                                postal_code: e.target.value,
+                                            }))
+                                        }
                                     />
                                 </div>
                             </div>
@@ -447,33 +670,52 @@ export default function CheckoutPage({
                                 <input
                                     type="checkbox"
                                     checked={useBillingSame}
-                                    onChange={(event) => setUseBillingSame(event.target.checked)}
+                                    onChange={(event) =>
+                                        setUseBillingSame(event.target.checked)
+                                    }
                                 />
                                 Fatura adresi teslimat adresi ile aynı
                             </label>
 
                             {!useBillingSame && (
                                 <>
-                                    <div className="pt-2 text-sm font-medium">Fatura Adresi</div>
+                                    <div className="pt-2 text-sm font-medium">
+                                        Fatura Adresi
+                                    </div>
 
                                     <div className="grid gap-3 sm:grid-cols-2">
                                         <input
                                             className="rounded border px-3 py-2 text-sm"
                                             placeholder="Ad Soyad"
                                             value={billingAddress.full_name}
-                                            onChange={(e) => setBillingAddress((prev) => ({ ...prev, full_name: e.target.value }))}
+                                            onChange={(e) =>
+                                                setBillingAddress((prev) => ({
+                                                    ...prev,
+                                                    full_name: e.target.value,
+                                                }))
+                                            }
                                         />
                                         <input
                                             className="rounded border px-3 py-2 text-sm"
                                             placeholder="Telefon"
                                             value={billingAddress.phone ?? ''}
-                                            onChange={(e) => setBillingAddress((prev) => ({ ...prev, phone: e.target.value }))}
+                                            onChange={(e) =>
+                                                setBillingAddress((prev) => ({
+                                                    ...prev,
+                                                    phone: e.target.value,
+                                                }))
+                                            }
                                         />
                                         <input
                                             className="rounded border px-3 py-2 text-sm sm:col-span-2"
                                             placeholder="E-posta"
                                             value={billingAddress.email ?? ''}
-                                            onChange={(e) => setBillingAddress((prev) => ({ ...prev, email: e.target.value }))}
+                                            onChange={(e) =>
+                                                setBillingAddress((prev) => ({
+                                                    ...prev,
+                                                    email: e.target.value,
+                                                }))
+                                            }
                                         />
                                     </div>
 
@@ -482,19 +724,36 @@ export default function CheckoutPage({
                                             className="rounded border px-3 py-2 text-sm"
                                             placeholder="Ulke"
                                             value={billingAddress.country}
-                                            onChange={(e) => setBillingAddress((prev) => ({ ...prev, country: e.target.value }))}
+                                            onChange={(e) =>
+                                                setBillingAddress((prev) => ({
+                                                    ...prev,
+                                                    country: e.target.value,
+                                                }))
+                                            }
                                         />
                                         <input
                                             className="rounded border px-3 py-2 text-sm"
                                             placeholder="Sehir"
                                             value={billingAddress.city}
-                                            onChange={(e) => setBillingAddress((prev) => ({ ...prev, city: e.target.value }))}
+                                            onChange={(e) =>
+                                                setBillingAddress((prev) => ({
+                                                    ...prev,
+                                                    city: e.target.value,
+                                                }))
+                                            }
                                         />
                                         <input
                                             className="rounded border px-3 py-2 text-sm"
                                             placeholder="Ilce"
-                                            value={billingAddress.district ?? ''}
-                                            onChange={(e) => setBillingAddress((prev) => ({ ...prev, district: e.target.value }))}
+                                            value={
+                                                billingAddress.district ?? ''
+                                            }
+                                            onChange={(e) =>
+                                                setBillingAddress((prev) => ({
+                                                    ...prev,
+                                                    district: e.target.value,
+                                                }))
+                                            }
                                         />
                                     </div>
 
@@ -503,20 +762,46 @@ export default function CheckoutPage({
                                             className="rounded border px-3 py-2 text-sm"
                                             placeholder="Adres satiri"
                                             value={billingAddress.line1}
-                                            onChange={(e) => setBillingAddress((prev) => ({ ...prev, line1: e.target.value }))}
+                                            onChange={(e) =>
+                                                setBillingAddress((prev) => ({
+                                                    ...prev,
+                                                    line1: e.target.value,
+                                                }))
+                                            }
                                         />
                                         <div className="grid gap-3 sm:grid-cols-2">
                                             <input
                                                 className="rounded border px-3 py-2 text-sm"
                                                 placeholder="Adres satiri 2"
-                                                value={billingAddress.line2 ?? ''}
-                                                onChange={(e) => setBillingAddress((prev) => ({ ...prev, line2: e.target.value }))}
+                                                value={
+                                                    billingAddress.line2 ?? ''
+                                                }
+                                                onChange={(e) =>
+                                                    setBillingAddress(
+                                                        (prev) => ({
+                                                            ...prev,
+                                                            line2: e.target
+                                                                .value,
+                                                        }),
+                                                    )
+                                                }
                                             />
                                             <input
                                                 className="rounded border px-3 py-2 text-sm"
                                                 placeholder="Posta kodu"
-                                                value={billingAddress.postal_code ?? ''}
-                                                onChange={(e) => setBillingAddress((prev) => ({ ...prev, postal_code: e.target.value }))}
+                                                value={
+                                                    billingAddress.postal_code ??
+                                                    ''
+                                                }
+                                                onChange={(e) =>
+                                                    setBillingAddress(
+                                                        (prev) => ({
+                                                            ...prev,
+                                                            postal_code:
+                                                                e.target.value,
+                                                        }),
+                                                    )
+                                                }
                                             />
                                         </div>
                                     </div>
@@ -539,13 +824,131 @@ export default function CheckoutPage({
                             <div className="flex items-center justify-between text-sm">
                                 <span>{shippingLabel}</span>
                                 <span className="font-medium">
-                                    {totals.shipping_total === 0 ? 'Ücretsiz' : formatMoney(totals.shipping_total)}
+                                    {totals.shipping_total === 0
+                                        ? 'Ücretsiz'
+                                        : formatMoney(totals.shipping_total)}
                                 </span>
                             </div>
                         </div>
 
                         <div className="space-y-3 rounded border p-4">
                             <div className="text-sm font-medium">Onay</div>
+                            <div className="space-y-2 rounded border p-3">
+                                <div className="text-xs font-semibold">
+                                    Odeme Yontemi
+                                </div>
+                                <div className="grid gap-2 sm:grid-cols-2">
+                                    {paymentMethods.map((method) => (
+                                        <label
+                                            key={method.code}
+                                            className="flex cursor-pointer items-center gap-2 rounded border px-3 py-2 text-sm"
+                                        >
+                                            <input
+                                                type="radio"
+                                                name="payment_method"
+                                                checked={
+                                                    selectedPaymentMethod ===
+                                                    method.code
+                                                }
+                                                onChange={() =>
+                                                    setSelectedPaymentMethod(
+                                                        method.code,
+                                                    )
+                                                }
+                                            />
+                                            <span>{method.label}</span>
+                                        </label>
+                                    ))}
+                                    {paymentMethods.length === 0 ? (
+                                        <div className="text-xs text-muted-foreground">
+                                            Aktif odeme yontemi bulunamadi.
+                                        </div>
+                                    ) : null}
+                                </div>
+                            </div>
+
+                            {selectedPaymentMethod === 'vakif_katilim' ? (
+                                <div className="space-y-3 rounded border p-3">
+                                    <div className="text-xs font-semibold">
+                                        Kart Bilgileri (Vakıf Katılım 3D Secure)
+                                    </div>
+                                    <input
+                                        className="rounded border px-3 py-2 text-sm"
+                                        placeholder="Kart sahibi"
+                                        value={vakifCard.card_holder}
+                                        onChange={(e) =>
+                                            setVakifCard((prev) => ({
+                                                ...prev,
+                                                card_holder: e.target.value,
+                                            }))
+                                        }
+                                    />
+                                    <input
+                                        className="rounded border px-3 py-2 text-sm"
+                                        placeholder="Kart numarasi"
+                                        value={vakifCard.card_number}
+                                        onChange={(e) =>
+                                            setVakifCard((prev) => ({
+                                                ...prev,
+                                                card_number: e.target.value,
+                                            }))
+                                        }
+                                    />
+                                    <div className="grid gap-2 sm:grid-cols-3">
+                                        <input
+                                            className="rounded border px-3 py-2 text-sm"
+                                            placeholder="AA"
+                                            value={vakifCard.card_exp_month}
+                                            onChange={(e) =>
+                                                setVakifCard((prev) => ({
+                                                    ...prev,
+                                                    card_exp_month:
+                                                        e.target.value,
+                                                }))
+                                            }
+                                        />
+                                        <input
+                                            className="rounded border px-3 py-2 text-sm"
+                                            placeholder="YYYY"
+                                            value={vakifCard.card_exp_year}
+                                            onChange={(e) =>
+                                                setVakifCard((prev) => ({
+                                                    ...prev,
+                                                    card_exp_year:
+                                                        e.target.value,
+                                                }))
+                                            }
+                                        />
+                                        <input
+                                            className="rounded border px-3 py-2 text-sm"
+                                            placeholder="CVV"
+                                            value={vakifCard.card_cvv}
+                                            onChange={(e) =>
+                                                setVakifCard((prev) => ({
+                                                    ...prev,
+                                                    card_cvv: e.target.value,
+                                                }))
+                                            }
+                                        />
+                                    </div>
+                                    <input
+                                        className="rounded border px-3 py-2 text-sm"
+                                        type="number"
+                                        min={0}
+                                        max={12}
+                                        placeholder="Taksit (0 = pesin)"
+                                        value={vakifCard.installment}
+                                        onChange={(e) =>
+                                            setVakifCard((prev) => ({
+                                                ...prev,
+                                                installment: Number(
+                                                    e.target.value || 0,
+                                                ),
+                                            }))
+                                        }
+                                    />
+                                </div>
+                            ) : null}
                             {contractPage ? (
                                 <div className="flex flex-col gap-2 rounded border border-dashed p-3 text-xs">
                                     <button
@@ -553,13 +956,18 @@ export default function CheckoutPage({
                                         onClick={() => setIsContractOpen(true)}
                                         className="text-left font-semibold text-[#ec135b] underline"
                                     >
-                                        {contractPage.title || 'Mesafeli Satış Sözleşmesi'}
+                                        {contractPage.title ||
+                                            'Mesafeli Satış Sözleşmesi'}
                                     </button>
                                     <label className="flex items-center gap-2">
                                         <input
                                             type="checkbox"
                                             checked={hasAcceptedContract}
-                                            onChange={(event) => setHasAcceptedContract(event.target.checked)}
+                                            onChange={(event) =>
+                                                setHasAcceptedContract(
+                                                    event.target.checked,
+                                                )
+                                            }
                                         />
                                         Sözleşmeyi okudum, kabul ediyorum.
                                     </label>
@@ -568,17 +976,28 @@ export default function CheckoutPage({
                             <button
                                 type="button"
                                 onClick={confirmCheckout}
-                                disabled={loading || !selectedShipping || (contractPage ? !hasAcceptedContract : false)}
+                                disabled={
+                                    loading ||
+                                    !selectedShipping ||
+                                    paymentMethods.length === 0 ||
+                                    (contractPage
+                                        ? !hasAcceptedContract
+                                        : false)
+                                }
                                 className="rounded bg-black px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
                             >
                                 Siparisi Olustur ve Odemeye Gec
                             </button>
 
                             {orderId ? (
-                                <div className="text-xs text-muted-foreground">Siparis No: #{orderId}</div>
+                                <div className="text-xs text-muted-foreground">
+                                    Siparis No: #{orderId}
+                                </div>
                             ) : null}
                             {paymentMessage ? (
-                                <div className="text-xs text-muted-foreground">{paymentMessage}</div>
+                                <div className="text-xs text-muted-foreground">
+                                    {paymentMessage}
+                                </div>
                             ) : null}
                         </div>
                     </div>
@@ -591,7 +1010,9 @@ export default function CheckoutPage({
                         {totals.discount_total > 0 ? (
                             <div className="flex items-center justify-between text-sm text-emerald-700">
                                 <span>İndirim</span>
-                                <span>{formatMoney(-totals.discount_total)}</span>
+                                <span>
+                                    {formatMoney(-totals.discount_total)}
+                                </span>
                             </div>
                         ) : null}
                         {!pricesIncludeTax ? (
@@ -617,13 +1038,20 @@ export default function CheckoutPage({
                 <Dialog open={isContractOpen} onOpenChange={setIsContractOpen}>
                     <DialogContent className="sm:max-w-3xl">
                         <DialogHeader>
-                            <DialogTitle>{contractPage.title || 'Mesafeli Satış Sözleşmesi'}</DialogTitle>
+                            <DialogTitle>
+                                {contractPage.title ||
+                                    'Mesafeli Satış Sözleşmesi'}
+                            </DialogTitle>
                         </DialogHeader>
                         <div className="max-h-[70vh] overflow-y-auto rounded-md border p-4 text-sm leading-relaxed">
                             {contractHtml ? (
                                 <div
                                     className="prose max-w-none text-sm"
-                                    dangerouslySetInnerHTML={{ __html: decodeHtmlEntities(contractHtml) }}
+                                    dangerouslySetInnerHTML={{
+                                        __html: decodeHtmlEntities(
+                                            contractHtml,
+                                        ),
+                                    }}
                                 />
                             ) : (
                                 <p>Sözleşme içeriği bulunamadı.</p>

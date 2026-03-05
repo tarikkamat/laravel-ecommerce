@@ -15,6 +15,7 @@ type ProductInfoProps = {
 export function ProductInfo({ product }: ProductInfoProps) {
     const [isAdding, setIsAdding] = useState(false);
     const [added, setAdded] = useState(false);
+    const [shareStatus, setShareStatus] = useState<string | null>(null);
     const price = parsePrice(product.price);
     const salePrice = product.sale_price ? parsePrice(product.sale_price) : null;
     const hasDiscount = salePrice !== null && salePrice > 0 && salePrice < price;
@@ -75,6 +76,42 @@ export function ProductInfo({ product }: ProductInfoProps) {
         }
     };
 
+    const handleShare = async () => {
+        if (typeof window === 'undefined') {
+            return;
+        }
+
+        const shareUrl = `${window.location.origin}/urunler/${product.slug}`;
+
+        try {
+            if (typeof navigator.share === 'function') {
+                await navigator.share({
+                    title: product.title,
+                    text: product.title,
+                    url: shareUrl,
+                });
+                setShareStatus('Ürün bağlantısı paylaşıldı.');
+                return;
+            }
+
+            if (navigator.clipboard?.writeText) {
+                await navigator.clipboard.writeText(shareUrl);
+                setShareStatus('Ürün bağlantısı kopyalandı.');
+                return;
+            }
+
+            window.prompt('Bağlantıyı kopyalayın:', shareUrl);
+            setShareStatus('Ürün bağlantısı hazır.');
+        } catch (error) {
+            if (error instanceof DOMException && error.name === 'AbortError') {
+                return;
+            }
+            setShareStatus('Paylaşım başarısız oldu.');
+        } finally {
+            window.setTimeout(() => setShareStatus(null), 1600);
+        }
+    };
+
     return (
         <div className="flex flex-col h-full">
             <div className="space-y-4">
@@ -88,7 +125,13 @@ export function ProductInfo({ product }: ProductInfoProps) {
                         </Link>
                     )}
                     <div className="flex items-center gap-1">
-                        <Button variant="ghost" size="icon-sm" className="rounded-full">
+                        <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            className="rounded-full"
+                            onClick={handleShare}
+                            type="button"
+                        >
                             <Share2 className="size-4" />
                         </Button>
                         <Button variant="ghost" size="icon-sm" className="rounded-full">
@@ -96,6 +139,9 @@ export function ProductInfo({ product }: ProductInfoProps) {
                         </Button>
                     </div>
                 </div>
+                {shareStatus && (
+                    <p className="text-xs font-medium text-emerald-600">{shareStatus}</p>
+                )}
 
                 <div className="space-y-1">
                     <h1 className="text-2xl font-bold tracking-tight text-foreground md:text-3xl lg:text-4xl">

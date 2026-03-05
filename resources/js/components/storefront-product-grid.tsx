@@ -122,7 +122,7 @@ export function StorefrontProductGrid({
 
     const handlePageChange = (url: string | null) => {
         if (!url) return;
-        router.visit(url, { preserveScroll: true });
+        router.visit(url, { preserveScroll: false });
     };
 
     const buildQuery = (nextSort: string) => {
@@ -236,11 +236,11 @@ export function StorefrontProductGrid({
                                 type="text"
                                 value={search}
                                 onChange={(event) => setSearch(event.target.value)}
-                                placeholder="Ürün veya marka ara"
+                                placeholder="Ürün adı ara"
                                 className="h-9 w-full rounded-md border border-gray-200 bg-white px-3 text-sm text-gray-700 shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ec135b]/30 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-200"
                             />
                             <p className="mt-2 text-xs text-gray-400">
-                                Marka adı, ürün adı veya açıklamada arama yapar.
+                                Sadece ürün adı içinde arama yapar.
                             </p>
                         </div>
                         {/* Categories Filter */}
@@ -427,12 +427,6 @@ function CategoryTree({ categories, selected, onToggle, query = '', level = 0 }:
     const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
     const normalizedQuery = query.trim().toLowerCase();
 
-    useEffect(() => {
-        if (level === 0) {
-            setExpandedIds(new Set(categories.map((category) => category.id)));
-        }
-    }, [categories, level]);
-
     const toggleExpand = (id: number) => {
         setExpandedIds((prev) => {
             const next = new Set(prev);
@@ -450,6 +444,14 @@ function CategoryTree({ categories, selected, onToggle, query = '', level = 0 }:
         return node.children.some(hasMatch);
     };
 
+    const hasSelectedDescendant = (node: CategoryNode): boolean => {
+        if (selected.includes(node.slug)) {
+            return true;
+        }
+
+        return node.children.some(hasSelectedDescendant);
+    };
+
     const filteredCategories = categories.filter((category) => {
         if (!normalizedQuery) return true;
         return hasMatch(category);
@@ -459,7 +461,10 @@ function CategoryTree({ categories, selected, onToggle, query = '', level = 0 }:
         <div className={level > 0 ? 'ml-4 border-l border-gray-100 pl-3 dark:border-gray-800' : ''}>
             {filteredCategories.map((category) => {
                 const hasChildren = category.children && category.children.length > 0;
-                const isExpanded = expandedIds.has(category.id);
+                const isExpanded =
+                    expandedIds.has(category.id) ||
+                    (normalizedQuery !== '' && hasMatch(category)) ||
+                    hasSelectedDescendant(category);
                 const checked = selected.includes(category.slug);
 
                 return (

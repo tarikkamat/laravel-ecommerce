@@ -15,6 +15,7 @@ import StorefrontLayout from '@/layouts/storefront/storefront-layout';
 import storefront from '@/routes/storefront';
 import type { ProductComment, SharedData } from '@/types';
 import type { Product } from '@/types/product';
+import { StorefrontProductCard } from '@/components/storefront-product-card';
 import { ProductGallery } from './components/ProductGallery';
 import { ProductInfo } from './components/ProductInfo';
 import { ProductTabs } from './components/ProductTabs';
@@ -22,6 +23,7 @@ import { ProductTabs } from './components/ProductTabs';
 type ProductShowProps = {
     product: Product;
     comments: ProductComment[];
+    relatedProducts: Product[];
 };
 
 const formatDate = (value: string) => {
@@ -32,7 +34,7 @@ const formatDate = (value: string) => {
     });
 };
 
-export default function ProductShow({ product, comments }: ProductShowProps) {
+export default function ProductShow({ product, comments, relatedProducts }: ProductShowProps) {
     const { auth } = usePage<SharedData>().props;
     const [notice, setNotice] = useState<string | null>(null);
     const { data, setData, post, processing, reset, errors } = useForm({ body: '' });
@@ -205,11 +207,20 @@ export default function ProductShow({ product, comments }: ProductShowProps) {
                     </div>
 
                     <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6">
-                        <div className="col-span-full flex h-40 flex-col items-center justify-center rounded-2xl border border-dashed bg-muted/30 px-4 text-center">
-                            <p className="text-sm text-muted-foreground">
-                                İlginizi çekebilecek diğer ürünler yakında burada listelenecek.
-                            </p>
-                        </div>
+                        {relatedProducts.length > 0 ? (
+                            relatedProducts.map((relatedProduct) => (
+                                <StorefrontProductCard
+                                    key={relatedProduct.id}
+                                    product={relatedProduct}
+                                />
+                            ))
+                        ) : (
+                            <div className="col-span-full flex h-40 flex-col items-center justify-center rounded-2xl border border-dashed bg-muted/30 px-4 text-center">
+                                <p className="text-sm text-muted-foreground">
+                                    Bu ürün için henüz benzer ürün bulunmuyor.
+                                </p>
+                            </div>
+                        )}
                     </div>
                 </div>
             </main>

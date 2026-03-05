@@ -80,14 +80,7 @@ class BrandRepository extends BaseRepository implements IBrandRepository
 
         if ($search !== null && trim($search) !== '') {
             $searchValue = trim($search);
-            $query->where(function ($builder) use ($searchValue) {
-                $builder
-                    ->where('title', 'like', "%{$searchValue}%")
-                    ->orWhere('description', 'like', "%{$searchValue}%")
-                    ->orWhereHas('brand', function ($inner) use ($searchValue) {
-                        $inner->where('title', 'like', "%{$searchValue}%");
-                    });
-            });
+            $query->where('title', 'like', "%{$searchValue}%");
         }
 
         switch ($sort) {

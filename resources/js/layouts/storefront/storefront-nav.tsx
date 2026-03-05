@@ -189,7 +189,7 @@ export function StorefrontNav() {
                             >
                                 <Link
                                     href={storefront.categories.products.url(category.slug)}
-                                    className={`group relative flex items-center gap-1 px-4 py-2 text-[13px] font-black uppercase tracking-widest transition-colors ${
+                                    className={`group relative flex items-center gap-1 px-4 py-2 text-[13px] font-bold tracking-wide transition-colors ${
                                         activeMegaMenu === 'category' && activeCategory?.id === category.id
                                             ? 'text-[#ec135b]'
                                             : 'text-[#181113] hover:text-[#ec135b] dark:text-[#f4f0f2]'
@@ -226,11 +226,11 @@ export function StorefrontNav() {
                             <span className="material-symbols-outlined text-[22px]">search</span>
                         </button>
                         {isSearchOpen && (
-                            <div className="absolute right-0 top-12 z-[70] w-[320px] overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-2xl dark:border-gray-800 dark:bg-gray-900">
+                            <div className="fixed inset-x-4 top-24 z-[80] max-h-[70vh] overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-2xl dark:border-gray-800 dark:bg-gray-900 lg:absolute lg:inset-x-auto lg:right-0 lg:top-12 lg:w-[360px] lg:max-h-[520px]">
                                 <div className="border-b border-gray-100 px-4 py-3 text-sm font-bold text-[#181113] dark:border-gray-800 dark:text-white">
                                     Ürün Ara
                                 </div>
-                                <div className="space-y-3 px-4 py-4">
+                                <div className="max-h-[calc(70vh-50px)] space-y-3 overflow-y-auto px-4 py-4 lg:max-h-[470px]">
                                     <div className="relative">
                                         <span className="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-gray-400">
                                             search
@@ -239,7 +239,7 @@ export function StorefrontNav() {
                                             autoFocus
                                             value={search}
                                             onChange={(event) => setSearch(event.target.value)}
-                                            placeholder="Örn. güneş kremi, La Roche"
+                                            placeholder="Örn. argan yağı"
                                             className="h-10 w-full rounded-full border border-gray-200 bg-white pl-10 pr-10 text-sm text-gray-700 shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ec135b]/30 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-200"
                                         />
                                         {search.trim().length > 0 && (

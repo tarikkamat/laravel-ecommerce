@@ -9,6 +9,7 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import admin from '@/routes/admin';
 import type { ImageModel, PaginatedData } from '@/types';
 
 const DEFAULT_PER_PAGE = 24;
@@ -123,22 +124,22 @@ export function ImagePickerModal({ open, onOpenChange, onSelect }: ImagePickerMo
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-3xl">
-                <DialogHeader>
+            <DialogContent className="max-h-[90vh] overflow-hidden p-0 sm:max-w-3xl">
+                <DialogHeader className="shrink-0 border-b px-6 py-4">
                     <DialogTitle>Görsel Seç</DialogTitle>
                     <DialogDescription>
                         İçerikte kullanmak istediğiniz görseli seçin.
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="space-y-4">
+                <div className="flex-1 space-y-4 overflow-y-auto px-6 py-4">
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                         <Input
                             value={search}
                             onChange={(event) => setSearch(event.target.value)}
                             placeholder="Görsel ara (başlık, slug, açıklama)"
                         />
-                        <div className="flex w-full gap-2 sm:w-auto">
+                        <div className="flex w-full flex-wrap gap-2 sm:w-auto sm:flex-nowrap">
                             <select
                                 value={order}
                                 onChange={(event) => setOrder(event.target.value as 'newest' | 'oldest')}
@@ -158,6 +159,14 @@ export function ImagePickerModal({ open, onOpenChange, onSelect }: ImagePickerMo
                                     </option>
                                 ))}
                             </select>
+                            <a
+                                href={admin.images.create().url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex h-10 items-center justify-center rounded-md border border-input bg-background px-3 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
+                            >
+                                Yeni Görsel Yükle
+                            </a>
                         </div>
                     </div>
 
@@ -171,29 +180,31 @@ export function ImagePickerModal({ open, onOpenChange, onSelect }: ImagePickerMo
                     )}
 
                     {!isLoading && !error && data?.data?.length ? (
-                        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-                            {data.data.map((image) => (
-                                <button
-                                    key={image.id}
-                                    type="button"
-                                    onClick={() => handleSelect(image)}
-                                    className="group overflow-hidden rounded-md border border-input bg-background text-left shadow-sm transition hover:border-primary"
-                                >
-                                    <div className="aspect-[4/3] w-full overflow-hidden bg-muted">
-                                        <img
-                                            src={`/storage/${image.path}`}
-                                            alt={image.title ?? image.slug}
-                                            className="h-full w-full object-cover transition group-hover:scale-105"
-                                            loading="lazy"
-                                        />
-                                    </div>
-                                    <div className="px-2 py-1.5">
-                                        <p className="truncate text-xs font-medium text-foreground">
-                                            {image.title ?? image.slug}
-                                        </p>
-                                    </div>
-                                </button>
-                            ))}
+                        <div className="max-h-[52vh] overflow-y-auto pr-1">
+                            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                                {data.data.map((image) => (
+                                    <button
+                                        key={image.id}
+                                        type="button"
+                                        onClick={() => handleSelect(image)}
+                                        className="group overflow-hidden rounded-md border border-input bg-background text-left shadow-sm transition hover:border-primary"
+                                    >
+                                        <div className="aspect-[4/3] w-full overflow-hidden bg-muted">
+                                            <img
+                                                src={`/storage/${image.path}`}
+                                                alt={image.title ?? image.slug}
+                                                className="h-full w-full object-cover transition group-hover:scale-105"
+                                                loading="lazy"
+                                            />
+                                        </div>
+                                        <div className="px-2 py-1.5">
+                                            <p className="truncate text-xs font-medium text-foreground">
+                                                {image.title ?? image.slug}
+                                            </p>
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
                         </div>
                     ) : null}
 
