@@ -46,6 +46,7 @@ Route::group(['as' => 'storefront.'], function () {
     Route::get('/checkout/sonuc/{order}', CheckoutResultController::class)->name('checkout.result');
     Route::post('/odeme/iyzico/callback', IyzicoCallbackController::class)
         ->withoutMiddleware([
+            \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Session\Middleware\StartSession::class,
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
@@ -53,6 +54,7 @@ Route::group(['as' => 'storefront.'], function () {
         ->name('payments.iyzico.callback');
     Route::match(['GET', 'POST'], '/odeme/vakif-katilim/3d/response/{payment?}', VakifKatilimCallbackController::class)
         ->withoutMiddleware([
+            \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Session\Middleware\StartSession::class,
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
