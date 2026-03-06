@@ -3,9 +3,11 @@ import type { Address as AddressType } from '@/types';
 
 type AddressCardProps = {
     address: AddressType;
+    onEdit?: (address: AddressType) => void;
+    onDelete?: (address: AddressType) => void;
 };
 
-export function AddressCard({ address }: AddressCardProps) {
+export function AddressCard({ address, onEdit, onDelete }: AddressCardProps) {
     return (
         <div className="group relative rounded-2xl border border-gray-100 bg-white p-5 transition-all hover:border-gray-200 dark:border-gray-800 dark:bg-gray-950">
             <div className="mb-3 flex items-start justify-between">
@@ -13,10 +15,20 @@ export function AddressCard({ address }: AddressCardProps) {
                     <MapPin className="h-5 w-5" />
                 </div>
                 <div className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-                    <button className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-white">
+                    <button
+                        type="button"
+                        onClick={() => onEdit?.(address)}
+                        className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-white"
+                        aria-label="Düzenle"
+                    >
                         <Edit2 className="h-3.5 w-3.5" />
                     </button>
-                    <button className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/30">
+                    <button
+                        type="button"
+                        onClick={() => onDelete?.(address)}
+                        className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/30"
+                        aria-label="Sil"
+                    >
                         <Trash2 className="h-3.5 w-3.5" />
                     </button>
                 </div>

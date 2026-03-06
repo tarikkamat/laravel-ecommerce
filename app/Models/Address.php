@@ -42,7 +42,7 @@ class Address extends Model
     protected function casts(): array
     {
         return [
-            'role' => AddressType::class,
+            'type' => AddressType::class,
         ];
     }
 }

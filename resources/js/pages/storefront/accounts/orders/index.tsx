@@ -20,6 +20,7 @@ type OrdersIndexProps = {
     apiEndpoints: {
         ordersIndex: string;
         orderShow: string;
+        orderCancel: string;
         productsPage: string;
     };
 };

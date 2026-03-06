@@ -51,7 +51,7 @@ export default function OrdersShow({ order, statusOptions, shipmentStatusOptions
     const [cancelReason, setCancelReason] = useState('');
     const [refundReason, setRefundReason] = useState('');
 
-    const canCancel = !['cancelled', 'refunded', 'paid'].includes(order.status);
+    const canCancel = !['cancelled', 'refunded'].includes(order.status);
     const canRefund = ['paid', 'shipped', 'delivered'].includes(order.status);
 
     const shipmentState = useMemo(() => {

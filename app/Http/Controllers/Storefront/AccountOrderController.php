@@ -4,12 +4,17 @@ namespace App\Http\Controllers\Storefront;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Services\OrderAdminService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class AccountOrderController extends Controller
 {
+    public function __construct(
+        private readonly OrderAdminService $orderAdminService,
+    ) {}
     public function index(Request $request): Response
     {
         $user = $request->user();
@@ -37,6 +42,7 @@ class AccountOrderController extends Controller
             'apiEndpoints' => [
                 'ordersIndex' => route('storefront.accounts.orders.index'),
                 'orderShow' => route('storefront.accounts.orders.show', ['order' => '__ORDER_ID__']),
+                'orderCancel' => route('storefront.accounts.orders.cancel', ['order' => '__ORDER_ID__']),
                 'productsPage' => route('storefront.products.index'),
             ],
         ]);
@@ -111,7 +117,23 @@ class AccountOrderController extends Controller
             'apiEndpoints' => [
                 'ordersIndex' => route('storefront.accounts.orders.index'),
                 'orderShow' => route('storefront.accounts.orders.show', ['order' => $order->id]),
+                'orderCancel' => route('storefront.accounts.orders.cancel', ['order' => $order->id]),
             ],
         ]);
+    }
+
+    public function cancel(Request $request, Order $order): RedirectResponse
+    {
+        $user = $request->user();
+        abort_if($order->user_id !== $user?->id, 403);
+
+        if ($order->status !== 'pending_payment') {
+            abort(422, 'Sadece ödeme bekleyen siparişler iptal edilebilir.');
+        }
+
+        $reason = $request->string('reason')->toString() ?: null;
+        $this->orderAdminService->cancel($order, $reason);
+
+        return redirect()->route('storefront.accounts.orders.show', $order);
     }
 }

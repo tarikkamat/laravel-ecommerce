@@ -67,13 +67,11 @@ class OrderAdminService
             ]);
         }
 
-        if ($order->status === 'paid') {
-            throw ValidationException::withMessages([
-                'status' => 'Ödenmiş sipariş iptal edilemez. İade olarak işleyin.',
-            ]);
-        }
-
         return DB::transaction(function () use ($order, $reason): Order {
+            if (in_array($order->status, ['paid', 'shipped', 'delivered'], true)) {
+                $this->restoreStock($order);
+            }
+
             $order->forceFill([
                 'status' => 'cancelled',
                 'cancelled_at' => now(),

@@ -385,15 +385,15 @@ export function StorefrontNav() {
                         </button>
 
                         <div
-                            className={`absolute right-0 top-14 z-[60] w-80 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-2xl transition-all dark:border-gray-800 dark:bg-gray-900 ${
+                            className={`fixed inset-x-4 top-24 z-[60] flex max-h-[70vh] flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-2xl transition-all dark:border-gray-800 dark:bg-gray-900 lg:absolute lg:inset-x-auto lg:right-0 lg:top-14 lg:max-h-none lg:w-80 lg:flex-none ${
                                 isCartOpen ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'
                             }`}
                         >
-                            <div className="border-b border-gray-100 px-4 py-3 text-sm font-bold text-[#181113] dark:border-gray-800 dark:text-white">
+                            <div className="shrink-0 border-b border-gray-100 px-4 py-3 text-sm font-bold text-[#181113] dark:border-gray-800 dark:text-white">
                                 Sepetim ({cartItemsCount})
                             </div>
 
-                            <div className="max-h-72 space-y-3 overflow-auto px-4 py-3">
+                            <div className="min-h-0 flex-1 space-y-3 overflow-auto px-4 py-3 lg:max-h-72 lg:flex-none">
                                 {cartItems.length === 0 ? (
                                     <div className="rounded-xl bg-gray-50 px-3 py-6 text-center text-xs text-gray-500 dark:bg-gray-800/60 dark:text-gray-400">
                                         Sepetiniz bos.
@@ -417,7 +417,7 @@ export function StorefrontNav() {
                                 )}
                             </div>
 
-                            <div className="space-y-2 border-t border-gray-100 px-4 py-3 text-xs dark:border-gray-800">
+                            <div className="shrink-0 space-y-2 border-t border-gray-100 px-4 py-3 text-xs dark:border-gray-800">
                                 <div className="flex items-center justify-between text-gray-600 dark:text-gray-300">
                                     <span>Ara Toplam</span>
                                     <span className="font-semibold">{Number(cartTotals?.subtotal ?? 0).toFixed(2)} TL</span>

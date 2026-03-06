@@ -1,10 +1,20 @@
 import { useState, type FormEvent } from 'react';
-import { useForm } from '@inertiajs/react';
+import { useForm, router } from '@inertiajs/react';
 import { Plus } from 'lucide-react';
 import { AddressCard } from './AddressCard';
 import { EmptyAddressState } from './EmptyAddressState';
 import type { Address as AddressType } from '@/types';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -21,7 +31,9 @@ export function AddressSection({
     type,
 }: AddressSectionProps) {
     const [isOpen, setIsOpen] = useState(false);
-    const { data, setData, post, processing, reset, errors } = useForm({
+    const [editingAddress, setEditingAddress] = useState<AddressType | null>(null);
+    const [deletingAddress, setDeletingAddress] = useState<AddressType | null>(null);
+    const { data, setData, post, put, processing, reset, errors } = useForm({
         type,
         contact_name: '',
         address: '',
@@ -30,16 +42,67 @@ export function AddressSection({
         zip_code: '',
     });
 
+    const openAddDialog = () => {
+        setEditingAddress(null);
+        setData({ type, contact_name: '', address: '', city: '', country: 'TR', zip_code: '' });
+        setIsOpen(true);
+    };
+
+    const openEditDialog = (address: AddressType) => {
+        setEditingAddress(address);
+        setData({
+            type: address.type as 'billing' | 'shipping',
+            contact_name: address.contact_name ?? '',
+            address: address.address,
+            city: address.city ?? '',
+            country: address.country ?? 'TR',
+            zip_code: address.zip_code ?? '',
+        });
+        setIsOpen(true);
+    };
+
+    const closeDialog = () => {
+        setIsOpen(false);
+        setEditingAddress(null);
+        reset();
+    };
+
     const submit = (event: FormEvent) => {
         event.preventDefault();
-        post('/hesabim/adres', {
-            preserveScroll: true,
-            onSuccess: () => {
-                reset();
-                setIsOpen(false);
-            },
-        });
+        if (editingAddress) {
+            put(`/hesabim/adres/${editingAddress.id}`, {
+                preserveScroll: true,
+                onSuccess: closeDialog,
+            });
+        } else {
+            post('/hesabim/adres', {
+                preserveScroll: true,
+                onSuccess: closeDialog,
+            });
+        }
     };
+
+    const handleDelete = (address: AddressType) => {
+        setDeletingAddress(address);
+    };
+
+    const confirmDelete = () => {
+        if (deletingAddress) {
+            router.delete(`/hesabim/adres/${deletingAddress.id}`, {
+                preserveScroll: true,
+            });
+            setDeletingAddress(null);
+        }
+    };
+
+    const dialogTitle =
+        editingAddress
+            ? type === 'shipping'
+                ? 'Teslimat Adresini Düzenle'
+                : 'Fatura Adresini Düzenle'
+            : type === 'shipping'
+              ? 'Teslimat Adresi Ekle'
+              : 'Fatura Adresi Ekle';
 
     return (
         <div className="space-y-4">
@@ -47,10 +110,7 @@ export function AddressSection({
                 <h3 className="text-sm font-bold uppercase tracking-wider text-gray-400">{title}</h3>
                 <button
                     type="button"
-                    onClick={() => {
-                        setData('type', type);
-                        setIsOpen(true);
-                    }}
+                    onClick={openAddDialog}
                     className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-[#ec135b] hover:opacity-80 transition-opacity"
                 >
                     <Plus className="h-3 w-3" />
@@ -61,17 +121,22 @@ export function AddressSection({
             {addresses.length > 0 ? (
                 <div className="grid gap-4 sm:grid-cols-2">
                     {addresses.map((address) => (
-                        <AddressCard key={address.id} address={address} />
+                        <AddressCard
+                            key={address.id}
+                            address={address}
+                            onEdit={openEditDialog}
+                            onDelete={handleDelete}
+                        />
                     ))}
                 </div>
             ) : (
                 <EmptyAddressState type={type} />
             )}
 
-            <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <Dialog open={isOpen} onOpenChange={(open) => !open && closeDialog()}>
                 <DialogContent className="sm:max-w-lg">
                     <DialogHeader>
-                        <DialogTitle>{type === 'shipping' ? 'Teslimat Adresi Ekle' : 'Fatura Adresi Ekle'}</DialogTitle>
+                        <DialogTitle>{dialogTitle}</DialogTitle>
                     </DialogHeader>
 
                     <form onSubmit={submit} className="space-y-4">
@@ -132,16 +197,33 @@ export function AddressSection({
                         </div>
 
                         <DialogFooter>
-                            <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
+                            <Button type="button" variant="outline" onClick={closeDialog}>
                                 Vazgeç
                             </Button>
                             <Button type="submit" disabled={processing}>
-                                Kaydet
+                                {editingAddress ? 'Güncelle' : 'Kaydet'}
                             </Button>
                         </DialogFooter>
                     </form>
                 </DialogContent>
             </Dialog>
+
+            <AlertDialog open={!!deletingAddress} onOpenChange={(open) => !open && setDeletingAddress(null)}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Adresi sil</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Bu adresi silmek istediğinize emin misiniz? Bu işlem geri alınamaz.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>İptal</AlertDialogCancel>
+                        <AlertDialogAction onClick={confirmDelete} className="bg-red-600 hover:bg-red-700">
+                            Sil
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }

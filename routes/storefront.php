@@ -23,7 +23,10 @@ Route::group(['as' => 'storefront.'], function () {
     Route::middleware(['auth', 'verified'])->prefix('hesabim')->group(function () {
         Route::get('/siparislerim', [AccountOrderController::class, 'index'])->name('accounts.orders.index');
         Route::get('/siparislerim/{order}', [AccountOrderController::class, 'show'])->name('accounts.orders.show');
+        Route::post('/siparislerim/{order}/cancel', [AccountOrderController::class, 'cancel'])->name('accounts.orders.cancel');
         Route::post('/adres', [AccountController::class, 'store'])->name('accounts.addresses.store');
+        Route::put('/adres/{address}', [AccountController::class, 'update'])->name('accounts.addresses.update');
+        Route::delete('/adres/{address}', [AccountController::class, 'destroy'])->name('accounts.addresses.destroy');
     });
 
     Route::get('/', [HomeController::class, 'index'])->name('home.index');

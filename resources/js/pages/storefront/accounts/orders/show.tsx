@@ -1,6 +1,8 @@
 import StorefrontLayout from '@/layouts/storefront/storefront-layout';
-import { Link } from '@inertiajs/react';
-import { useMemo } from 'react';
+import { Link, router } from '@inertiajs/react';
+import { useMemo, useState } from 'react';
+
+import { Button } from '@/components/ui/button';
 
 type OrderItem = {
     id: number;
@@ -73,10 +75,18 @@ type OrdersShowProps = {
     apiEndpoints: {
         ordersIndex: string;
         orderShow: string;
+        orderCancel: string;
     };
 };
 
 export default function OrdersShowPage({ order, apiEndpoints }: OrdersShowProps) {
+    const [cancelReason, setCancelReason] = useState('');
+    const canCancel = order.status === 'pending_payment';
+
+    const handleCancel = () => {
+        router.post(apiEndpoints.orderCancel, { reason: cancelReason });
+    };
+
     const mapShipmentStatus = (status: string) => {
         const key = (status || '').toUpperCase();
 
@@ -207,6 +217,20 @@ export default function OrdersShowPage({ order, apiEndpoints }: OrdersShowProps)
                         <div className="rounded border p-4">
                             <div className="mb-2 text-sm font-medium">Durum</div>
                             <div className="inline-flex rounded border px-2 py-1 text-xs">{order.status}</div>
+                            {canCancel ? (
+                                <div className="mt-3 space-y-2">
+                                    <input
+                                        type="text"
+                                        placeholder="İptal nedeni (opsiyonel)"
+                                        value={cancelReason}
+                                        onChange={(e) => setCancelReason(e.target.value)}
+                                        className="w-full rounded border border-input bg-background px-3 py-2 text-sm"
+                                    />
+                                    <Button variant="outline" size="sm" className="w-full" onClick={handleCancel}>
+                                        Siparişi İptal Et
+                                    </Button>
+                                </div>
+                            ) : null}
                         </div>
 
                         <div className="rounded border p-4">

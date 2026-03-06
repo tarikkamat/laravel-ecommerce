@@ -37,4 +37,30 @@ class AccountController extends Controller
 
         return redirect()->route('storefront.accounts.index')->with('success', 'Adres eklendi.');
     }
+
+    public function update(Request $request, int $address): RedirectResponse
+    {
+        $addressModel = $request->user()->addresses()->findOrFail($address);
+
+        $validated = $request->validate([
+            'type' => ['required', 'string', Rule::in(['billing', 'shipping'])],
+            'contact_name' => ['required', 'string', 'max:255'],
+            'address' => ['required', 'string', 'max:255'],
+            'city' => ['required', 'string', 'max:100'],
+            'country' => ['required', 'string', 'max:2'],
+            'zip_code' => ['nullable', 'string', 'max:20'],
+        ]);
+
+        $addressModel->update($validated);
+
+        return redirect()->route('storefront.accounts.index')->with('success', 'Adres güncellendi.');
+    }
+
+    public function destroy(Request $request, int $address): RedirectResponse
+    {
+        $addressModel = $request->user()->addresses()->findOrFail($address);
+        $addressModel->delete();
+
+        return redirect()->route('storefront.accounts.index')->with('success', 'Adres silindi.');
+    }
 }
