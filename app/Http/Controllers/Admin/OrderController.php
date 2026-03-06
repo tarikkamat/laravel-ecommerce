@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\OrderActionRequest;
 use App\Http\Requests\Admin\OrderStatusUpdateRequest;
+use App\Integrations\Geliver\GeliverClient;
 use App\Models\Order;
 use App\Services\OrderAdminService;
 use Illuminate\Http\Request;
@@ -13,7 +14,8 @@ use Inertia\Inertia;
 class OrderController extends Controller
 {
     public function __construct(
-        private readonly OrderAdminService $service
+        private readonly OrderAdminService $service,
+        private readonly GeliverClient $geliver,
     ) {}
 
     public function index(Request $request)
@@ -95,7 +97,7 @@ class OrderController extends Controller
             ],
             'statusOptions' => $this->statusOptions(),
             'paymentStatusOptions' => $this->paymentStatusOptions(),
-            'shipmentProviders' => [],
+            'shipmentProviders' => $this->resolveShipmentProviders(),
         ]);
     }
 
@@ -208,6 +210,20 @@ class OrderController extends Controller
         $this->service->refund($order, $reason !== '' ? $reason : null);
 
         return redirect()->route('admin.orders.show', $order);
+    }
+
+    /**
+     * @return array<int, array{id: string, label: string, providerCode: string|null}>
+     */
+    private function resolveShipmentProviders(): array
+    {
+        if (! $this->geliver->isConfigured()) {
+            return [];
+        }
+
+        return [
+            ['id' => 'geliver', 'label' => 'Geliver', 'providerCode' => null],
+        ];
     }
 
     private function statusOptions(): array

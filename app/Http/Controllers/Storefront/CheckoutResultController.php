@@ -18,12 +18,13 @@ class CheckoutResultController extends Controller
     {
         $order->loadMissing(['items', 'taxLines', 'shipments', 'addresses', 'cart']);
 
-        $this->authorizeOrder($request, $order);
-
         $paymentStatus = null;
-        if ($request->hasValidSignature()) {
-            $cached = Cache::pull("checkout_result_{$order->id}");
-            $paymentStatus = $cached['paymentStatus'] ?? null;
+        $callbackAccess = $this->resolveCallbackAccess($request, $order);
+
+        if ($callbackAccess['authorized']) {
+            $paymentStatus = $callbackAccess['paymentStatus'];
+        } else {
+            $this->authorizeOrder($request, $order);
         }
 
         return Inertia::render('storefront/checkout/result', [
@@ -51,13 +52,44 @@ class CheckoutResultController extends Controller
         ]);
     }
 
-    private function authorizeOrder(Request $request, Order $order): void
+    /**
+     * @return array{authorized: bool, paymentStatus: ?string}
+     */
+    private function resolveCallbackAccess(Request $request, Order $order): array
     {
-        // Allow when returning from payment callback via signed URL (no session write, preserves auth)
         if ($request->hasValidSignature()) {
-            return;
+            $cached = Cache::pull("checkout_result_{$order->id}");
+
+            return [
+                'authorized' => true,
+                'paymentStatus' => $cached['paymentStatus'] ?? null,
+            ];
         }
 
+        $accessToken = (string) $request->query('access', '');
+        if ($accessToken === '') {
+            return [
+                'authorized' => false,
+                'paymentStatus' => null,
+            ];
+        }
+
+        $cached = Cache::pull("checkout_result_access_{$accessToken}");
+        if (! is_array($cached) || (int) ($cached['orderId'] ?? 0) !== $order->id) {
+            return [
+                'authorized' => false,
+                'paymentStatus' => null,
+            ];
+        }
+
+        return [
+            'authorized' => true,
+            'paymentStatus' => $cached['paymentStatus'] ?? null,
+        ];
+    }
+
+    private function authorizeOrder(Request $request, Order $order): void
+    {
         $userId = $request->user()?->id;
 
         if ($userId) {
