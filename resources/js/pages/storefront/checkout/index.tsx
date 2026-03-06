@@ -4,6 +4,15 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import StorefrontLayout from '@/layouts/storefront/storefront-layout';
 import type { SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
@@ -868,85 +877,160 @@ export default function CheckoutPage({
                             </div>
 
                             {selectedPaymentMethod === 'vakif_katilim' ? (
-                                <div className="space-y-3 rounded border p-3">
-                                    <div className="text-xs font-semibold">
+                                <div className="space-y-4 rounded-lg border bg-muted/30 p-4">
+                                    <div className="text-sm font-semibold">
                                         Kart Bilgileri (Vakıf Katılım 3D Secure)
                                     </div>
-                                    <input
-                                        className="rounded border px-3 py-2 text-sm"
-                                        placeholder="Kart sahibi"
-                                        value={vakifCard.card_holder}
-                                        onChange={(e) =>
-                                            setVakifCard((prev) => ({
-                                                ...prev,
-                                                card_holder: e.target.value,
-                                            }))
-                                        }
-                                    />
-                                    <input
-                                        className="rounded border px-3 py-2 text-sm"
-                                        placeholder="Kart numarasi"
-                                        value={vakifCard.card_number}
-                                        onChange={(e) =>
-                                            setVakifCard((prev) => ({
-                                                ...prev,
-                                                card_number: e.target.value,
-                                            }))
-                                        }
-                                    />
-                                    <div className="grid gap-2 sm:grid-cols-3">
-                                        <input
-                                            className="rounded border px-3 py-2 text-sm"
-                                            placeholder="AA"
-                                            value={vakifCard.card_exp_month}
+                                    <div className="space-y-2">
+                                        <Label
+                                            htmlFor="card-holder"
+                                            className="text-xs"
+                                        >
+                                            Kart Sahibi
+                                        </Label>
+                                        <Input
+                                            id="card-holder"
+                                            placeholder="Ad Soyad"
+                                            value={vakifCard.card_holder}
                                             onChange={(e) =>
                                                 setVakifCard((prev) => ({
                                                     ...prev,
-                                                    card_exp_month:
-                                                        e.target.value,
-                                                }))
-                                            }
-                                        />
-                                        <input
-                                            className="rounded border px-3 py-2 text-sm"
-                                            placeholder="YYYY"
-                                            value={vakifCard.card_exp_year}
-                                            onChange={(e) =>
-                                                setVakifCard((prev) => ({
-                                                    ...prev,
-                                                    card_exp_year:
-                                                        e.target.value,
-                                                }))
-                                            }
-                                        />
-                                        <input
-                                            className="rounded border px-3 py-2 text-sm"
-                                            placeholder="CVV"
-                                            value={vakifCard.card_cvv}
-                                            onChange={(e) =>
-                                                setVakifCard((prev) => ({
-                                                    ...prev,
-                                                    card_cvv: e.target.value,
+                                                    card_holder: e.target.value,
                                                 }))
                                             }
                                         />
                                     </div>
-                                    <input
-                                        className="rounded border px-3 py-2 text-sm"
-                                        type="number"
-                                        min={0}
-                                        max={12}
-                                        placeholder="Taksit (0 = pesin)"
-                                        value={vakifCard.installment}
-                                        onChange={(e) =>
-                                            setVakifCard((prev) => ({
-                                                ...prev,
-                                                installment: Number(
-                                                    e.target.value || 0,
-                                                ),
-                                            }))
-                                        }
-                                    />
+                                    <div className="space-y-2">
+                                        <Label
+                                            htmlFor="card-number"
+                                            className="text-xs"
+                                        >
+                                            Kart Numarası
+                                        </Label>
+                                        <Input
+                                            id="card-number"
+                                            placeholder="0000 0000 0000 0000"
+                                            value={vakifCard.card_number}
+                                            onChange={(e) =>
+                                                setVakifCard((prev) => ({
+                                                    ...prev,
+                                                    card_number: e.target.value,
+                                                }))
+                                            }
+                                        />
+                                    </div>
+                                    <div className="grid gap-4 sm:grid-cols-3">
+                                        <div className="space-y-2">
+                                            <Label
+                                                htmlFor="card-exp-month"
+                                                className="text-xs"
+                                            >
+                                                Ay
+                                            </Label>
+                                            <Select
+                                                value={
+                                                    vakifCard.card_exp_month ||
+                                                    undefined
+                                                }
+                                                onValueChange={(value) =>
+                                                    setVakifCard((prev) => ({
+                                                        ...prev,
+                                                        card_exp_month: value,
+                                                    }))
+                                                }
+                                            >
+                                                <SelectTrigger
+                                                    id="card-exp-month"
+                                                    className="w-full"
+                                                >
+                                                    <SelectValue placeholder="Ay" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {Array.from(
+                                                        { length: 12 },
+                                                        (_, i) => {
+                                                            const m = String(
+                                                                i + 1,
+                                                            ).padStart(2, '0');
+                                                            return (
+                                                                <SelectItem
+                                                                    key={m}
+                                                                    value={m}
+                                                                >
+                                                                    {m}
+                                                                </SelectItem>
+                                                            );
+                                                        },
+                                                    )}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label
+                                                htmlFor="card-exp-year"
+                                                className="text-xs"
+                                            >
+                                                Yıl
+                                            </Label>
+                                            <Select
+                                                value={
+                                                    vakifCard.card_exp_year ||
+                                                    undefined
+                                                }
+                                                onValueChange={(value) =>
+                                                    setVakifCard((prev) => ({
+                                                        ...prev,
+                                                        card_exp_year: value,
+                                                    }))
+                                                }
+                                            >
+                                                <SelectTrigger
+                                                    id="card-exp-year"
+                                                    className="w-full"
+                                                >
+                                                    <SelectValue placeholder="Yıl" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {Array.from(
+                                                        { length: 21 },
+                                                        (_, i) => {
+                                                            const y = String(
+                                                                new Date().getFullYear() +
+                                                                    i,
+                                                            );
+                                                            return (
+                                                                <SelectItem
+                                                                    key={y}
+                                                                    value={y}
+                                                                >
+                                                                    {y}
+                                                                </SelectItem>
+                                                            );
+                                                        },
+                                                    )}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label
+                                                htmlFor="card-cvv"
+                                                className="text-xs"
+                                            >
+                                                CVV
+                                            </Label>
+                                            <Input
+                                                id="card-cvv"
+                                                placeholder="000"
+                                                value={vakifCard.card_cvv}
+                                                onChange={(e) =>
+                                                    setVakifCard((prev) => ({
+                                                        ...prev,
+                                                        card_cvv: e.target.value,
+                                                    }))
+                                                }
+                                            />
+                                        </div>
+                                    </div>
                                 </div>
                             ) : null}
                             {contractPage ? (
