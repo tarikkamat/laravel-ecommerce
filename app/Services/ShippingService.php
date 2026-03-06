@@ -88,6 +88,9 @@ class ShippingService
     {
         $normalized = [
             'full_name' => (string) Arr::get($address, 'full_name', ''),
+            'company_name' => Arr::get($address, 'company_name'),
+            'tax_number' => Arr::get($address, 'tax_number'),
+            'tax_office' => Arr::get($address, 'tax_office'),
             'phone' => Arr::get($address, 'phone'),
             'email' => Arr::get($address, 'email'),
             'country' => (string) Arr::get($address, 'country', 'TR'),

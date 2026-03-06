@@ -149,6 +149,9 @@ class CheckoutService
             $order->addresses()->create([
                 'type' => 'billing',
                 'full_name' => (string) ($billingAddress['full_name'] ?? $address['full_name']),
+                'company_name' => $billingAddress['company_name'] ?? null,
+                'tax_number' => $billingAddress['tax_number'] ?? null,
+                'tax_office' => $billingAddress['tax_office'] ?? null,
                 'phone' => $billingAddress['phone'] ?? $address['phone'] ?? null,
                 'country' => (string) ($billingAddress['country'] ?? $address['country']),
                 'city' => (string) ($billingAddress['city'] ?? $address['city']),
@@ -252,7 +255,7 @@ class CheckoutService
      */
     private function assertAddress(array $address): void
     {
-        $required = ['full_name', 'country', 'city', 'line1'];
+        $required = ['full_name', 'phone', 'email', 'country', 'city', 'line1'];
 
         foreach ($required as $key) {
             $value = trim((string) ($address[$key] ?? ''));

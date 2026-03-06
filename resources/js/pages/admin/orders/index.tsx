@@ -1,4 +1,4 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Eye, FileDown, ShoppingCart } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
@@ -85,12 +85,8 @@ const paymentLabels: Record<string, string> = {
     failure: 'Başarısız',
 };
 
-const getCsrfToken = (): string => {
-    const meta = document.querySelector('meta[name="csrf-token"]');
-    return meta?.getAttribute('content') ?? '';
-};
-
 export default function OrdersIndex({ items, filters, statusOptions, paymentStatusOptions, shipmentProviders }: Props) {
+    const { csrf } = usePage<{ csrf: string }>().props;
     const [form, setForm] = useState({
         status: filters.status || 'all',
         payment_status: filters.payment_status || 'all',
@@ -177,7 +173,7 @@ export default function OrdersIndex({ items, filters, statusOptions, paymentStat
                 headers: {
                     'Content-Type': 'application/json',
                     Accept: 'application/json',
-                    'X-CSRF-TOKEN': getCsrfToken(),
+                    'X-CSRF-TOKEN': csrf ?? document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '',
                 },
                 credentials: 'same-origin',
                 body: JSON.stringify({

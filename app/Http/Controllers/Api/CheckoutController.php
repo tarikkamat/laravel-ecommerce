@@ -25,8 +25,8 @@ class CheckoutController extends Controller
         if ($request->has('shipping')) {
             $data = $request->validate([
                 'shipping.full_name' => ['required', 'string', 'max:255'],
-                'shipping.phone' => ['nullable', 'string', 'max:50'],
-                'shipping.email' => ['nullable', 'email', 'max:255'],
+                'shipping.phone' => ['required', 'string', 'max:50'],
+                'shipping.email' => ['required', 'email', 'max:255'],
                 'shipping.country' => ['required', 'string', 'max:2'],
                 'shipping.city' => ['required', 'string', 'max:100'],
                 'shipping.district' => ['nullable', 'string', 'max:100'],
@@ -34,8 +34,11 @@ class CheckoutController extends Controller
                 'shipping.line2' => ['nullable', 'string', 'max:255'],
                 'shipping.postal_code' => ['nullable', 'string', 'max:20'],
                 'billing.full_name' => ['required', 'string', 'max:255'],
-                'billing.phone' => ['nullable', 'string', 'max:50'],
-                'billing.email' => ['nullable', 'email', 'max:255'],
+                'billing.company_name' => ['nullable', 'string', 'max:255'],
+                'billing.tax_number' => ['nullable', 'string', 'max:20'],
+                'billing.tax_office' => ['nullable', 'string', 'max:100'],
+                'billing.phone' => ['required', 'string', 'max:50'],
+                'billing.email' => ['required', 'email', 'max:255'],
                 'billing.country' => ['required', 'string', 'max:2'],
                 'billing.city' => ['required', 'string', 'max:100'],
                 'billing.district' => ['nullable', 'string', 'max:100'],
@@ -51,8 +54,8 @@ class CheckoutController extends Controller
 
         $data = $request->validate([
             'full_name' => ['required', 'string', 'max:255'],
-            'phone' => ['nullable', 'string', 'max:50'],
-            'email' => ['nullable', 'email', 'max:255'],
+            'phone' => ['required', 'string', 'max:50'],
+            'email' => ['required', 'email', 'max:255'],
             'country' => ['required', 'string', 'max:2'],
             'city' => ['required', 'string', 'max:100'],
             'district' => ['nullable', 'string', 'max:100'],
@@ -69,8 +72,8 @@ class CheckoutController extends Controller
         if ($request->has('address')) {
             $address = $request->validate([
                 'address.full_name' => ['required', 'string', 'max:255'],
-                'address.phone' => ['nullable', 'string', 'max:50'],
-                'address.email' => ['nullable', 'email', 'max:255'],
+                'address.phone' => ['required', 'string', 'max:50'],
+                'address.email' => ['required', 'email', 'max:255'],
                 'address.country' => ['required', 'string', 'max:2'],
                 'address.city' => ['required', 'string', 'max:100'],
                 'address.district' => ['nullable', 'string', 'max:100'],

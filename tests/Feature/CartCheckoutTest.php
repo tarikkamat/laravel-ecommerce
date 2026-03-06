@@ -76,6 +76,7 @@ class CartCheckoutTest extends TestCase
         $address = [
             'full_name' => 'Test User',
             'phone' => '5550000000',
+            'email' => 'test@example.com',
             'country' => 'TR',
             'city' => 'Istanbul',
             'district' => 'Kadikoy',

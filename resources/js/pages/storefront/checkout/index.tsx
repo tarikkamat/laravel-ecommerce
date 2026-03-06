@@ -36,6 +36,9 @@ type CartTotals = {
 
 type Address = {
     full_name: string;
+    company_name?: string | null;
+    tax_number?: string | null;
+    tax_office?: string | null;
     phone?: string | null;
     email?: string | null;
     country: string;
@@ -126,6 +129,9 @@ function decodeHtmlEntities(html: string): string {
 
 const emptyAddress: Address = {
     full_name: '',
+    company_name: '',
+    tax_number: '',
+    tax_office: '',
     phone: '',
     email: '',
     country: 'TR',
@@ -214,6 +220,9 @@ export default function CheckoutPage({
         const billingBlock = `
             <p><strong>Fatura Bilgileri</strong></p>
             <p>Ad/Soyad/Unvan: ${billing.full_name || '-'}</p>
+            ${billing.company_name ? `<p>Unvan (Sirket Adi): ${billing.company_name}</p>` : ''}
+            ${billing.tax_number ? `<p>Vergi No: ${billing.tax_number}</p>` : ''}
+            ${billing.tax_office ? `<p>Vergi Dairesi: ${billing.tax_office}</p>` : ''}
             <p>Adres: ${billing.line1 || '-'}</p>
             <p>Telefon: ${billing.phone || '-'}</p>
             <p>Eposta/kullanıcı adı: ${billing.email || '-'}</p>
@@ -350,7 +359,14 @@ export default function CheckoutPage({
                 credentials: 'same-origin',
                 body: JSON.stringify({
                     shipping: address,
-                    billing: useBillingSame ? address : billingAddress,
+                    billing: useBillingSame
+                        ? {
+                              ...address,
+                              company_name: billingAddress.company_name || null,
+                              tax_number: billingAddress.tax_number || null,
+                              tax_office: billingAddress.tax_office || null,
+                          }
+                        : billingAddress,
                 }),
             });
             const data = (await response.json()) as CheckoutSummaryResponse;
@@ -579,8 +595,9 @@ export default function CheckoutPage({
                                 />
                                 <input
                                     className="rounded border px-3 py-2 text-sm"
-                                    placeholder="Telefon"
+                                    placeholder="Telefon *"
                                     value={address.phone ?? ''}
+                                    required
                                     onChange={(e) =>
                                         setAddress((prev) => ({
                                             ...prev,
@@ -589,9 +606,11 @@ export default function CheckoutPage({
                                     }
                                 />
                                 <input
+                                    type="email"
                                     className="rounded border px-3 py-2 text-sm sm:col-span-2"
-                                    placeholder="E-posta"
+                                    placeholder="E-posta *"
                                     value={address.email ?? ''}
+                                    required
                                     onChange={(e) =>
                                         setAddress((prev) => ({
                                             ...prev,
@@ -686,6 +705,53 @@ export default function CheckoutPage({
                                 Fatura adresi teslimat adresi ile aynı
                             </label>
 
+                            <div className="space-y-2 rounded border border-dashed bg-muted/20 p-3">
+                                <div className="text-xs font-medium">
+                                    Kurumsal Fatura Bilgileri (İsteğe bağlı)
+                                </div>
+                                <div className="grid gap-2 sm:grid-cols-3">
+                                    <input
+                                        className="rounded border px-3 py-2 text-sm"
+                                        placeholder="Ünvan / Şirket Adı"
+                                        value={
+                                            billingAddress.company_name ?? ''
+                                        }
+                                        onChange={(e) =>
+                                            setBillingAddress((prev) => ({
+                                                ...prev,
+                                                company_name: e.target.value,
+                                            }))
+                                        }
+                                    />
+                                    <input
+                                        className="rounded border px-3 py-2 text-sm"
+                                        placeholder="Vergi No"
+                                        value={
+                                            billingAddress.tax_number ?? ''
+                                        }
+                                        onChange={(e) =>
+                                            setBillingAddress((prev) => ({
+                                                ...prev,
+                                                tax_number: e.target.value,
+                                            }))
+                                        }
+                                    />
+                                    <input
+                                        className="rounded border px-3 py-2 text-sm"
+                                        placeholder="Vergi Dairesi"
+                                        value={
+                                            billingAddress.tax_office ?? ''
+                                        }
+                                        onChange={(e) =>
+                                            setBillingAddress((prev) => ({
+                                                ...prev,
+                                                tax_office: e.target.value,
+                                            }))
+                                        }
+                                    />
+                                </div>
+                            </div>
+
                             {!useBillingSame && (
                                 <>
                                     <div className="pt-2 text-sm font-medium">
@@ -706,8 +772,9 @@ export default function CheckoutPage({
                                         />
                                         <input
                                             className="rounded border px-3 py-2 text-sm"
-                                            placeholder="Telefon"
+                                            placeholder="Telefon *"
                                             value={billingAddress.phone ?? ''}
+                                            required={!useBillingSame}
                                             onChange={(e) =>
                                                 setBillingAddress((prev) => ({
                                                     ...prev,
@@ -716,9 +783,11 @@ export default function CheckoutPage({
                                             }
                                         />
                                         <input
+                                            type="email"
                                             className="rounded border px-3 py-2 text-sm sm:col-span-2"
-                                            placeholder="E-posta"
+                                            placeholder="E-posta *"
                                             value={billingAddress.email ?? ''}
+                                            required={!useBillingSame}
                                             onChange={(e) =>
                                                 setBillingAddress((prev) => ({
                                                     ...prev,
@@ -1064,6 +1133,11 @@ export default function CheckoutPage({
                                     loading ||
                                     !selectedShipping ||
                                     paymentMethods.length === 0 ||
+                                    !address.email?.trim() ||
+                                    !address.phone?.trim() ||
+                                    (!useBillingSame &&
+                                        (!billingAddress.email?.trim() ||
+                                            !billingAddress.phone?.trim())) ||
                                     (contractPage
                                         ? !hasAcceptedContract
                                         : false)
