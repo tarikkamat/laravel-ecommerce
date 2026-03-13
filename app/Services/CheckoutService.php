@@ -106,6 +106,8 @@ class CheckoutService
         $address = $this->shippingService->getStoredAddress($request);
         $this->assertAddress($address);
 
+        $billingAddress = $this->shippingService->getStoredBillingAddress($request);
+
         $selectedShipping = $this->shippingService->getSelectedRate($request);
 
         if (! $selectedShipping) {
@@ -121,7 +123,7 @@ class CheckoutService
             ? $this->shippingSettings->flat_rate_label
             : 'Standart Kargo';
 
-        return DB::transaction(function () use ($cart, $address, $selectedShipping, $shippingTotal, $taxLabel, $shippingLabel, $request): Order {
+        return DB::transaction(function () use ($cart, $address, $billingAddress, $selectedShipping, $shippingTotal, $taxLabel, $shippingLabel, $request): Order {
             $order = Order::query()->create([
                 'user_id' => $request->user()?->id,
                 'cart_id' => $cart->id,

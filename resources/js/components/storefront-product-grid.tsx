@@ -9,7 +9,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { useStorefrontSearch } from '@/hooks/use-storefront-search';
 
@@ -85,7 +85,6 @@ export function StorefrontProductGrid({
     const [categorySearch, setCategorySearch] = useState('');
     const [brandSearch, setBrandSearch] = useState('');
     const { search, setSearch, normalizedSearch, withSearch } = useStorefrontSearch(filters?.search ?? '');
-    const debounceRef = useRef<number | null>(null);
 
     useEffect(() => {
         setSelectedCategories(filters?.categories?.length ? filters.categories : []);
@@ -98,27 +97,6 @@ export function StorefrontProductGrid({
     useEffect(() => {
         setSearch(filters?.search ?? '');
     }, [filters?.search, setSearch]);
-
-    useEffect(() => {
-        const current = (filters?.search ?? '').trim();
-        if (normalizedSearch === current) {
-            return;
-        }
-
-        if (debounceRef.current) {
-            window.clearTimeout(debounceRef.current);
-        }
-
-        debounceRef.current = window.setTimeout(() => {
-            router.get(pathname, buildQuery(sort), { preserveScroll: true });
-        }, 400);
-
-        return () => {
-            if (debounceRef.current) {
-                window.clearTimeout(debounceRef.current);
-            }
-        };
-    }, [normalizedSearch, filters?.search, pathname, sort]);
 
     const handlePageChange = (url: string | null) => {
         if (!url) return;
