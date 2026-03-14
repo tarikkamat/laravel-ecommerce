@@ -86,9 +86,9 @@ class BrandService extends BaseService implements IBrandService
                 'seo_description' => $data['image_seo_description'] ?? null,
             ];
 
-            // If brand already has an image, update it
-            if ($brand->image_id) {
-                $this->imageService->updateWithFile($brand->image_id, $data['logo_file'], $imageMetadata, 'brands');
+            // Prefer the loaded relation so stale image_id values don't cause a 404 on update.
+            if ($brand->image) {
+                $this->imageService->updateWithFile($brand->image->id, $data['logo_file'], $imageMetadata, 'brands');
             } else {
                 // Create new image
                 $image = $this->imageService->upload($data['logo_file'], $imageMetadata, 'brands');

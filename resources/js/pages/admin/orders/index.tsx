@@ -1,7 +1,19 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { Eye, FileDown, ShoppingCart } from 'lucide-react';
+import { Eye, FileDown, ShoppingCart, Trash2 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogMedia,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import {
     Empty,
     EmptyDescription,
@@ -397,6 +409,37 @@ export default function OrdersIndex({ items, filters, statusOptions, paymentStat
                                                         <FileDown className="h-4 w-4" />
                                                     </Button>
                                                 )}
+                                                <AlertDialog>
+                                                    <AlertDialogTrigger asChild>
+                                                        <Button variant="ghost" size="icon">
+                                                            <Trash2 className="h-4 w-4 text-destructive" />
+                                                        </Button>
+                                                    </AlertDialogTrigger>
+                                                    <AlertDialogContent size="sm">
+                                                        <AlertDialogHeader>
+                                                            <AlertDialogMedia className="bg-destructive/10 text-destructive dark:bg-destructive/20 dark:text-destructive">
+                                                                <Trash2 />
+                                                            </AlertDialogMedia>
+                                                            <AlertDialogTitle>Siparişi sil?</AlertDialogTitle>
+                                                            <AlertDialogDescription>
+                                                                #{order.id} numaralı sipariş silinecek. Bu işlem siparişi listeden kaldırır.
+                                                            </AlertDialogDescription>
+                                                        </AlertDialogHeader>
+                                                        <AlertDialogFooter>
+                                                            <AlertDialogCancel variant="outline">İptal</AlertDialogCancel>
+                                                            <AlertDialogAction
+                                                                variant="destructive"
+                                                                onClick={() =>
+                                                                    router.delete(admin.orders.destroy(order.id).url, {
+                                                                        preserveScroll: true,
+                                                                    })
+                                                                }
+                                                            >
+                                                                Sil
+                                                            </AlertDialogAction>
+                                                        </AlertDialogFooter>
+                                                    </AlertDialogContent>
+                                                </AlertDialog>
                                             </div>
                                         </TableCell>
                                     </TableRow>

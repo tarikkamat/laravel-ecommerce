@@ -36,7 +36,7 @@ Route::middleware(['auth', 'verified', 'role.admin'])->prefix('suug')->as('admin
     Route::delete('comments/{comment}', [ProductCommentController::class, 'destroy'])->name('comments.destroy');
     Route::resource('tags', TagController::class);
     Route::resource('users', UserController::class);
-    Route::resource('orders', OrderController::class)->only(['index', 'show', 'update']);
+    Route::resource('orders', OrderController::class)->only(['index', 'show', 'update', 'destroy']);
     Route::post('orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
     Route::post('orders/{order}/refund', [OrderController::class, 'refund'])->name('orders.refund');
     Route::patch('orders/{order}/shipments/{shipment}', [OrderShipmentController::class, 'update'])->name('orders.shipments.update');

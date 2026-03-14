@@ -199,6 +199,13 @@ class OrderController extends Controller
         return redirect()->route('admin.orders.show', $order);
     }
 
+    public function destroy(Order $order)
+    {
+        $order->delete();
+
+        return back()->with('success', 'Sipariş silindi.');
+    }
+
     public function cancel(OrderActionRequest $request, Order $order)
     {
         $reason = $request->string('reason')->toString();
