@@ -8,17 +8,13 @@ use App\Http\Requests\Admin\OrderShipmentUpdateRequest;
 use App\Integrations\Geliver\GeliverClient;
 use App\Models\Order;
 use App\Models\OrderShipment;
-use App\Settings\ShippingSettings;
 use Illuminate\Support\Facades\File;
 use Illuminate\Validation\ValidationException;
 use ZipArchive;
 
 class OrderShipmentController extends Controller
 {
-    public function __construct(
-        private readonly GeliverClient $geliverClient,
-        private readonly ShippingSettings $shippingSettings
-    ) {}
+    public function __construct(private readonly GeliverClient $geliverClient) {}
 
     public function update(OrderShipmentUpdateRequest $request, Order $order, OrderShipment $shipment)
     {
@@ -58,7 +54,6 @@ class OrderShipmentController extends Controller
         $shipments = OrderShipment::query()
             ->whereIn('id', $shipmentIds)
             ->where('provider', 'geliver')
-            ->with(['order.addresses', 'order.user'])
             ->get();
 
         if ($shipments->isEmpty()) {
@@ -70,35 +65,6 @@ class OrderShipmentController extends Controller
         if (! $this->geliverClient->isConfigured()) {
             throw ValidationException::withMessages([
                 'shipment_ids' => 'Geliver ayarları tamamlanmamış.',
-            ]);
-        }
-
-        $senderAddressId = (string) $this->shippingSettings->geliver_sender_address_id;
-
-        if ($senderAddressId === '') {
-            throw ValidationException::withMessages([
-                'shipment_ids' => 'Geliver gönderici adresi ayarlanmamış.',
-            ]);
-        }
-
-        $invalidOrders = [];
-
-        foreach ($shipments as $shipment) {
-            $order = $shipment->order;
-            $address = $order?->addresses?->firstWhere('type', 'shipping');
-            $phone = trim((string) ($address?->phone ?? ''));
-            $line1 = trim((string) ($address?->line1 ?? ''));
-            $city = trim((string) ($address?->city ?? ''));
-
-            if (! $order || ! $address || $phone === '' || $line1 === '' || $city === '') {
-                $invalidOrders[] = $order?->id ?? $shipment->order_id;
-            }
-        }
-
-        if ($invalidOrders !== []) {
-            $unique = implode(', ', array_unique(array_map('strval', $invalidOrders)));
-            throw ValidationException::withMessages([
-                'shipment_ids' => 'Eksik adres/telefon bilgisi olan siparişler: '.$unique,
             ]);
         }
 

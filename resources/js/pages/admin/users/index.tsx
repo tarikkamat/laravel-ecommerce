@@ -104,6 +104,8 @@ export default function UsersIndex({ items }: Props) {
                                     <TableHead className="w-[80px]">ID</TableHead>
                                     <TableHead>Ad Soyad</TableHead>
                                     <TableHead>E-posta</TableHead>
+                                    <TableHead className="hidden lg:table-cell">Telefon</TableHead>
+                                    <TableHead className="hidden xl:table-cell">Adres</TableHead>
                                     <TableHead>Rol</TableHead>
                                     <TableHead className="hidden md:table-cell">Adres Sayısı</TableHead>
                                     <TableHead className="w-[120px] text-right">İşlemler</TableHead>
@@ -118,6 +120,14 @@ export default function UsersIndex({ items }: Props) {
                                         </TableCell>
                                         <TableCell className="text-muted-foreground">
                                             {user.email}
+                                        </TableCell>
+                                        <TableCell className="hidden lg:table-cell text-muted-foreground">
+                                            {user.phone || '-'}
+                                        </TableCell>
+                                        <TableCell className="hidden xl:table-cell max-w-[320px] text-muted-foreground">
+                                            <span className="line-clamp-2">
+                                                {user.address_summary || '-'}
+                                            </span>
                                         </TableCell>
                                         <TableCell>
                                             <Badge variant={user.role === 'admin' ? 'default' : 'secondary'}>

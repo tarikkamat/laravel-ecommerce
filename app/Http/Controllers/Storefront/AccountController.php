@@ -31,6 +31,9 @@ class AccountController extends Controller
             'city' => ['required', 'string', 'max:100'],
             'country' => ['required', 'string', 'max:2'],
             'zip_code' => ['nullable', 'string', 'max:20'],
+            'company_name' => ['nullable', 'string', 'max:255'],
+            'tax_number' => ['nullable', 'string', 'max:20'],
+            'tax_office' => ['nullable', 'string', 'max:100'],
         ]);
 
         $request->user()->addresses()->create($validated);
@@ -49,6 +52,9 @@ class AccountController extends Controller
             'city' => ['required', 'string', 'max:100'],
             'country' => ['required', 'string', 'max:2'],
             'zip_code' => ['nullable', 'string', 'max:20'],
+            'company_name' => ['nullable', 'string', 'max:255'],
+            'tax_number' => ['nullable', 'string', 'max:20'],
+            'tax_office' => ['nullable', 'string', 'max:100'],
         ]);
 
         $addressModel->update($validated);

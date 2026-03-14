@@ -1,5 +1,5 @@
-import { MapPin, Trash2, Edit2 } from 'lucide-react';
 import type { Address as AddressType } from '@/types';
+import { Edit2, MapPin, Trash2 } from 'lucide-react';
 
 type AddressCardProps = {
     address: AddressType;
@@ -8,13 +8,17 @@ type AddressCardProps = {
 };
 
 export function AddressCard({ address, onEdit, onDelete }: AddressCardProps) {
+    const showCorporateDetails =
+        address.type === 'billing' &&
+        (address.company_name || address.tax_number || address.tax_office);
+
     return (
         <div className="group relative rounded-2xl border border-gray-100 bg-white p-5 transition-all hover:border-gray-200 dark:border-gray-800 dark:bg-gray-950">
             <div className="mb-3 flex items-start justify-between">
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gray-50 text-gray-400 group-hover:bg-[#ec135b]/10 group-hover:text-[#ec135b] dark:bg-gray-900">
                     <MapPin className="h-5 w-5" />
                 </div>
-                <div className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                <div className="flex gap-1 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100">
                     <button
                         type="button"
                         onClick={() => onEdit?.(address)}
@@ -38,7 +42,7 @@ export function AddressCard({ address, onEdit, onDelete }: AddressCardProps) {
                 <h4 className="text-sm font-bold text-gray-900 dark:text-white">
                     {address.contact_name || 'İsimsiz Adres'}
                 </h4>
-                <p className="text-xs leading-relaxed text-gray-500 dark:text-gray-400 line-clamp-2">
+                <p className="line-clamp-2 text-xs leading-relaxed text-gray-500 dark:text-gray-400">
                     {address.address}
                 </p>
                 {(address.city || address.zip_code) && (
@@ -47,6 +51,17 @@ export function AddressCard({ address, onEdit, onDelete }: AddressCardProps) {
                         {address.city}
                         {address.country && `, ${address.country}`}
                     </p>
+                )}
+                {showCorporateDetails && (
+                    <div className="rounded-xl bg-gray-50 px-3 py-2 text-[11px] text-gray-500 dark:bg-gray-900 dark:text-gray-400">
+                        {address.company_name && <p>{address.company_name}</p>}
+                        {address.tax_number && (
+                            <p>Vergi No: {address.tax_number}</p>
+                        )}
+                        {address.tax_office && (
+                            <p>Vergi Dairesi: {address.tax_office}</p>
+                        )}
+                    </div>
                 )}
             </div>
         </div>

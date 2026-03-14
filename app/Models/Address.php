@@ -22,6 +22,9 @@ class Address extends Model
         'address',
         'zip_code',
         'contact_name',
+        'company_name',
+        'tax_number',
+        'tax_office',
         'city',
         'country',
     ];

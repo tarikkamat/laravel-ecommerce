@@ -6,8 +6,11 @@ use App\Enums\Role;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UserStoreRequest;
 use App\Http\Requests\Admin\UserUpdateRequest;
+use App\Models\Address;
 use App\Models\Order;
+use App\Models\OrderAddress;
 use App\Models\ProductComment;
+use App\Models\User;
 use App\Services\Contracts\IUserService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -19,9 +22,38 @@ class UserController extends Controller
     public function index(Request $request)
     {
         $perPage = (int) $request->integer('per_page', 15);
+        $items = $this->service->paginate($perPage, ['*'], ['addresses', 'orders.addresses']);
+
+        $items->setCollection(
+            $items->getCollection()->map(function (User $user): array {
+                $latestOrderAddress = $user->orders
+                    ->sortByDesc('id')
+                    ->flatMap(fn (Order $order) => $order->addresses)
+                    ->sortByDesc('id')
+                    ->first();
+
+                $primaryAddress = $user->addresses
+                    ->sortByDesc('id')
+                    ->first();
+
+                return [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'email_verified_at' => $user->email_verified_at?->toIso8601String(),
+                    'role' => $user->role instanceof Role ? $user->role->value : $user->role,
+                    'phone' => $this->resolvePhone($latestOrderAddress),
+                    'address_summary' => $this->resolveAddressSummary($primaryAddress, $latestOrderAddress),
+                    'addresses' => $user->addresses->values()->all(),
+                    'two_factor_confirmed_at' => $user->two_factor_confirmed_at?->toIso8601String(),
+                    'created_at' => $user->created_at?->toIso8601String(),
+                    'updated_at' => $user->updated_at?->toIso8601String(),
+                ];
+            })
+        );
 
         return Inertia::render('admin/users/index', [
-            'items' => $this->service->paginate($perPage),
+            'items' => $items,
         ]);
     }
 
@@ -144,5 +176,34 @@ class UserController extends Controller
                 ->values()
                 ->all(),
         ];
+    }
+
+    private function resolvePhone(?OrderAddress $latestOrderAddress): ?string
+    {
+        $phone = $latestOrderAddress?->phone;
+
+        return filled($phone) ? $phone : null;
+    }
+
+    private function resolveAddressSummary(?Address $primaryAddress, ?OrderAddress $latestOrderAddress): ?string
+    {
+        if ($primaryAddress) {
+            return collect([
+                $primaryAddress->address,
+                $primaryAddress->city,
+                $primaryAddress->country,
+            ])->filter(fn (?string $value) => filled($value))->implode(', ');
+        }
+
+        if ($latestOrderAddress) {
+            return collect([
+                $latestOrderAddress->line1,
+                $latestOrderAddress->district,
+                $latestOrderAddress->city,
+                $latestOrderAddress->country,
+            ])->filter(fn (?string $value) => filled($value))->implode(', ');
+        }
+
+        return null;
     }
 }

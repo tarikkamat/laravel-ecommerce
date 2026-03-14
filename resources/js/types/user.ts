@@ -9,6 +9,9 @@ export interface Address {
     address: string;
     zip_code: string | null;
     contact_name: string | null;
+    company_name: string | null;
+    tax_number: string | null;
+    tax_office: string | null;
     city: string | null;
     country: string | null;
     created_at: string;
@@ -22,6 +25,8 @@ export interface User {
     email: string;
     email_verified_at: string | null;
     role: Role;
+    phone?: string | null;
+    address_summary?: string | null;
     addresses: Address[];
     two_factor_confirmed_at: string | null;
     created_at: string;
